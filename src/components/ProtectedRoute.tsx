@@ -17,13 +17,19 @@ export default function ProtectedRoute({
 
   const allowedRoles = Array.isArray(role) ? role : [role];
 
-  // ✅ ALLOW PARENT PORTAL TO ACCESS RECEPTIONIST ROUTES
-  if (
-    allowedRoles.includes(userRole) ||
-    (isParentPortal && allowedRoles.includes("receptionist"))
-  ) {
-    return children;
-  }
+// 🔥 NORMALIZE ROLES (THIS FIXES BLANK PAGE)
+const normalizedUserRole = userRole.toLowerCase().trim();
+const normalizedAllowedRoles = allowedRoles.map(r =>
+  r.toLowerCase().trim()
+);
+
+// ✅ ALLOW ACCESS
+if (
+  normalizedAllowedRoles.includes(normalizedUserRole) ||
+  (isParentPortal && normalizedAllowedRoles.includes("receptionist"))
+) {
+  return children;
+}
 
   return <Navigate to="/unauthorized" replace />;
 }

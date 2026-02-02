@@ -193,19 +193,23 @@ export default function App() {
   <Route
   path="academic/academic-year"
   element={
-    <ProtectedRoute role={["Super Admin", "admin"]}>
+    <ProtectedRoute role={["admin", "super admin", "super_admin", "receptionist"]}
+    >
       <AcademicYear />
     </ProtectedRoute>
   }
 />
+
 <Route
-  path="academic/academic-year/:year"
+  path="academic/academic-year/:id"
   element={
-    <ProtectedRoute role="admin">
+    <ProtectedRoute role={["admin", "super admin", "super_admin", "receptionist"]}
+    >
       <AcademicYearDetails />
     </ProtectedRoute>
   }
 />
+
   <Route path="academic/section" element={<SectionPage />} />
   <Route path="academic/subject" element={<SubjectPage />} />
   <Route path="academic/syllabus" element={<SyllabusPage />} />

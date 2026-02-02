@@ -37,7 +37,7 @@ export default function DashboardLayout() {
 
 
       {/* ===== Right Content ===== */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-visible">
 
       <Header
   onMenuClick={() => {

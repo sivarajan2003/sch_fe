@@ -18,6 +18,7 @@ import { User, LogOut } from "lucide-react";
 import { useEffect } from "react";
 import { CalendarDays } from "lucide-react";
 import StatisticsChart from "../components/StatisticsChart";
+import { getAcademicyears } from "../service/academicyearService.js";
 
 export default function Header({
   onMenuClick,
@@ -33,20 +34,62 @@ export default function Header({
   const [country, setCountry] = useState<"IN" | "US">("IN");
   const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
-  useEffect(() => {
-    const close = () => setProfileOpen(false);
-    window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, []);
-    
-  const [selectedYear, setSelectedYear] = useState("2024 / 2025");
+  // useEffect(() => {
+  //   const close = () => setProfileOpen(false);
+  //   window.addEventListener("click", close);
+  //   return () => window.removeEventListener("click", close);
+  // }, []);
+
+  const [academicYears, setAcademicYears] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState("");
+  
+  //const [selectedYear, setSelectedYear] = useState("2024 / 2025");
   const [notificationOpen, setNotificationOpen] = useState(false);
 
-const academicYears = Array.from({ length: 6 }, (_, i) => {
-  const start = 2020 + i;
-  return `${start} / ${start + 1}`;
-});
+//const academicYears = Array.from({ length: 6 }, (_, i) => {
+  //const start = 2020 + i;
+  //return `${start} / ${start + 1}`;
+//});
+useEffect(() => {
+  async function loadAcademicYears() {
+    try {
+      const res = await getAcademicyears();
 
+      // ✅ FULL normalization (same as academicyear.tsx)
+      const payload =
+        (res as any)?.data?.data ??
+        (res as any)?.data ??
+        res;
+
+      const list: any[] = Array.isArray(payload)
+        ? payload
+        : payload?.rows ??
+          payload?.items ??
+          payload?.data ??
+          [];
+
+      const years = list
+        .map((y: any) => y.yearsbyname ?? y.year ?? y.name)
+        .filter(Boolean);
+
+      console.log("HEADER YEARS:", years); // 🔍 DEBUG
+
+      setAcademicYears(years);
+
+      const saved = localStorage.getItem("academicYear");
+      if (saved && years.includes(saved)) {
+        setSelectedYear(saved);
+      } else if (years.length) {
+        setSelectedYear(years[years.length - 1]);
+        localStorage.setItem("academicYear", years[years.length - 1]);
+      }
+    } catch (err) {
+      console.error("Failed to load academic years", err);
+    }
+  }
+
+  loadAcademicYears();
+}, []);
   // 🔹 Fullscreen toggle
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -59,14 +102,13 @@ const academicYears = Array.from({ length: 6 }, (_, i) => {
   };
 
   return (
-<header className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2">
+<header className="relative z-[10000] bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2">
 <div className="flex items-center justify-between gap-2 flex-wrap md:flex-nowrap">
 
-    {/* LEFT SECTION */}
 {/* LEFT SECTION */}
 <div className="flex items-center gap-3">
 
-  {/* 🍔 HAMBURGER MENU (ALWAYS VISIBLE LIKE IMG-2) */}
+  {/* 🍔 HAMBURGER MENU  */}
   <button
     onClick={onMenuClick}
     className="p-2 rounded-lg hover:bg-gray-100"
@@ -87,38 +129,39 @@ const academicYears = Array.from({ length: 6 }, (_, i) => {
 </div>
 
     {/* RIGHT ICONS  */}
+{/* ACADEMIC YEAR */}
+<div className="relative">
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setYearOpen((prev) => !prev);
+    }}
+    className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50"
+  >
+    <CalendarDays className="w-4 h-4 text-gray-500" />
+    <span>Academic Year : {selectedYear || "Select"}</span>
+    <ChevronDown className="w-4 h-4 text-gray-400" />
+  </button>
+  {yearOpen && (
+    <div className="absolute right-0 top-full mt-2 w-64 bg-white border rounded-xl shadow-xl z-[50]">
+    <div className="px-4 py-2 text-xs text-gray-500">
+      Years count: {academicYears.length}
+    </div>
 
-        {/* ACADEMIC YEAR */}
-        <div className="relative">
-        <button
-  onClick={() => setYearOpen(!yearOpen)}
-  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 hover:bg-gray-50"
->
-  <CalendarDays className="w-4 h-4 text-gray-500" />
-  <span className="hidden sm:inline">
-  Academic Year : {selectedYear}
-</span>
-<span className="sm:hidden">
-  {selectedYear}
-</span>
-  <ChevronDown className="w-4 h-4 text-gray-400" />
-</button>
-
-
-{yearOpen && (
-  <div className="absolute top-11 left-0 w-full bg-white border rounded-lg shadow text-sm z-50">
     {academicYears.map((year) => (
       <div
         key={year}
         onClick={() => {
+          localStorage.setItem("academicYear", year);
           setSelectedYear(year);
           setYearOpen(false);
-        
-          navigate("/admin/dashboard/academic/academic-year");
+
+          navigate("/admin/dashboard/academic/academic-year", {
+            state: { year },
+          });
         }}
-        
         className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-          selectedYear === year ? "bg-blue-50 font-medium" : ""
+          selectedYear === year ? "bg-blue-50 font-semibold" : ""
         }`}
       >
         {year}
@@ -127,7 +170,7 @@ const academicYears = Array.from({ length: 6 }, (_, i) => {
   </div>
 )}
 
-        </div>
+</div>
 
         {/* ICONS */}
         <div className="flex items-center gap-1 sm:gap-3">

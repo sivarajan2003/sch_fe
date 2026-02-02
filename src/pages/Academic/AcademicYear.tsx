@@ -7,7 +7,8 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 // use the service instead of direct api calls
 import {
   getAcademicyears,
@@ -33,8 +34,10 @@ export default function AcademicYear() {
     alert("Login expired. Please login again.");
     return null;
   }
-
+  const headerYear = localStorage.getItem("academicYear");
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [data, setData] = useState<AcademicYearType[]>([]);
 
   const [deleteId, setDeleteId] = useState<string | number | null>(null);
@@ -55,18 +58,44 @@ export default function AcademicYear() {
     status: "Active",
   });
   const [yearSortAsc, setYearSortAsc] = useState(true);
-  const [selectedYear, setSelectedYear] = useState<string | "ALL">("ALL");
-  const [openYearDropdown, setOpenYearDropdown] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string | "ALL">(
+    headerYear || "ALL"
+  );
+    const [openYearDropdown, setOpenYearDropdown] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   /* ACTIONS */
   const handleRefresh = () => {
     fetchAcademicYears();
   };
-  useEffect(() => {
-    fetchAcademicYears();
-  }, []);
+// STEP 1 – Load table data
+useEffect(() => {
+  fetchAcademicYears();
+}, []);
 
-  const handlePrint = () => window.print();
+// ✅ SINGLE SOURCE OF TRUTH FOR HEADER → POPUP
+useEffect(() => {
+  if (!location.state) return;
+
+  const { openAdd, year } = location.state as {
+    openAdd?: boolean;
+    year?: string;
+  };
+
+  if (openAdd) {
+    setOpenAddModal(true);
+  }
+
+  if (year) {
+    setSelectedYear(year);
+    setForm((prev) => ({
+      ...prev,
+      year,
+    }));
+  }
+}, [location.state]);
+
+   const handlePrint = () => window.print();
 
   const sortByAcademicYear = () => {
     setData((prev) =>
@@ -77,7 +106,9 @@ export default function AcademicYear() {
     setYearSortAsc(!yearSortAsc);
   };
   const filteredData =
-    selectedYear === "ALL" ? data : data.filter((item) => item.year === selectedYear);
+  selectedYear === "ALL"
+    ? data
+    : data.filter((item) => item.year === selectedYear);
 
   const fetchAcademicYears = async () => {
     try {
@@ -158,18 +189,22 @@ export default function AcademicYear() {
   };
 
   const handleAddAcademicYear = async () => {
+    if (saving) return; 
+  
     try {
-      // validate first
+      setSaving(true);
+  
+      // validation
       if (!form.year || !form.start || !form.end) {
         alert("All fields are required");
         return;
       }
-
+  
       if (new Date(form.start) > new Date(form.end)) {
         alert("Start date cannot be after End date");
         return;
       }
-
+  
       const payload = {
         yearsbyname: form.year,
         startdate: new Date(form.start).toISOString().split("T")[0],
@@ -177,16 +212,10 @@ export default function AcademicYear() {
         is_current: form.current === "Yes",
         is_active: form.status === "Active",
       };
-
-      console.log("Submitting payload:", payload); // 👈 IMPORTANT
-
-      const res = await createAcademicyear(payload);
-
-      if (res && (res.success === false || res.error)) {
-        throw new Error(res.message || res.error || "Backend rejected request");
-      }
-
-      // close & refresh
+  
+      await createAcademicyear(payload); // ✅ ONE API CALL ONLY
+  
+      // close modal & reset
       setOpenAddModal(false);
       setForm({
         year: "",
@@ -195,23 +224,20 @@ export default function AcademicYear() {
         current: "No",
         status: "Active",
       });
-      fetchAcademicYears();
+      localStorage.setItem("academicYear", payload.yearsbyname);
+      await fetchAcademicYears(); // reload once
     } catch (error: any) {
-      console.error("Save failed FULL ERROR", {
-        status: error?.response?.status,
-        data: error?.response?.data,
-        message: error?.message,
-      });
-
+      console.error("Save failed", error);
       alert(
         error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          `Save failed`
+        error?.message ||
+        "Save failed"
       );
+    } finally {
+      setSaving(false); // 🔓 unlock
     }
   };
-
+  
   return (
     <div className="space-y-6">
       {/* ================= HEADER ================= */}
@@ -417,9 +443,18 @@ export default function AcademicYear() {
 
             {/* FOOTER */}
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={handleAddAcademicYear} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
-                Save
-              </button>
+            <button
+  onClick={handleAddAcademicYear}
+  disabled={saving}
+  className={`px-4 py-2 rounded-lg text-sm text-white ${
+    saving
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-600 hover:bg-blue-700"
+  }`}
+>
+  {saving ? "Saving..." : "Save"}
+</button>
+
 
               <button onClick={() => setOpenAddModal(false)} className="px-4 py-2 border rounded-lg text-sm">
                 Cancel

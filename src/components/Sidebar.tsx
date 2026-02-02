@@ -62,7 +62,7 @@ export default function Sidebar({
     navigate("/login");
   };
   //const role = localStorage.getItem("role");
-  const [openDashboard, setOpenDashboard] = useState(true);
+  //const [openDashboard, setOpenDashboard] = useState(true);
   const [openApplications, setOpenApplications] = useState(
     location.pathname.startsWith(
       "/admin/dashboard/receptionist/admissions"
@@ -147,128 +147,70 @@ const isManagementItemActive = (path: string) =>
  <nav className="p-4 space-y-2">
       {canAccess(["admin", "teacher", "student", "parent"]) && (
   <>
-        {/* ================= DASHBOARD ================= */}
-        <button
-          onClick={() => setOpenDashboard(!openDashboard)}
-          className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-blue-50 text-blue-600"
-        >
-          <div
-  className={`flex items-center ${
-    collapsed ? "justify-center" : "gap-3"
-  }`}
->
-  <LayoutDashboard className="w-5 h-5" />
-
-  {!collapsed && (
-    <span className="text-sm font-medium">Dashboard</span>
-  )}
-</div>
-
-          <ChevronDown
-            className={`w-4 h-4 transition-transform ${
-              openDashboard ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-
-        {!collapsed && openDashboard && (
-  <div className="ml-11 mt-2 space-y-2">
-{/* ADMIN CAN SEE ALL */}
-    {role === "admin" || role === "Super Admin" && (
-      <>
-        <SubItem
-          label="Admin Dashboard"
-          onClick={() => navigate("/admin/dashboard")}
-          active={location.pathname === "/admin/dashboard"}
-          />
-        {(role === "admin" || isPureParentPortal) && (
-  <SubItem
-    label="Receptionist Dashboard"
-    onClick={() => navigate("/admin/dashboard/receptionist")}
-    active={location.pathname.startsWith(
-      "/admin/dashboard/receptionist"
-    )}
-  />
-)}
-
-        <SubItem
-          label="Student Dashboard"
-          onClick={() => navigate("/student/dashboard")}
-          active={location.pathname.startsWith("/student/dashboard")}
-        />
-        <SubItem
-          label="Teacher Dashboard"
-          onClick={() => navigate("/teacher/dashboard")}
-          active={location.pathname.startsWith("/teacher/dashboard")}
-        />
-        <SubItem
-          label="Parent Dashboard"
-          onClick={() => navigate("/parent/dashboard")}
-          active={location.pathname.startsWith("/parent/dashboard")}
-        />
-        {/* Admissions */}
-        <SubItem
-      label="Parent Portal"
-      onClick={() => navigate("/parent/dashboard/admissions")}
-      active={location.pathname.startsWith(
-        "/parent/dashboard/admissions"
-      )}
-    />
- 
-
-      </>
-    )}
-
-    {/* NON-ADMIN USERS */}
-    {role === "student" && (
-      <SubItem
-        label="Student Dashboard"
-        onClick={() => navigate("/student/dashboard")}
-        active={location.pathname.startsWith("/student/dashboard")}
-      />
-    )}
-
-    {role === "teacher" && (
-      <SubItem
-        label="Teacher Dashboard"
-        onClick={() => navigate("/teacher/dashboard")}
-        active={location.pathname.startsWith("/teacher/dashboard")}
-      />
-    )}
-
-{role === "parent" && !isParentPortal && (
-  <SubItem
-    label="Parent Dashboard"
-    onClick={() => navigate("/parent/dashboard")}
-    active={location.pathname === "/parent/dashboard"}
-  />
-)}
-
-{isPureParentPortal && (
+{/* ===== DIRECT DASHBOARDS ===== */}
+{/* ADMIN – SEE ALL DASHBOARDS */}
+{role === "admin" && (
   <>
-  <SubItem
+    <MenuItem
+      icon={LayoutDashboard}
+      label="Admin Dashboard"
+      onClick={() => navigate("/admin/dashboard")}
+      active={location.pathname === "/admin/dashboard"}
+    />
+
+    <MenuItem
+      icon={UserCheck}
       label="Receptionist Dashboard"
       onClick={() => navigate("/admin/dashboard/receptionist")}
-      active={location.pathname.startsWith(
-        "/admin/dashboard/receptionist"
-      )}
+      active={location.pathname.startsWith("/admin/dashboard/receptionist")}
     />
-    
-<SubItem
-  label="Parent Portal"
-  onClick={() => navigate("/parent/dashboard/admissions")}
-  active={location.pathname.startsWith(
-    "/parent/dashboard/admissions"
-  )}
-/>
 
-    
+    <MenuItem
+      icon={GraduationCap}
+      label="Student Dashboard"
+      onClick={() => navigate("/student/dashboard")}
+      active={location.pathname.startsWith("/student/dashboard")}
+    />
+
+    <MenuItem
+      icon={Users}
+      label="Teacher Dashboard"
+      onClick={() => navigate("/teacher/dashboard")}
+      active={location.pathname.startsWith("/teacher/dashboard")}
+    />
+
+    <MenuItem
+      icon={User}
+      label="Parent Dashboard"
+      onClick={() => navigate("/parent/dashboard")}
+      active={location.pathname.startsWith("/parent/dashboard")}
+    />
   </>
 )}
+{role === "teacher" && (
+  <MenuItem
+    icon={Users}
+    label="Teacher Dashboard"
+    onClick={() => navigate("/teacher/dashboard")}
+    active={location.pathname.startsWith("/teacher/dashboard")}
+  />
+)}
 
-
-
-  </div>
+{role === "student" && (
+  <MenuItem
+    icon={GraduationCap}
+    label="Student Dashboard"
+    onClick={() => navigate("/student/dashboard")}
+    active={location.pathname.startsWith("/student/dashboard")}
+  />
+)}
+{role === "parent" && (
+  <MenuItem
+    icon={User}
+    label="Parent Dashboard"
+    onClick={() => navigate("/parent/dashboard")}
+    active={location.pathname.startsWith("/parent/dashboard")}
+  />
 )}
  </>
  
