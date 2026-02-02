@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes scale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  .animate-fade {
+    animation: fade 0.4s ease-out;
+  }
+  
+  .animate-scale {
+    animation: scale 0.25s ease-out;
+  }
+  /* Remove browser default password reveal icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
+  /* ================= CARD ENTER ANIMATION ================= */
+@keyframes cardFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card {
+  animation: cardFadeUp 0.45s ease-out both;
+}
+
+/* ================= HOVER (DESKTOP) ================= */
+.card-interactive {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= TOUCH / TAP (MOBILE) ================= */
+.card-interactive:active {
+  transform: scale(0.97);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.wave-svg {
+  transform: scaleX(1.25) translateX(40px);
+  transform-origin: left;
+}
+
+.btn-outline {
+  @apply flex items-center gap-2 px-3 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-100;
+}
+
+.btn-primary {
+  @apply flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700;
+}
+
+/* ================= DISABLE HOVER ON TOUCH DEVICES ================= */
+@media (hover: none) {
+  .card-interactive:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+@keyframes popupEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+    padding: 0.75rem;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    padding: 1.25rem;
+  }
+}
+/* Hide scrollbar but allow scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.animate-popup {
+  animation: popupEnter 0.25s ease-out forwards;
+}
+
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card {
+  animation: fadeUp 0.45s ease-out both;
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
