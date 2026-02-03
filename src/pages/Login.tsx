@@ -237,6 +237,16 @@ export default function Login() {
             </span>
           </p>
 
+          {/* PARENT PORTAL LINK - ADDED */}
+          <div className="mt-5 pt-4 border-t border-gray-100 text-center">
+            <button
+              onClick={() => navigate("/parent-portal/login")}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline flex items-center justify-center gap-2 mx-auto"
+            >
+              School Parent? Login Here &rarr;
+            </button>
+          </div>
+
           <p className="mt-8 text-center text-xs text-gray-400">Copyright © 2025 - Preskool</p>
         </div>
       </div>

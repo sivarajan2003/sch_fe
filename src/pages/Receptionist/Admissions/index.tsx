@@ -10,7 +10,7 @@ export default function ReceptionistAdmissions() {
     );
 
   return (
-    <div className="p-6">
+    <div className="p-1">
       {!hideAdmissionsHeading && (
         <h1 className="text-xl font-semibold mb-4">Admissions</h1>
       )}

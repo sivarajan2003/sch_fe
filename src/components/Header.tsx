@@ -102,7 +102,7 @@ useEffect(() => {
   };
 
   return (
-<header className="relative z-[10000] bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2">
+<header className="relative z-[10] bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2">
 <div className="flex items-center justify-between gap-2 flex-wrap md:flex-nowrap">
 
 {/* LEFT SECTION */}

@@ -388,7 +388,7 @@ if (role === "parent" && !isParentPortal) {
 }
 
   return (
-<div className="space-y-4 sm:space-y-6 px-3 sm:px-4 md:px-6">
+<div className="space-y-4 sm:space-y-6">
 
      {/* ================= HEADER ================= */}
 <div className="bg-white border border-gray-200 rounded-2xl px-6 py-6">
@@ -580,23 +580,23 @@ if (role === "parent" && !isParentPortal) {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-600">
             <tr>
-              <th className="px-6 py-3 text-left">APPLICATION</th>
-              <th className="px-6 py-3 text-left">STUDENT DETAILS</th>
-              <th className="px-6 py-3 text-left">CONTACT</th>
-              <th className="px-6 py-3 text-left">CLASS</th>
-              <th className="px-6 py-3 text-left">STATUS</th>
-              <th className="px-6 py-3 text-left">DOCUMENTS</th>
-              <th className="px-6 py-3 text-center">ACTIONS</th>
+              <th className="px-4 py-3 text-left">APPLICATION</th>
+              <th className="px-4 py-3 text-left">STUDENT DETAILS</th>
+              <th className="px-4 py-3 text-left">CONTACT</th>
+              <th className="px-4 py-3 text-left">CLASS</th>
+              <th className="px-4 py-3 text-left">STATUS</th>
+              <th className="px-4 py-3 text-left">DOCUMENTS</th>
+              <th className="px-4 py-3 text-center">ACTIONS</th>
             </tr>
           </thead>
           <tbody className="divide-y">
           {paginatedData.map((app) => (
     <tr key={app.id} className="hover:bg-gray-50">
-      <td className="px-6 py-4 text-blue-600 font-medium">
+      <td className="px-2 py-4 text-blue-600 font-medium">
         {app.id}
       </td>
 
-      <td className="px-6 py-4">
+      <td className="px-2 py-4">
   <div className="flex items-center gap-3">
     
     {/* PROFILE IMAGE */}
@@ -620,16 +620,16 @@ if (role === "parent" && !isParentPortal) {
 </td>
 
 
-      <td className="px-6 py-4">
+      <td className="px-2 py-4">
         <p>{app.phone}</p>
         <p className="text-xs text-gray-500">{app.email}</p>
       </td>
 
-      <td className="px-6 py-4">
+      <td className="px-2 py-4">
   {app.class || "Grade 1"}
 </td>
 
-      <td className="px-6 py-4">
+      <td className="px-2 py-4">
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyle(
             app.status
@@ -639,12 +639,12 @@ if (role === "parent" && !isParentPortal) {
         </span>
       </td>
 
-      <td className="px-6 py-4 flex items-center gap-2">
+      <td className="px-2 py-4 flex items-center gap-2">
         <FileText className="w-4 h-4 text-gray-500" />
         {app.documents}
       </td>
 
-      <td className="px-6 py-4 text-center">
+      <td className="px-2 py-4 text-center">
   <div className="inline-flex items-center gap-4">
     
     {/* VIEW */}
