@@ -1,128 +1,114 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { X } from "lucide-react";
 
+type Props = {
+  onClose: () => void;
+  onCreate: (payload: any) => Promise<void> | void;
+};
 
-export default function AddClass() {
-    const navigate = useNavigate();
-  const STORAGE_KEY = "academic_classes";
-
-  const initialForm = {
+export default function AddClassModal({ onClose, onCreate }: Props) {
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
     id: "",
-    className: "",
+    name: "",
     section: "",
-    students: "",
-    teacherName: "",
-    subjects: 0,
-    status: "Active",
+    capacity: "",
+    subjects: "0",
+    is_active: true,
+  });
+
+  const validate = () => {
+    if (!form.name.trim()) return "Class name is required";
+    if (!form.section.trim()) return "Section is required";
+    if (!form.capacity || Number(form.capacity) < 1) return "Capacity must be at least 1";
+    if (!form.id.trim()) return "Class ID is required";
+    return null;
   };
 
-  const [formData, setFormData] = useState<any>(initialForm);
+  const handleSubmit = async () => {
+    if (loading) return;
+    const err = validate();
+    if (err) {
+      alert(err);
+      return;
+    }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev: any) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSave = () => {
-    if (
-        !formData.id ||
-        !formData.className ||
-        !formData.section ||
-        !formData.students ||
-        !formData.subjects ||
-        !formData.teacherName
-      ) {
-        toast.error("Please fill all fields");
-        return;
-      }      
-
-    const saved =
-      JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-
-      const newClass = {
-        ...formData,
-        students: Number(formData.students),
-        subjects: Number(formData.subjects), 
-        status: "Active",
+    try {
+      setLoading(true);
+      const payload = {
+        // backend expects 'name', 'section', 'capacity'
+        name: form.name.trim(),
+        section: form.section.trim(),
+        capacity: Number(form.capacity),
+        is_active: form.is_active,
+        // optional front-only fields we keep for UI compatibility
+        clientMeta: {
+          id: form.id.trim(),
+          subjects: Number(form.subjects),
+        },
       };
-       localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify([newClass, ...saved])
-    );
 
-    toast.success("Class created successfully");
-
-     //✅ RESET FORM (stay on same page)
-    setFormData(initialForm);
+      await onCreate(payload);
+      // success feedback handled by parent
+      setForm({ id: "", name: "", section: "", capacity: "", subjects: "0", is_active: true });
+      // parent will close modal on success
+    } catch (err) {
+      console.error("Create class failed", err);
+      alert("Failed to create class");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-<div className="p-6 space-y-6">
-<div className="flex flex-col sm:flex-row sm:items-center gap-3">
-  <button
-    onClick={() => navigate("/admin/dashboard")}
-    className="w-fit px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
-  >
-    ← Back
-  </button>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl w-[520px] p-6 max-h-[90vh] overflow-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Add Class</h3>
+          <button onClick={onClose} disabled={loading}><X size={18} /></button>
+        </div>
 
-  <div>
-    <h2 className="text-xl sm:text-2xl font-semibold">Add Class</h2>
-    <p className="text-sm text-gray-500">
-      Dashboard / Academic / Classes / Add Class
-    </p>
-  </div>
-</div>
-
-
-<div className="bg-white border rounded-xl p-4 sm:p-6 w-full sm:max-w-xl mx-auto">
-        <div className="space-y-4">
-
-        <Input label="Class ID" name="id" value={formData.id} onChange={handleChange} />
-<Input label="Class" name="className" value={formData.className} onChange={handleChange} />
-<Input label="Section" name="section" value={formData.section} onChange={handleChange} />
-<Input label="No of Students" name="students" type="number" value={formData.students} onChange={handleChange} />
-<Input label="No of Subjects" name="subjects" type="number" value={formData.subjects} onChange={handleChange} />
-<Input label="Class Teacher" name="teacherName" value={formData.teacherName} onChange={handleChange} />
-<div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-<button
-  onClick={() => setFormData(initialForm)}
-  className="px-4 py-2 border rounded-lg w-full sm:w-auto"
->
-  Cancel
-</button>
-
-<button
-  onClick={handleSave}
-  className="px-4 py-2 bg-blue-600 text-white rounded-lg w-full sm:w-auto"
->
-  Save Class
-</button>
-
+        <div className="space-y-3 text-sm">
+          <div>
+            <label className="text-xs text-gray-600 block mb-1">Class ID <span className="text-red-500">*</span></label>
+            <input value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} className="w-full border rounded-lg px-3 py-2" placeholder="C123456" />
           </div>
 
+          <div>
+            <label className="text-xs text-gray-600 block mb-1">Class Name <span className="text-red-500">*</span></label>
+            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full border rounded-lg px-3 py-2" placeholder="Grade name (e.g. V)" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Section <span className="text-red-500">*</span></label>
+              <input value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })} className="w-full border rounded-lg px-3 py-2" placeholder="A" />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Capacity (No of Students) <span className="text-red-500">*</span></label>
+              <input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="w-full border rounded-lg px-3 py-2" placeholder="30" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">No of Subjects (optional)</label>
+              <input type="number" value={form.subjects} onChange={(e) => setForm({ ...form, subjects: e.target.value })} className="w-full border rounded-lg px-3 py-2" placeholder="3" />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input id="isActive" type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4" />
+              <label htmlFor="isActive" className="text-xs text-gray-500">Active</label>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-6">
+          <button onClick={onClose} disabled={loading} className="px-4 py-2 text-sm border rounded-lg">Cancel</button>
+          <button onClick={handleSubmit} disabled={loading} className={`px-4 py-2 text-sm text-white rounded-lg ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}>{loading ? "Saving..." : "Save Class"}</button>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* REUSABLE INPUT */
-function Input({ label, name, value, onChange, type = "text" }: any) {
-  return (
-    <div>
-      <label className="text-sm text-gray-600">{label}</label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="w-full border rounded-lg px-4 py-2 mt-1"
-      />
     </div>
   );
 }

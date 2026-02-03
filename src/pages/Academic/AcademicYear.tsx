@@ -58,10 +58,7 @@ export default function AcademicYear() {
     status: "Active",
   });
   const [yearSortAsc, setYearSortAsc] = useState(true);
-  const [selectedYear, setSelectedYear] = useState<string | "ALL">(
-    headerYear || "ALL"
-  );
-    const [openYearDropdown, setOpenYearDropdown] = useState(false);
+  
   const [saving, setSaving] = useState(false);
 
   /* ACTIONS */
@@ -74,26 +71,7 @@ useEffect(() => {
 }, []);
 
 // ✅ SINGLE SOURCE OF TRUTH FOR HEADER → POPUP
-useEffect(() => {
-  if (!location.state) return;
 
-  const { openAdd, year } = location.state as {
-    openAdd?: boolean;
-    year?: string;
-  };
-
-  if (openAdd) {
-    setOpenAddModal(true);
-  }
-
-  if (year) {
-    setSelectedYear(year);
-    setForm((prev) => ({
-      ...prev,
-      year,
-    }));
-  }
-}, [location.state]);
 
    const handlePrint = () => window.print();
 
@@ -105,35 +83,30 @@ useEffect(() => {
     );
     setYearSortAsc(!yearSortAsc);
   };
-  const filteredData =
-  selectedYear === "ALL"
-    ? data
-    : data.filter((item) => item.year === selectedYear);
+
 
   const fetchAcademicYears = async () => {
-    try {
-      const res = await getAcademicyears();
-      // handle different response shapes:
-      const payload = (res as any)?.data?.data ?? (res as any)?.data ?? res;
-      const list: any[] = Array.isArray(payload) ? payload : payload?.rows ?? payload?.items ?? payload?.data ?? payload;
+  try {
+    const res = await getAcademicyears();
 
-      const mapped =
-        Array.isArray(list) && list.length > 0
-          ? list.map((y: any) => ({
-              id: y.id,
-              year: y.yearsbyname ?? y.year ?? y.name,
-              start: y.startdate ?? y.start,
-              end: y.enddate ?? y.end,
-              current: y.is_current || y.isCurrent || y.current ? "Yes" : "No",
-              status: y.is_active || y.active ? "Active" : "Inactive",
-            }))
-          : [];
+    // ✅ backend always returns rows
+    const rows = res?.rows ?? [];
 
-      setData(mapped);
-    } catch (error) {
-      console.error("Failed to load academic years", error);
-    }
-  };
+    const mapped: AcademicYearType[] = rows.map((y: any) => ({
+      id: y.id,
+      year: y.yearsbyname,
+      start: y.startdate,
+      end: y.enddate,
+      current: y.is_current ? "Yes" : "No", // safe even if missing
+      status: y.is_active ? "Active" : "Inactive",
+    }));
+
+    setData(mapped);
+  } catch (error) {
+    console.error("Failed to load academic years", error);
+  }
+};
+
 
   const handleUpdateAcademicYear = async () => {
     if (!editingYear) return;
@@ -265,43 +238,6 @@ useEffect(() => {
               <Plus size={14} />
               Add Academic Year
             </button>
-            {/* Academic Year Filter */}
-            <div className="relative">
-              <button
-                onClick={() => setOpenYearDropdown(!openYearDropdown)}
-                className="px-4 py-2 border rounded-lg text-sm flex items-center gap-2 hover:bg-gray-50"
-              >
-                Academic Year :
-                <span className="font-medium">{selectedYear === "ALL" ? "All" : selectedYear}</span>
-              </button>
-
-              {openYearDropdown && (
-                <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow z-50">
-                  <button
-                    onClick={() => {
-                      setSelectedYear("ALL");
-                      setOpenYearDropdown(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                  >
-                    All Years
-                  </button>
-
-                  {Array.from(new Set(data.map((d) => d.year))).map((year) => (
-                    <button
-                      key={year}
-                      onClick={() => {
-                        setSelectedYear(year);
-                        setOpenYearDropdown(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                    >
-                      {year}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -335,7 +271,8 @@ useEffect(() => {
           </thead>
 
           <tbody>
-            {filteredData.map((y, idx) => (
+            {data.map((y, idx) => (
+
               <tr
                 key={y.id}
                 className="border-t hover:bg-blue-50 cursor-pointer"
