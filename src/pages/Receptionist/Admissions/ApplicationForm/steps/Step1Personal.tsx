@@ -51,7 +51,7 @@ export default function Step1Personal({ data, onNext, onBack }: Props) {
   };
 
   return (
-<div className="bg-white border rounded-xl mx-2 sm:mx-0">
+    <div className="bg-white border rounded-xl mx-2 sm:mx-0">
       {/* FORM BODY */}
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         <h2 className="text-lg font-semibold">Student Personal Details</h2>
@@ -120,9 +120,9 @@ export default function Step1Personal({ data, onNext, onBack }: Props) {
               className="w-full border rounded-lg px-4 py-2"
             >
               <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
             {errors.gender && (
               <p className="text-xs text-red-500 mt-1">{errors.gender}</p>
@@ -215,7 +215,7 @@ export default function Step1Personal({ data, onNext, onBack }: Props) {
         </button>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-        <button className="w-full sm:w-auto px-4 py-2 rounded-lg border">
+          <button className="w-full sm:w-auto px-4 py-2 rounded-lg border">
             Save Draft
           </button>
 

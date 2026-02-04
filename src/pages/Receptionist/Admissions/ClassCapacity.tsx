@@ -1,10 +1,25 @@
+import { useState, useEffect } from "react";
+// @ts-ignore
+import admissionService from "../../../service/admissionService";
+
 export default function ClassCapacity() {
-  const classes = [
-    { name: "Nursery", filled: 28, total: 30 },
-    { name: "Grade 1", filled: 78, total: 90 },
-    { name: "Grade 2", filled: 85, total: 90 },
-    { name: "Grade 3", filled: 56, total: 60 },
-  ];
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    admissionService.getSeatAllocation().then((res: any) => {
+      if (res.success) {
+        // Map API response to component structure
+        // API returns: [{ stream: string, total: number, allocated: number, ... }]
+        setData(res.data.map((item: any) => ({
+          name: item.stream,
+          filled: item.allocated,
+          total: item.total
+        })));
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
   const getBarColor = (percent: number) => {
     if (percent >= 90) return "bg-red-500";
@@ -12,13 +27,15 @@ export default function ClassCapacity() {
     return "bg-green-500";
   };
 
-  const totalEnrolled = classes.reduce((a, b) => a + b.filled, 0);
-  const totalCapacity = classes.reduce((a, b) => a + b.total, 0);
+  const totalEnrolled = data.reduce((a, b) => a + b.filled, 0);
+  const totalCapacity = data.reduce((a, b) => a + b.total, 0);
   const totalAvailable = totalCapacity - totalEnrolled;
+
+  if (loading) return <div className="p-6 bg-white border rounded-2xl h-64 flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="bg-white rounded-2xl border p-6 shadow-sm hover:shadow-md transition">
-      
+
       {/* HEADER */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900">
@@ -30,14 +47,14 @@ export default function ClassCapacity() {
       </div>
 
       {/* CLASSES */}
-      <div className="space-y-6">
-        {classes.map((c) => {
-          const percent = Math.round((c.filled / c.total) * 100);
+      <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+        {data.length === 0 ? <p className="text-gray-500 text-center">No class data available</p> : data.map((c) => {
+          const percent = c.total > 0 ? Math.round((c.filled / c.total) * 100) : 0;
           const remaining = c.total - c.filled;
 
           return (
             <div key={c.name} className="space-y-2">
-              
+
               {/* TITLE ROW */}
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-800">
@@ -63,13 +80,12 @@ export default function ClassCapacity() {
                 </span>
 
                 <span
-                  className={`font-medium ${
-                    remaining <= 5
+                  className={`font-medium ${remaining <= 5
                       ? "text-red-600"
                       : remaining <= 10
-                      ? "text-orange-600"
-                      : "text-green-600"
-                  }`}
+                        ? "text-orange-600"
+                        : "text-green-600"
+                    }`}
                 >
                   {remaining} seats available
                 </span>
