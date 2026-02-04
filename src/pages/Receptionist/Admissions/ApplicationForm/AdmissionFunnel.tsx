@@ -5,9 +5,10 @@ import Step1Personal from "./steps/Step1Personal";
 import Step2Academic from "./steps/Step2Academic";
 import Step3PreviousSchool from "./steps/Step3PreviousSchool";
 import Step4Documents from "./steps/Step4Documents";
+import StepFees from "./steps/StepFees";
 import Step5Review from "./steps/Step5Review";
 
-import { saveApplication } from "./storage";
+import { saveApplication, getApplication } from "./storage";
 import { AdmissionApplication } from "./types";
 
 export default function AdmissionFunnel() {
@@ -16,12 +17,7 @@ export default function AdmissionFunnel() {
   // ✅ STATE MUST COME FIRST
   const [step, setStep] = useState(1);
 
-  const [formData, setFormData] = useState<AdmissionApplication>({
-    personal: {},
-    academic: {},
-    previousSchool: {},
-    documents: {},
-  } as AdmissionApplication);
+  const [formData, setFormData] = useState<AdmissionApplication>(getApplication());
 
   // ✅ THEN FUNCTIONS
   const next = (data: any) => {
@@ -31,6 +27,7 @@ export default function AdmissionFunnel() {
     if (step === 2) updated.academic = data;
     if (step === 3) updated.previousSchool = data;
     if (step === 4) updated.documents = data;
+    if (step === 5) updated.fees = data;
 
     setFormData(updated);
     saveApplication(updated); // autosave
@@ -47,14 +44,14 @@ export default function AdmissionFunnel() {
     <div className="w-full">
       {/* PAGE CONTAINER */}
       <div className="mx-auto max-w-6xl px-3 sm:px-4 md:px-6 space-y-6">
-        
+
         {step === 1 && (
           <Step1Personal
             data={formData.personal}
             onNext={next}
           />
         )}
-  
+
         {step === 2 && (
           <Step2Academic
             data={formData.academic}
@@ -62,7 +59,7 @@ export default function AdmissionFunnel() {
             onBack={back}
           />
         )}
-  
+
         {step === 3 && (
           <Step3PreviousSchool
             data={formData.previousSchool}
@@ -70,7 +67,7 @@ export default function AdmissionFunnel() {
             onBack={back}
           />
         )}
-  
+
         {step === 4 && (
           <Step4Documents
             data={formData.documents}
@@ -78,8 +75,16 @@ export default function AdmissionFunnel() {
             onBack={back}
           />
         )}
-  
+
         {step === 5 && (
+          <StepFees
+            data={formData.fees}
+            onNext={next}
+            onBack={back}
+          />
+        )}
+
+        {step === 6 && (
           <Step5Review
             data={formData}
             onBack={back}
@@ -89,5 +94,5 @@ export default function AdmissionFunnel() {
       </div>
     </div>
   );
-  
+
 }
