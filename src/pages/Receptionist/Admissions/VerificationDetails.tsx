@@ -6,7 +6,7 @@ import admissionService from "../../../service/admissionService";
 import { toast } from "react-toastify";
 
 export default function VerificationDetails() {
-  const { id } = useParams();
+  const { applicationId: id } = useParams();
   const navigate = useNavigate();
   const [app, setApp] = useState<any>(null);
   const [loading, setLoading] = useState(true);
