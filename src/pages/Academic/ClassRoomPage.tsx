@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   RefreshCcw,
   Printer,
@@ -9,7 +9,8 @@ import {
   CalendarDays,
 } from "lucide-react";
 import AddClassRoomModal from "../../components/AddClassRoomModal";
-import { useEffect } from "react";
+import { getClassrooms } from "../../service/classroomService";
+
 /* ================= CLASS ROOM DATA ================= */
 
 const initialRooms = [
@@ -30,10 +31,27 @@ const initialRooms = [
 export default function ClassRoomPage() {
   const STORAGE_KEY = "academic_class_rooms";
 
-  const [data, setData] = useState<any[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : initialRooms;
-  });
+  const [data, setData] = useState<any[]>([]);
+
+useEffect(() => {
+  loadClassrooms();
+}, []);
+
+const loadClassrooms = async () => {
+  try {
+    const res = await getClassrooms();
+    const mapped = res.rows.map((r) => ({
+      id: r.id,
+      roomNo: r.room_no,
+      capacity: r.capacity,
+      status: r.is_active ? "Active" : "Inactive",
+    }));
+    setData(mapped);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
   
   //const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);

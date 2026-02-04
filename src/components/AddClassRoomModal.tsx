@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { createClassroom } from "../service/classroomService";
 
 type Props = {
   onClose: () => void;
@@ -16,22 +17,40 @@ export default function AddClassRoomModal({ onClose, onAdd }: Props) {
   const [capacity, setCapacity] = useState("");
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
 
-  const handleSubmit = () => {
-    if (!roomNo || !capacity) {
-      alert("Please fill all fields");
-      return;
-    }
+  const handleSubmit = async () => {
+  if (!roomNo || !capacity) {
+    alert("Please fill all fields");
+    return;
+  }
 
-    const newRoom = {
-      id: "R" + Math.floor(100000 + Math.random() * 900000),
-      roomNo,
-      capacity: Number(capacity),
-      status,
-    };
+  try {
+   const payload = {
+  school_id: "1", // 🔴 REQUIRED (temporary test)
+  room_no: roomNo,
+  capacity: Number(capacity),
+  is_active: status === "Active",
+};
 
-    onAdd(newRoom);
+
+    const res = await createClassroom(payload);
+
+    onAdd({
+      id: res.data.id,
+      roomNo: res.data.room_no,
+      capacity: res.data.capacity,
+      status: res.data.is_active ? "Active" : "Inactive",
+    });
+
     onClose();
-  };
+  } catch (error: any) {
+  console.error("CREATE ERROR 👉", error.response?.data || error);
+  alert(
+    error.response?.data?.message ||
+    "Backend rejected request – check console"
+  );
+}
+
+};
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
