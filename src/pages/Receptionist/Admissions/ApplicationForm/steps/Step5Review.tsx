@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function Step5Review({ data, onBack, onSubmit }: Props) {
-  const { personal, academic, previousSchool, documents } = data;
+  const { personal, academic, previousSchool, documents, fees = {} } = data;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [className, setClassName] = useState<string | null>(null);
@@ -193,6 +193,27 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
                 url={documents.address_proof}
               />
             </div>
+          </Section>
+
+          {/* FEES DETAILS */}
+          <Section title="Fees & Payment">
+            <Grid>
+              <Row label="Payment Mode" value={fees.paymentMode === 'cash' ? 'Cash Payment' : 'Online Payment'} />
+              {fees.paymentMode === 'cash' && (
+                <>
+                  <Row label="Amount Collected" value={fees.amount ? `₹${fees.amount}` : '-'} />
+                  <Row label="Receipt No" value={fees.receiptNo} />
+                </>
+              )}
+              {fees.paymentMode === 'online' && (
+                <Row label="Payment Status" value={fees.onlineStatus || 'To be paid'} />
+              )}
+            </Grid>
+            {fees.remark && (
+              <div className="mt-3">
+                <Row label="Remark" value={fees.remark} />
+              </div>
+            )}
           </Section>
 
           {/* FOOTER BUTTONS */}

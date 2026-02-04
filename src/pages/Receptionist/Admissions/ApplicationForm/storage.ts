@@ -15,6 +15,7 @@ export function getApplication(): ApplicationData {
       academic: {} as any,
       previousSchool: {} as any,
       documents: {} as any,
+      fees: {} as any,
     };
   }
 

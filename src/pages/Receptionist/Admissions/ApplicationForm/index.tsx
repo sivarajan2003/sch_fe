@@ -9,6 +9,7 @@ import Step1Personal from "./steps/Step1Personal";
 import Step2Academic from "./steps/Step2Academic";
 import Step3PreviousSchool from "./steps/Step3PreviousSchool";
 import Step4Documents from "./steps/Step4Documents";
+import StepFees from "./steps/StepFees";
 import Step5Review from "./steps/Step5Review";
 
 export default function ApplicationForm() {
@@ -20,11 +21,11 @@ export default function ApplicationForm() {
     academic: {},
     previousSchool: {},
     documents: {},
+    fees: {},
   });
 
   const nextStep = () => {
-    if (step < 5) {
-      // toast.success(`Step ${step} completed`);
+    if (step < 6) {
       setStep(step + 1);
     }
   };
@@ -65,6 +66,13 @@ export default function ApplicationForm() {
         tc_certificate: formData.documents.tc_certificate || null,
         passport_size_photo: formData.documents.passport_size_photo || null,
         address_proof: formData.documents.address_proof || null,
+
+        // --- FEES ---
+        payment_mode: formData.fees.paymentMode || 'online',
+        amount_collected: formData.fees.amount || 0,
+        receipt_no: formData.fees.receiptNo || null,
+        fee_remark: formData.fees.remark || null,
+        payment_status: formData.fees.paymentMode === 'cash' ? 'Paid' : (formData.fees.onlineStatus || 'Pending'),
 
         // --- DEFAULTS ---
         admission_status: "Pending",
@@ -145,6 +153,17 @@ export default function ApplicationForm() {
       )}
 
       {step === 5 && (
+        <StepFees
+          data={formData.fees}
+          onBack={prevStep}
+          onNext={(data: any) => {
+            setFormData({ ...formData, fees: data });
+            nextStep();
+          }}
+        />
+      )}
+
+      {step === 6 && (
         <Step5Review
           data={formData}
           onBack={prevStep}

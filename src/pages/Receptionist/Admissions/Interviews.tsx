@@ -96,20 +96,33 @@ export default function Interviews() {
       });
 
       if (res.success && res.rows) {
-        const mapped = res.rows.map((item: any) => ({
-          id: item.addmission_number || item.id,
-          name: item.student_name,
-          dob: item.date_of_birth,
-          phone: item.parent_number,
-          email: item.parent_email,
-          class: item.class_name || "N/A",
-          status: item.admission_status,
-          documents: "0/0", // TODO: count
-          avatar: item.passport_size_photo ? (item.passport_size_photo.startsWith("http") ? item.passport_size_photo : `http://localhost:4000/${item.passport_size_photo}`) : `https://ui-avatars.com/api/?name=${item.student_name}&background=random`,
-          interviewDate: item.interview_date, // Field doesn't exist yet, but for future
-          interviewLocation: item.interview_location,
-          original: item
-        }));
+        const mapped = res.rows.map((item: any) => {
+          // Calculate documents count
+          const docs = [
+            item.birth_certificate,
+            item.tc_certificate,
+            item.passport_size_photo,
+            item.address_proof
+          ];
+          const uploadedCount = docs.filter(d => d && d !== 'null').length;
+          const totalDocs = 4; // Based on known requirements
+
+          return {
+            id: item.addmission_number || item.id,
+            name: item.student_name,
+            dob: item.date_of_birth,
+            phone: item.parent_number,
+            email: item.parent_email,
+            class: item.class_name || item.class_applied_id || "N/A",
+            status: item.admission_status,
+            documents: `${uploadedCount}/${totalDocs}`,
+            avatar: item.passport_size_photo ? (item.passport_size_photo.startsWith("http") ? item.passport_size_photo : `http://localhost:4000/${item.passport_size_photo}`) : `https://ui-avatars.com/api/?name=${item.student_name}&background=random`,
+            interviewDate: item.interview_date ? new Date(item.interview_date).toLocaleDateString() : "-",
+            interviewTime: item.interview_time || "",
+            interviewLocation: item.interview_location || "Admin Office",
+            original: item
+          };
+        });
         setData(mapped);
       }
     } catch (error) {
@@ -146,12 +159,12 @@ export default function Interviews() {
     try {
       // Since we don't have interview date/time fields in backend yet, we just update status
       // In a real implementation we would send date/time/location
+      // Update status and schedule details
       await admissionService.updateAdmission(scheduleApp.original.id, {
         admission_status: "Interview Scheduled",
-        // additional fields if backend supported:
-        // interview_date: scheduleDate,
-        // interview_time: scheduleTime,
-        // interview_location: scheduleLocation
+        interview_date: scheduleDate,
+        interview_time: scheduleTime,
+        interview_location: scheduleLocation
       });
       toast.success(`Interview Scheduled for ${scheduleApp.name}`);
       setScheduleApp(null);

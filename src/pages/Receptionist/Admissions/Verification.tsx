@@ -53,7 +53,8 @@ export default function Verification() {
       if (res.success) {
         setTotalCount(res.count);
         const mapped = res.rows.map((item: any) => ({
-          id: item.addmission_number || item.id,
+          id: item.id, // Keep UUID for navigation
+          displayId: item.addmission_number || item.id, // For UI
           name: item.student_name,
           dob: item.date_of_birth,
           phone: item.parent_number,
@@ -132,7 +133,7 @@ export default function Verification() {
           <tbody className="divide-y">
             {loading ? <tr><td colSpan={7} className="p-4 text-center">Loading...</td></tr> : data.map((app) => (
               <tr key={app.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-blue-600 font-medium">{String(app.id).substring(0, 8)}</td>
+                <td className="px-6 py-4 text-blue-600 font-medium">{String(app.displayId).substring(0, 20)}</td>
                 <td className="px-4 sm:px-6 py-3 sm:py-4">
                   <div className="flex items-center gap-3">
                     <img src={app.avatar} className="w-10 h-10 rounded-full object-cover" />
@@ -161,7 +162,7 @@ export default function Verification() {
             <div className="flex justify-between items-start gap-3">
               <div className="flex gap-3">
                 <img src={app.avatar} className="w-12 h-12 rounded-full object-cover border" />
-                <div><p className="text-blue-600 font-semibold">{String(app.id).substring(0, 8)}</p><p className="font-medium">{app.name}</p><p className="text-xs text-gray-500">DOB: {app.dob}</p></div>
+                <div><p className="text-blue-600 font-semibold">{String(app.displayId).substring(0, 20)}</p><p className="font-medium">{app.name}</p><p className="text-xs text-gray-500">DOB: {app.dob}</p></div>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs whitespace-nowrap ${statusStyle(app.status)}`}>{app.status}</span>
             </div>
