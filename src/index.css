@@ -156,3 +156,21 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     width: 100%;
   }
 }
+/* Full page background when modal is open */
+/* Full app overlay when modal is open */
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4); /* slate-900 with opacity */
+  z-index: 9998;
+}
+
+/* FULL PAGE OVERLAY WHEN MODAL IS OPEN */
+body.modal-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* same grey as img-1 */
+  z-index: 999; /* BELOW modal, ABOVE header */
+}

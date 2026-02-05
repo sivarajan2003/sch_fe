@@ -1,9 +1,13 @@
 // classroomService.js
 import axios from "axios";
 import { getAccessToken } from "../utils/token";
+import BASE_API from "../api/baseurl";
 
 const API = axios.create({
-  baseURL: "https://sms-iqc8.onrender.com/api/v1/psms",
+  baseURL: BASE_API,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 API.interceptors.request.use((config) => {
@@ -14,13 +18,13 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ GET
+// GET
 export const getClassrooms = async () => {
   const res = await API.get("/school/classroom");
   return res.data;
 };
 
-// ✅ CREATE
+//CREATE
 export const createClassroom = async (payload) => {
   console.log("CREATE CLASSROOM PAYLOAD 👉", payload);
 

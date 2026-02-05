@@ -98,6 +98,23 @@ const loadClassrooms = async () => {
     setCurrentPage(1);
   };
   
+useEffect(() => {
+  const isAnyModalOpen =
+    openAddRoom ||
+    openViewRoom ||
+    openEditRoom ||
+    Boolean(confirmDeleteId);
+
+  if (isAnyModalOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
+  }
+
+  return () => {
+    document.body.style.overflow = "auto";
+  };
+}, [openAddRoom, openViewRoom, openEditRoom, confirmDeleteId]);
 
   /* EXPORT */
   const handleExport = () => {
@@ -394,7 +411,7 @@ const loadClassrooms = async () => {
 
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left">ID</th>
+              <th className="px-4 py-3 text-center">S.No</th>
               <th className="px-4 py-3">Room No</th>
               <th className="px-4 py-3">Capacity</th>
               <th className="px-4 py-3">Status</th>
@@ -404,9 +421,11 @@ const loadClassrooms = async () => {
           </thead>
 
           <tbody>
-            {paginatedData.map((r) => (
-              <tr key={r.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-3 text-blue-600">{r.id}</td>
+{paginatedData.map((r, index) => (         
+    <tr key={r.id} className="border-t hover:bg-gray-50">
+<td className="px-4 py-3 text-center font-medium">
+  {(currentPage - 1) * rowsPerPage + index + 1}
+</td>
                 <td className="px-4 py-3 text-center">{r.roomNo}</td>
                 <td className="px-4 py-3 text-center">{r.capacity}</td>
                 <td className="px-4 py-3 text-center">
@@ -468,7 +487,7 @@ const loadClassrooms = async () => {
 </div> 
 {/* ================= MOBILE / TAB CARD VIEW ================= */}
 <div className="space-y-4 lg:hidden">
-  {paginatedData.map((r) => (
+{paginatedData.map((r, index) => (
     <div
       key={r.id}
       className="bg-white border border-gray-200 rounded-xl p-4 space-y-3"
@@ -476,9 +495,8 @@ const loadClassrooms = async () => {
       {/* TOP */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-blue-600 text-sm font-medium">
-          {r.id}
-        </span>
-
+  S.No: {(currentPage - 1) * rowsPerPage + index + 1}
+</span>
         <span
           className={`px-3 py-1 text-xs rounded-full ${
             r.status === "Active"
@@ -578,8 +596,18 @@ const loadClassrooms = async () => {
   />
 )}
 {confirmDeleteId && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div className="bg-white rounded-xl w-full max-w-sm p-6">
+<div
+  className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
+  onMouseDown={(e) => {
+    if (e.target === e.currentTarget) {
+      setOpenAddRoom(false); // change per modal
+    }
+  }}
+>
+<div
+  className="bg-white rounded-xl w-full max-w-md p-6"
+  onMouseDown={(e) => e.stopPropagation()}
+>
 
       <h3 className="text-lg font-semibold mb-2">
         Confirm Delete

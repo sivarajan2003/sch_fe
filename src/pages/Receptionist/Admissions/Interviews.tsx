@@ -213,7 +213,20 @@ export default function Interviews() {
       }
     });
   }, []);
+useEffect(() => {
+  if (viewApp || scheduleApp) {
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("modal-open");
+  } else {
+    document.body.style.overflow = "auto";
+    document.body.classList.remove("modal-open");
+  }
 
+  return () => {
+    document.body.style.overflow = "auto";
+    document.body.classList.remove("modal-open");
+  };
+}, [viewApp, scheduleApp]);
 
   const handlePrint = () => window.print();
   const handleExport = () => { /* Export logic similar to before but using data */ };
@@ -335,8 +348,8 @@ export default function Interviews() {
 
       {/* MODALS */}
       {viewApp && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl">
+  <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
+ <div className="bg-white w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl">
             <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
               <h3 className="font-bold">Student Details</h3>
               <button onClick={() => setViewApp(null)}>✕</button>
@@ -358,9 +371,9 @@ export default function Interviews() {
         </div>
       )}
 
-      {scheduleApp && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="bg-white w-full max-w-md rounded-2xl p-6">
+     {scheduleApp && (
+  <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
+<div className="bg-white w-full max-w-md rounded-2xl p-6">
             <h2 className="text-xl font-semibold">Schedule Interview</h2>
             <p className="text-gray-500 mb-4">{scheduleApp.name}</p>
             <div className="space-y-4">

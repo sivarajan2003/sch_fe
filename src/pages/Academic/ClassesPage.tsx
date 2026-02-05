@@ -147,6 +147,14 @@ export default function ClassesPage() {
     setCurrentPage(1);
     fetchClasses();
   };
+useEffect(() => {
+  const isAnyModalOpen = openAddClass || openViewModal || openEditClass;
+  document.body.style.overflow = isAnyModalOpen ? "hidden" : "auto";
+
+  return () => {
+    document.body.style.overflow = "auto";
+  };
+}, [openAddClass, openViewModal, openEditClass]);
 
   const handleExport = () => {
     const headers = ["S.No", "Class", "Section", "Students", "Academic Year", "Status"];
@@ -427,9 +435,15 @@ export default function ClassesPage() {
 
       {/* VIEW */}
       {openViewModal && selectedClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-4">
+        <div
+  className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center"
+  onClick={() => setOpenViewModal(false)}
+>
+  <div
+    className="bg-white rounded-xl w-full max-w-md p-6"
+    onClick={(e) => e.stopPropagation()}
+  >
+<div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Class Details</h3>
               <button onClick={() => setOpenViewModal(false)} className="text-gray-500 hover:text-red-500">✕</button>
             </div>
@@ -453,7 +467,10 @@ export default function ClassesPage() {
 
       {/* EDIT MODAL */}
       {openEditClass && editingClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div
+  className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center"
+  onClick={() => setOpenEditClass(false)}
+>
           <div className="bg-white rounded-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold">Edit Class</h3>

@@ -116,6 +116,20 @@ export default function AllApplications() {
   const handlePrint = () => {
     window.print();
   };
+useEffect(() => {
+  if (viewApp) {
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("modal-open");
+  } else {
+    document.body.style.overflow = "auto";
+    document.body.classList.remove("modal-open");
+  }
+
+  return () => {
+    document.body.style.overflow = "auto";
+    document.body.classList.remove("modal-open");
+  };
+}, [viewApp]);
 
   const handleExport = () => {
     // Basic CSV export of CURRENT PAGE data (or fetch all if needed)
@@ -149,9 +163,8 @@ export default function AllApplications() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-
-      {/* ================= HEADER ================= */}
+<div className="space-y-4 sm:space-y-6">
+    {/* ================= HEADER ================= */}
       <div className="bg-white border border-gray-200 rounded-2xl px-6 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
@@ -496,7 +509,7 @@ export default function AllApplications() {
 
       {/* VIEW MODAL */}
       {viewApp && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+<div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
               <h3 className="font-bold text-lg">Application Details</h3>
