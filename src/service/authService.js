@@ -1,105 +1,16 @@
-import axios from "axios";
-import BASE_API from "../api/baseurl";
+import api from "../api/client";
 import {
-  getAccessToken,
   getRefreshToken,
   setTokens,
   clearTokens,
 } from "../utils/token";
 
 /* ----------------------------------------
-   Axios Instance
----------------------------------------- */
-const api = axios.create({
-  baseURL: `${BASE_API}/adminuser`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-/* ----------------------------------------
-   Response Interceptor (Refresh Token)
----------------------------------------- */
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error);
-    else prom.resolve(token);
-  });
-  failedQueue = [];
-};
-
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      getRefreshToken()
-    ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const res = await axios.post(
-          `${BASE_API}/adminusers/refresh-token`,
-          {
-            refreshToken: getRefreshToken(),
-          }
-        );
-
-        const { accessToken, refreshToken } = res.data.data;
-        setTokens({ accessToken, refreshToken });
-
-        api.defaults.headers.Authorization = `Bearer ${accessToken}`;
-        processQueue(null, accessToken);
-
-        return api(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        clearTokens();
-        window.location.href = "/login";
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-/* ----------------------------------------
    Auth Services
 ---------------------------------------- */
 
-
 export const login = async (payload) => {
-  const res = await api.post("/login", payload);
+  const res = await api.post("/adminuser/login", payload);
 
   // ✅ Your backend response is FLAT
   const { accessToken, refreshToken, user } = res.data;
@@ -125,7 +36,7 @@ export const login = async (payload) => {
  * POST /refresh-token
  */
 export const refreshToken = async () => {
-  const res = await api.post("/refresh-token", {
+  const res = await api.post("/adminuser/refresh-token", {
     refreshToken: getRefreshToken(),
   });
   setTokens(res.data.data);
@@ -137,7 +48,7 @@ export const refreshToken = async () => {
  * GET /me
  */
 export const getMe = async () => {
-  const res = await api.get("/me");
+  const res = await api.get("/adminuser/me");
   return res.data;
 };
 
@@ -146,7 +57,7 @@ export const getMe = async () => {
  * POST /logout
  */
 export const logout = async () => {
-  await api.post("/logout");
+  await api.post("/adminuser/logout");
   clearTokens();
 };
 
@@ -155,7 +66,7 @@ export const logout = async () => {
  * POST /change-password
  */
 export const changePassword = async (payload) => {
-  const res = await api.post("/change-password", payload);
+  const res = await api.post("/adminuser/change-password", payload);
   return res.data;
 };
 
@@ -168,7 +79,7 @@ export const changePassword = async (payload) => {
  * GET /
  */
 export const getAdminUsers = async (params = {}) => {
-  const res = await api.get("/", { params });
+  const res = await api.get("/adminuser/", { params });
   return res.data;
 };
 
@@ -177,7 +88,7 @@ export const getAdminUsers = async (params = {}) => {
  * POST /
  */
 export const createAdminUser = async (payload) => {
-  const res = await api.post("/", payload);
+  const res = await api.post("/adminuser/", payload);
   return res.data;
 };
 
@@ -186,7 +97,7 @@ export const createAdminUser = async (payload) => {
  * GET /:id
  */
 export const getAdminUserById = async (id) => {
-  const res = await api.get(`/${id}`);
+  const res = await api.get(`/adminuser/${id}`);
   return res.data;
 };
 
@@ -195,7 +106,7 @@ export const getAdminUserById = async (id) => {
  * PUT /:id
  */
 export const updateAdminUser = async (id, payload) => {
-  const res = await api.put(`/${id}`, payload);
+  const res = await api.put(`/adminuser/${id}`, payload);
   return res.data;
 };
 
@@ -204,7 +115,7 @@ export const updateAdminUser = async (id, payload) => {
  * PATCH /:id
  */
 export const patchAdminUser = async (id, payload) => {
-  const res = await api.patch(`/${id}`, payload);
+  const res = await api.patch(`/adminuser/${id}`, payload);
   return res.data;
 };
 
@@ -213,7 +124,7 @@ export const patchAdminUser = async (id, payload) => {
  * DELETE /:id
  */
 export const deleteAdminUser = async (id) => {
-  const res = await api.delete(`/${id}`);
+  const res = await api.delete(`/adminuser/${id}`);
   return res.data;
 };
 
@@ -222,7 +133,7 @@ export const deleteAdminUser = async (id) => {
  * POST /:id/restore
  */
 export const restoreAdminUser = async (id) => {
-  const res = await api.post(`/${id}/restore`);
+  const res = await api.post(`/adminuser/${id}/restore`);
   return res.data;
 };
 
@@ -240,4 +151,5 @@ export default {
   deleteAdminUser,
   restoreAdminUser,
 };
+
 

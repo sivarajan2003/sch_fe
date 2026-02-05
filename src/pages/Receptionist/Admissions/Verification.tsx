@@ -83,7 +83,7 @@ export default function Verification() {
   const totalPages = Math.ceil(totalCount / rowsPerPage);
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 md:px-6">
+    <div className="space-y-4 sm:space-y-6 px-1">
       {/* HEADER */}
       <div className="bg-white border rounded-2xl px-6 py-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
