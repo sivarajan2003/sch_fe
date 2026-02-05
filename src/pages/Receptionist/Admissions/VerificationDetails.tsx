@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 // @ts-ignore
 import admissionService from "../../../service/admissionService";
 import { toast } from "react-toastify";

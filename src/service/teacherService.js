@@ -1,30 +1,4 @@
-import axios from "axios";
-import BASE_API from "../api/baseurl";
-import { getAccessToken } from "../utils/token";
-
-/* ----------------------------------------
-   Axios Instance
----------------------------------------- */
-const api = axios.create({
-  baseURL: BASE_API,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-/* ----------------------------------------
-   Request Interceptor (Attach Access Token)
----------------------------------------- */
-api.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+import api from "../api/client";
 
 /* ----------------------------------------
    Teacher Services
