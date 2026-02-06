@@ -1,3 +1,4 @@
+// Step5Review.tsx
 import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import SuccessAnimation from "../../../../../components/SuccessAnimation";
@@ -16,16 +17,12 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [className, setClassName] = useState<string | null>(null);
 
-  // Fetch class name from API using the class ID
   useEffect(() => {
     const fetchClassName = async () => {
-      console.log("Fetching class name for ID:", academic.applyingClass);
-      if (academic.applyingClass) {
+      if (academic?.applyingClass) {
         try {
           const res = await classService.getClassById(academic.applyingClass);
-          console.log("Class fetch response:", res);
           if (res.success && res.data) {
-            // Transform "Class 12" to "12th"
             let displayName = res.data.name;
             if (displayName.toLowerCase().startsWith("class ")) {
               const num = displayName.split(" ")[1];
@@ -41,26 +38,23 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
           }
         } catch (error) {
           console.error("Failed to fetch class name:", error);
-          setClassName("-"); // Show dash on error
+          setClassName("-");
         }
       } else {
-        console.log("No applyingClass value found");
         setClassName("-");
       }
     };
     fetchClassName();
-  }, [academic.applyingClass]);
+  }, [academic?.applyingClass]);
 
   const handleSubmit = async () => {
-    if (isSubmitting) return; // Prevent double click
-
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       await onSubmit();
       setShowSuccess(true);
     } catch (error) {
       setIsSubmitting(false);
-      // Error is already handled in parent component
     }
   };
 
@@ -68,18 +62,12 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
     <div>
       <p className="text-xs text-gray-500">{label}</p>
       <p className="text-sm sm:text-base font-medium text-gray-800">
-        {value || "-"}
+        {value ?? "-"}
       </p>
     </div>
   );
 
-  const DocumentRow = ({
-    label,
-    url
-  }: {
-    label: string;
-    url: string | null;
-  }) => (
+  const DocumentRow = ({ label, url }: { label: string; url: string | null }) => (
     <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50">
       <div className="flex items-center gap-3">
         {url ? (
@@ -107,6 +95,35 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
     </div>
   );
 
+  // Normalize display of fees (accept many shapes)
+  const normalizedFees = (() => {
+    const registration_fee = fees?.registration_fee ?? fees?.total_amount ?? fees?.amount ?? fees?.amount_collected ?? fees?.amountCollected;
+    const amount = Number.isFinite(Number(registration_fee)) ? Number(registration_fee) : null;
+
+    const paymentMethod = fees?.payment_method ?? fees?.paymentMethod ?? fees?.payment_mode ?? fees?.paymentMode;
+    const paymentStatus = fees?.payment_status ?? fees?.paymentStatus ?? fees?.onlineStatus ?? fees?.status;
+    const receipt = fees?.receipt_no ?? fees?.receiptNo ?? fees?.transaction_id ?? null;
+    const remark = fees?.fee_remark ?? fees?.remark ?? null;
+
+    return {
+      amount,
+      paymentMethod,
+      paymentStatus,
+      receipt,
+      remark,
+    };
+  })();
+
+  const displayPaymentMode = (fees?.payment_mode === "cash" || fees?.paymentMode === "cash") ? "Cash Payment" : (normalizedFees.paymentMethod ? "Online Payment" : "Online Payment");
+  const displayAmount = normalizedFees.amount ? `₹${normalizedFees.amount.toLocaleString()}` : "-";
+  const displayReceipt = normalizedFees.receipt || "-";
+  const displayStatus = (() => {
+    const s = String(normalizedFees.paymentStatus || "pending").toLowerCase();
+    if (["completed", "paid", "complete", "success"].includes(s)) return "Completed";
+    if (["failed", "error"].includes(s)) return "Failed";
+    return "Pending";
+  })();
+
   return (
     <>
       <div className="bg-white rounded-xl border overflow-hidden">
@@ -118,17 +135,17 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
           {/* PERSONAL DETAILS */}
           <Section title="Personal Details">
             <Grid>
-              <Row label="First Name" value={personal.firstName} />
-              <Row label="Last Name" value={personal.lastName} />
-              <Row label="Date of Birth" value={personal.dob} />
-              <Row label="Gender" value={personal.gender} />
-              <Row label="Parent / Guardian" value={personal.parentName} />
-              <Row label="Phone" value={personal.phone} />
-              <Row label="Email" value={personal.email} />
+              <Row label="First Name" value={personal?.firstName} />
+              <Row label="Last Name" value={personal?.lastName} />
+              <Row label="Date of Birth" value={personal?.dob} />
+              <Row label="Gender" value={personal?.gender} />
+              <Row label="Parent / Guardian" value={personal?.parentName} />
+              <Row label="Phone" value={personal?.phone} />
+              <Row label="Email" value={personal?.email} />
             </Grid>
 
             <div className="mt-3">
-              <Row label="Address" value={personal.address} />
+              <Row label="Address" value={personal?.address} />
             </div>
           </Section>
 
@@ -136,14 +153,14 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
           <Section title="Academic Details">
             <Grid>
               <Row label="Applying Class" value={className === null ? "Loading..." : className} />
-              <Row label="Stream" value={academic.stream} />
-              <Row label="Quota" value={academic.quota} />
+              <Row label="Stream" value={academic?.stream} />
+              <Row label="Quota" value={academic?.quota} />
             </Grid>
 
             <div className="mt-3">
               <Row
                 label="Achievements"
-                value={academic.achievements}
+                value={academic?.achievements}
               />
             </div>
           </Section>
@@ -153,22 +170,22 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
             <Grid>
               <Row
                 label="School Name"
-                value={previousSchool.schoolName}
+                value={previousSchool?.schoolName}
               />
               <Row
                 label="Last Class"
-                value={previousSchool.lastClass}
+                value={previousSchool?.lastClass}
               />
               <Row
                 label="Year Completed"
-                value={previousSchool.yearCompleted}
+                value={previousSchool?.yearCompleted}
               />
             </Grid>
 
             <div className="mt-3">
               <Row
                 label="Reason for Transfer"
-                value={previousSchool.reason}
+                value={previousSchool?.reason}
               />
             </div>
           </Section>
@@ -178,19 +195,19 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
             <div className="space-y-3">
               <DocumentRow
                 label="Birth Certificate"
-                url={documents.birth_certificate}
+                url={documents?.birth_certificate}
               />
               <DocumentRow
                 label="Leaving Certificate"
-                url={documents.tc_certificate}
+                url={documents?.tc_certificate}
               />
               <DocumentRow
                 label="Passport Photo"
-                url={documents.passport_size_photo}
+                url={documents?.passport_size_photo}
               />
               <DocumentRow
                 label="Address Proof"
-                url={documents.address_proof}
+                url={documents?.address_proof}
               />
             </div>
           </Section>
@@ -198,20 +215,14 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
           {/* FEES DETAILS */}
           <Section title="Fees & Payment">
             <Grid>
-              <Row label="Payment Mode" value={fees.paymentMode === 'cash' ? 'Cash Payment' : 'Online Payment'} />
-              {fees.paymentMode === 'cash' && (
-                <>
-                  <Row label="Amount Collected" value={fees.amount ? `₹${fees.amount}` : '-'} />
-                  <Row label="Receipt No" value={fees.receiptNo} />
-                </>
-              )}
-              {fees.paymentMode === 'online' && (
-                <Row label="Payment Status" value={fees.onlineStatus || 'To be paid'} />
-              )}
+              <Row label="Payment Mode" value={displayPaymentMode} />
+              <Row label="Amount" value={displayAmount} />
+              <Row label="Receipt No" value={displayReceipt} />
+              <Row label="Payment Status" value={displayStatus} />
             </Grid>
-            {fees.remark && (
+            {normalizedFees.remark && (
               <div className="mt-3">
-                <Row label="Remark" value={fees.remark} />
+                <Row label="Remark" value={normalizedFees.remark} />
               </div>
             )}
           </Section>
@@ -260,7 +271,6 @@ export default function Step5Review({ data, onBack, onSubmit }: Props) {
         submessage="Your admission application has been received. We'll contact you soon."
         onComplete={() => {
           setShowSuccess(false);
-          // Navigation will be handled by parent component
         }}
       />
     </>

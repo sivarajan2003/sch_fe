@@ -68,11 +68,16 @@ export default function ApplicationForm() {
         address_proof: formData.documents.address_proof || null,
 
         // --- FEES ---
-        payment_mode: formData.fees.paymentMode || 'online',
-        amount_collected: formData.fees.amount || 0,
-        receipt_no: formData.fees.receiptNo || null,
-        fee_remark: formData.fees.remark || null,
-        payment_status: formData.fees.paymentMode === 'cash' ? 'Paid' : (formData.fees.onlineStatus || 'Pending'),
+        // --- FEES (BACKEND SAFE) ---
+registration_fee: Number(formData.fees.registration_fee ?? 500),
+total_amount: Number(formData.fees.total_amount ?? formData.fees.registration_fee ?? 500),
+
+payment_method: formData.fees.payment_method || "UPI",
+payment_date: formData.fees.payment_date || new Date().toISOString(),
+payment_status: formData.fees.payment_status || "Pending",
+
+receipt_no: formData.fees.receipt_no ?? null,
+fee_remark: formData.fees.fee_remark ?? null,
 
         // --- DEFAULTS ---
         admission_status: "Pending",
