@@ -158,37 +158,37 @@ export default function Sidebar({
                   collapsed={collapsed}
                 />
 
-                <MenuItem
+                {/* <MenuItem
                   icon={UserCheck}
                   label="Receptionist Dashboard"
                   onClick={() => navigate("/admin/dashboard/receptionist")}
                   active={location.pathname.startsWith("/admin/dashboard/receptionist")}
                   collapsed={collapsed}
-                />
+                /> */}
 
-                <MenuItem
+                {/* <MenuItem
                   icon={GraduationCap}
                   label="Student Dashboard"
                   onClick={() => navigate("/student/dashboard")}
                   active={location.pathname.startsWith("/student/dashboard")}
                   collapsed={collapsed}
-                />
+                /> */}
 
-                <MenuItem
+                {/* <MenuItem
                   icon={Users}
                   label="Teacher Dashboard"
                   onClick={() => navigate("/teacher/dashboard")}
                   active={location.pathname.startsWith("/teacher/dashboard")}
                   collapsed={collapsed}
-                />
+                /> */}
 
-                <MenuItem
+                {/* <MenuItem
                   icon={User}
                   label="Parent Dashboard"
                   onClick={() => navigate("/parent/dashboard")}
                   active={location.pathname.startsWith("/parent/dashboard")}
                   collapsed={collapsed}
-                />
+                /> */}
               </>
             )}
             {role === "teacher" && (
@@ -335,7 +335,7 @@ export default function Sidebar({
                 {/* ================= STUDENTS ================= */}
                 {!isParent && (
                   <>
-                    <button
+                    {/* <button
                       onClick={() => navigate(`${basePath}/people/students`)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg
     ${isActive(`${basePath}/people/students`)
@@ -356,7 +356,7 @@ export default function Sidebar({
 
                         <span className="text-sm font-medium">Students</span>
                       </div>
-                    </button>
+                    </button> */}
 
 
                     {/*{openStudents && (
@@ -375,7 +375,7 @@ export default function Sidebar({
     )}*/}
 
                     {/* ================= PARENTS ================= */}
-                    <button
+                    {/* <button
                       onClick={() => {
                         navigate(`${basePath}/people/parents`);
                         setActiveItem("parents");
@@ -393,11 +393,11 @@ export default function Sidebar({
                       </span>
 
                       <span className="text-sm font-medium">Parents</span>
-                    </button>
+                    </button> */}
                   </>
                 )}
                 {/* ================= GUARDIANS ================= */}
-                <button
+                {/* <button
                   onClick={() => {
                     navigate(`${basePath}/people/guardians`);
                     setActiveItem("guardians");
@@ -414,7 +414,7 @@ export default function Sidebar({
                   </span>
 
                   <span className="text-sm font-medium">Guardians</span>
-                </button>
+                </button> */}
 
                 {/* ================= TEACHERS ================= */}
                 <button
@@ -434,15 +434,15 @@ export default function Sidebar({
                       <Users className="w-4 h-4 text-gray-700" />
                     </span>
 
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium ">
                       Teachers
                     </span>
                   </div>
 
-                  <ChevronDown
+                  {/* <ChevronDown
                     className={`w-4 h-4 transition-transform ${openTeachers ? "rotate-180" : ""
                       }`}
-                  />
+                  /> */}
                 </button>
 
                 {/*{openTeachers && (
@@ -513,38 +513,38 @@ export default function Sidebar({
                   icon={DoorOpen}
                   path={`${basePath}/academic/class-room`}
                 />
-                {!isAdmissionAdmin && (
+                {/* {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Class Routine"
                     icon={CalendarDays}
                     path={`${basePath}/academic/class-routine`}
                   />
-                )}
-                {!isAdmissionAdmin && (
+                )} */}
+                {/* {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Subject"
                     icon={BookOpen}
                     path={`${basePath}/academic/subject`}
                   />
-                )}
-                {!isAdmissionAdmin && (
+                )} */}
+                {/* {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Syllabus"
                     icon={FileText}
                     path={`${basePath}/academic/syllabus`}
                   />
-                )}
-                {!isAdmissionAdmin && (
+                )} */}
+                {/* {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Time Table"
                     icon={Table}
                     path={`${basePath}/academic/time-table`}
                   />
-                )}
+                )} */}
                 {/* ================= EXAMINATIONS (HAS CHILD) ================= */}
-                {!isParent && !isAdmissionAdmin && (
+                {/* {!isParent && !isAdmissionAdmin && ( */}
                   <>
-                    <button
+                    {/* <button
                       onClick={() => setOpenExams(!openExams)}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg"
                     >
@@ -598,32 +598,31 @@ export default function Sidebar({
                         onClick={() => navigate(`${basePath}/attendance`)}
                         active={location.pathname.startsWith(`${basePath}/attendance`)}
                       />
-                    )}
+                    )} */}
 
 
                     {/* ================= SINGLE MENU ================= */}
-                    {!isAdmissionAdmin && (
+                    {/* {!isAdmissionAdmin && (
                       <MainItem
                         label="Reasons"
                         icon={HelpCircle}
                         active={location.pathname.startsWith(`${basePath}/academic/reasons`)}
                         onClick={() => navigate(`${basePath}/academic/reasons`)}
                       />
-                    )}
+                    )} */}
 
 
                   </>
-                )}
+                {/* )} */}
               </div>
             )}
           </>
         )}
 
-        {canAccess(["admin", "student", "teacher"]) &&
+        {/* {canAccess(["admin", "student", "teacher"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
             <>
-              {/* ================= MANAGEMENT ================= */}
               <SectionHeader
                 icon={Briefcase}
                 label="Management"
@@ -633,7 +632,6 @@ export default function Sidebar({
               />
               {!collapsed && openManagement && (
                 <div className="ml-4 mt-2 space-y-1">
-                  {/* ================= FEES COLLECTION ================= */}
                   {role === "admin" && (
                     <button
                       onClick={() =>
@@ -662,17 +660,8 @@ export default function Sidebar({
                     </button>
                   )}
 
-                  {/* {openFees && (
-      <div className="ml-11 space-y-1">
-        <ChildItem label="Fees Group" />
-        <ChildItem label="Fees Type" />
-        <ChildItem label="Fees Master" />
-        <ChildItem label="Fees Assign" />
-        <ChildItem label="Collect Fees" />
-      </div>
-    )}*/}
+                  
 
-                  {/* ================= LIBRARY ================= */}
                   <button
                     onClick={() => navigate(`${basePath}/management/library`)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
@@ -693,16 +682,6 @@ export default function Sidebar({
                     <span className="text-sm">Library Members</span>
                   </button>
 
-                  {/*{openLibrary && (
-      <div className="ml-11 space-y-1">
-        <ChildItem label="Library Members" />
-        <ChildItem label="Books" />
-        <ChildItem label="Issue Book" />
-        <ChildItem label="Return" />
-      </div>
-    )}*/}
-
-                  {/* ================= SPORTS (NO CHILD) ================= */}
 
                   <button
                     onClick={() => navigate(`${basePath}/management/sports`)}
@@ -725,7 +704,6 @@ export default function Sidebar({
                     <span className="text-sm">Sports</span>
                   </button>
 
-                  {/* ================= HOSTEL ================= */}
 
                   <button
                     onClick={() => navigate(`${basePath}/management/hostel`)}
@@ -748,15 +726,6 @@ export default function Sidebar({
                     <span className="text-sm">Hostel</span>
                   </button>
 
-                  {/*{openHostel && (
-      <div className="ml-11 space-y-1">
-        <ChildItem label="Hostel List" />
-        <ChildItem label="Hostel Rooms" />
-        <ChildItem label="Room Type" />
-      </div>
-    )}*/}
-
-                  {/* ================= TRANSPORT ================= */}
                   <button
                     onClick={() => navigate(`${basePath}/management/transport`)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
@@ -778,25 +747,15 @@ export default function Sidebar({
                     <span className="text-sm">Transport</span>
                   </button>
 
-                  {/*{openTransport && (
-      <div className="ml-11 space-y-1">
-        <ChildItem label="Routes" />
-        <ChildItem label="Pickup Points" />
-        <ChildItem label="Vehicle Drivers" />
-        <ChildItem label="Vehicles" />
-        <ChildItem label="Assign Vehicle" />
-      </div>
-    )}*/}
 
                 </div>
               )}
             </>
-          )}
-        {canAccess(["admin", "Super Admin", "student", "teacher", "parent"]) &&
+          )} */}
+        {/* {canAccess(["admin", "Super Admin", "student", "teacher", "parent"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
             <>
-              {/* ================= HRM ================= */}
               <SectionHeader
                 icon={UserCog}
                 label="HRM"
@@ -807,11 +766,6 @@ export default function Sidebar({
               {!collapsed && openHRM && (
                 <div className="ml-4 mt-2 space-y-1">
 
-                  {/*<HRMItem
-  icon={Users}
-  label="Staffs"
-  path="/admin/dashboard/hrm/staffs"
-/>*/}
 
                   {role === "admin" || role === "Super Admin" && (
                     <HRMItem
@@ -829,7 +783,6 @@ export default function Sidebar({
                   )}
 
 
-                  {/* ===== Attendance (HAS CHILD) ===== */}
 
                   {(role === "admin" || role === "Super Admin" || role === "teacher") && (
                     <>
@@ -850,7 +803,6 @@ export default function Sidebar({
                       {openAttendance && (
                         <div className="ml-11 space-y-1">
 
-                          {/* Student Attendance */}
                           <ChildItem
                             label="Student Attendance"
                             onClick={() =>
@@ -862,7 +814,6 @@ export default function Sidebar({
                             }
                           />
 
-                          {/* Teacher Attendance */}
                           <ChildItem
                             label="Teacher Attendance"
                             onClick={() =>
@@ -873,8 +824,6 @@ export default function Sidebar({
                               )
                             }
                           />
-
-                          {/* Staff Attendance (ADMIN ONLY) */}
                           {role === "admin" || role === "Super Admin" && (
                             <ChildItem
                               label="Staff Attendance"
@@ -888,7 +837,6 @@ export default function Sidebar({
                     </>
                   )}
 
-                  {/* ===== Leaves (HAS CHILD) ===== */}
                   {role === "admin" && (
                     <>
                       <button
@@ -927,7 +875,6 @@ export default function Sidebar({
                       )}
                     </>
                   )}
-                  {/* ===== Holidays ===== */}
                   {(role === "admin" || role === "teacher" || role === "student" || role === "parent") && (
                     <HRMItem
                       icon={Briefcase}
@@ -951,7 +898,7 @@ export default function Sidebar({
                 </div>
               )}
             </>
-          )}
+          )} */}
         {canAccess(["admin", "teacher", "parent", "student"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
