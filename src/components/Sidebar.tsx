@@ -153,8 +153,8 @@ export default function Sidebar({
                 <MenuItem
                   icon={LayoutDashboard}
                   label="Admin Dashboard"
-                  onClick={() => navigate("/admin/dashboard")}
-                  active={location.pathname === "/admin/dashboard"}
+                  onClick={() => navigate("/admin/dashboard/receptionist")}
+                  active={location.pathname === "/admin/dashboard/receptionist"}
                   collapsed={collapsed}
                 />
 
@@ -249,13 +249,13 @@ export default function Sidebar({
                   path={`${admissionBasePath}/application-form`}
                 />
 
-                {!isPureParentPortal && (
+                {/* {!isPureParentPortal && (
                   <ApplicationItem
                     label="Fee Payment"
                     icon={Wallet}
                     path={`${admissionBasePath}/fee-payment`}
                   />
-                )}
+                )} */}
 
                 {!isPureParentPortal && (
                   <ApplicationItem
@@ -265,13 +265,13 @@ export default function Sidebar({
                   />
                 )}
 
-                {!isPureParentPortal && (
+                {/* {!isPureParentPortal && (
                   <ApplicationItem
                     label="New Application"
                     icon={Mail}
                     path={`${admissionBasePath}/new`}
                   />
-                )}
+                )} */}
 
                 {!isPureParentPortal && (
                   <ApplicationItem
@@ -901,44 +901,44 @@ export default function Sidebar({
           )} */}
         {canAccess(["admin", "teacher", "parent", "student"]) &&
           !isPureParentPortal &&
-          !isAdmissionAdmin && (
+          !isAdmissionAdmin && (  
             <>
               {/* ================= REPORTS ================= */}
-              <SectionHeader
+              {/* <SectionHeader
                 icon={FileBarChart2}
                 label="Reports"
                 collapsed={collapsed}
                 open={openReports}
                 onClick={() => setOpenReports(!openReports)}
-              />
+              /> */}
               {!collapsed && openReports && (
                 <div className="ml-4 mt-2 space-y-1">
 
-                  <ReportItem
+                  {/* <ReportItem
                     icon={ClipboardCheck}
                     label="Attendance Report"
                     path={`${basePath}/reports/attendance`}
-                  />
-                  {role === "admin" && (
+                  /> */}
+                  {/* {role === "admin" && (
                     <ReportItem
                       icon={Wallet}
                       label="Fee Collection"
                       path={`${basePath}/reports/fees`}
                     />
-                  )}
+                  )} */}
 
-                  <ReportItem
+                  {/* <ReportItem
                     icon={FileText}
                     label="Exam Results"
                     path={`${basePath}/reports/exam-results`}
-                  />
-                  {role === "admin" && (
+                  /> */}
+                  {/* {role === "admin" && (
                     <ReportItem
                       icon={FileBarChart2}
                       label="Custom Reports"
                       path={`${basePath}/reports/custom`}
                     />
-                  )}
+                  )} */}
 
                   {/* <ReportItem
       icon={GraduationCap}

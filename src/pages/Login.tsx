@@ -99,7 +99,7 @@ export default function Login() {
       const isAdmin = roleLower === "super admin" || roleLower === "admin";
 
       if (isAdmin) {
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard/receptionist");
       } else if (roleLower === "student") {
         navigate("/student/dashboard");
       } else if (roleLower === "teacher") {
