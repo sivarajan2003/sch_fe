@@ -380,7 +380,7 @@ export default function App() {
         <Route
           path="/parent/dashboard"
           element={
-            <ProtectedRoute role={["parent", "admin"]}>
+            <ProtectedRoute role={["Parent", "admin"]}>
               <DashboardLayout />
             </ProtectedRoute>
           }
@@ -388,7 +388,7 @@ export default function App() {
           <Route
             path="/parent/dashboard/admissions"
             element={
-              <ProtectedRoute role={["parent", "admin"]}>
+              <ProtectedRoute role={["Parent", "admin"]}>
                 <AdmissionPortal />
               </ProtectedRoute>
             }
