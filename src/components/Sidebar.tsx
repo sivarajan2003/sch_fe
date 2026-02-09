@@ -29,7 +29,7 @@ export default function Sidebar({
   const navigate = useNavigate();
   const location = useLocation();
   const rawRole = localStorage.getItem("role");
-  const role = rawRole === "Super Admin" ? "admin" : rawRole;
+  const role = (rawRole === "Super Admin" || rawRole === "super admin") ? "admin" : rawRole;
   const isParent = role === "parent";
   const isParentPortal = localStorage.getItem("portal") === "true";
 
@@ -242,13 +242,13 @@ export default function Sidebar({
                     path={`${admissionBasePath}/all`}
                   />
                 )}
-{!isPureParentPortal && (
-                <ApplicationItem
-                  label="Application Form"
-                  icon={FileText}
-                  path={`${admissionBasePath}/application-form`}
-                />
-)}
+                {!isPureParentPortal && (
+                  <ApplicationItem
+                    label="Application Form"
+                    icon={FileText}
+                    path={`${admissionBasePath}/application-form`}
+                  />
+                )}
 
                 {isPureParentPortal && (
                   <ApplicationItem
@@ -256,7 +256,7 @@ export default function Sidebar({
                     icon={Wallet}
                     path={`${admissionBasePath}/fee-payment`}
                   />
-                )} 
+                )}
 
                 {!isPureParentPortal && (
                   <ApplicationItem
@@ -274,12 +274,12 @@ export default function Sidebar({
                   />
                 )} */}
 
-               
-                  <ApplicationItem
-                    label="Documents"
-                    icon={ClipboardCheck}
-                    path={`${admissionBasePath}/documents`}
-                  />
+
+                <ApplicationItem
+                  label="Documents"
+                  icon={ClipboardCheck}
+                  path={`${admissionBasePath}/documents`}
+                />
 
                 <ApplicationItem
                   label="Interviews"
@@ -543,8 +543,8 @@ export default function Sidebar({
                 )} */}
                 {/* ================= EXAMINATIONS (HAS CHILD) ================= */}
                 {/* {!isParent && !isAdmissionAdmin && ( */}
-                  <>
-                    {/* <button
+                <>
+                  {/* <button
                       onClick={() => setOpenExams(!openExams)}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg"
                     >
@@ -601,8 +601,8 @@ export default function Sidebar({
                     )} */}
 
 
-                    {/* ================= SINGLE MENU ================= */}
-                    {/* {!isAdmissionAdmin && (
+                  {/* ================= SINGLE MENU ================= */}
+                  {/* {!isAdmissionAdmin && (
                       <MainItem
                         label="Reasons"
                         icon={HelpCircle}
@@ -612,7 +612,7 @@ export default function Sidebar({
                     )} */}
 
 
-                  </>
+                </>
                 {/* )} */}
               </div>
             )}
@@ -901,7 +901,7 @@ export default function Sidebar({
           )} */}
         {canAccess(["admin", "teacher", "parent", "student"]) &&
           !isPureParentPortal &&
-          !isAdmissionAdmin && (  
+          !isAdmissionAdmin && (
             <>
               {/* ================= REPORTS ================= */}
               {/* <SectionHeader

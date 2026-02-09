@@ -67,7 +67,7 @@ export default function Login() {
       localStorage.setItem("isAuth", "true");
 
       toast.success("Parent Portal Login Successful ");
-      navigate("/parent/dashboard/admissions");
+      navigate("/parent/dashboard");
       setLoading(false);
       return;
     }
@@ -86,8 +86,14 @@ export default function Login() {
       // Persist tokens & user
       // If rememberMe behavior required to persist differently, implement here.
       localStorage.setItem("token", accessToken);
-      if (user?.role) localStorage.setItem("role", user.role);
-      localStorage.setItem("portal", String(user?.portal ?? false));
+
+      const normalizedRole = user?.role?.toLowerCase() || "";
+      if (normalizedRole) localStorage.setItem("role", normalizedRole);
+
+      // Set portal=true parent unless explicit false in user object
+      const isPortal = normalizedRole === "parent" ? (user?.portal !== false) : (user?.portal ?? false);
+      localStorage.setItem("portal", String(isPortal));
+
       localStorage.setItem("user", JSON.stringify(user ?? {}));
       localStorage.setItem("isAuth", "true");
 
@@ -108,7 +114,7 @@ export default function Login() {
         navigate("/admin/dashboard/receptionist");
       } else if (roleLower === "parent") {
         if (user?.portal === true || localStorage.getItem("portal") === "true") {
-          navigate("/parent/dashboard/admissions");
+          navigate("/parent/dashboard");
         } else {
           navigate("/parent/dashboard");
         }
