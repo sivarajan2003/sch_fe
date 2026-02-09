@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 export default function AddTeacherModal({
   open,
@@ -106,9 +107,12 @@ export default function AddTeacherModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-[520px] p-6 max-h-[90vh] overflow-auto">
+ return createPortal(
+ <div
+  className="fixed top-0 left-0 w-screen h-screen bg-black/60 backdrop-blur-sm flex items-center justify-center"
+  style={{ zIndex: 999999 }}
+>
+ <div className="bg-white rounded-xl w-[520px] p-6 max-h-[90vh] overflow-auto">
         {/* ================= HEADER ================= */}
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Add Teacher</h3>
@@ -321,6 +325,7 @@ export default function AddTeacherModal({
           </button>
         </div>
       </div>
-    </div>
-  );
+  </div>,
+  document.body
+);
 }

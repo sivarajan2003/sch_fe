@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Props {
   onClose: () => void;
@@ -25,10 +26,19 @@ export default function AddHolidayModal({ onClose, onAdd }: Props) {
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white w-full max-w-md rounded-xl p-6">
-        <h3 className="text-lg font-semibold mb-4">Add Holiday</h3>
+ return createPortal(
+  <div
+    className="fixed top-0 left-0 w-screen h-screen bg-black/60 backdrop-blur-sm flex items-center justify-center"
+    style={{ zIndex: 999999 }}
+    onMouseDown={(e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}
+  >
+    <div
+      className="bg-white rounded-xl w-[420px] p-6"
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+       <h3 className="text-lg font-semibold mb-4">Add Holiday</h3>
 
         {/* Holiday Title */}
         <div className="mb-3">
@@ -94,6 +104,7 @@ export default function AddHolidayModal({ onClose, onAdd }: Props) {
           </button>
         </div>
       </div>
-    </div>
-  );
+  </div>,
+  document.body
+);
 }

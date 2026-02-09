@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 interface Props {
   onClose: () => void;
@@ -30,10 +31,20 @@ export default function AddRoutineModal({ onClose, onSave }: Props) {
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-xl w-full max-w-3xl p-6 relative">
-
+  return createPortal(
+    <div
+      className="fixed top-0 left-0 w-screen h-screen bg-black/60 backdrop-blur-sm flex items-center justify-center"
+      style={{ zIndex: 999999 }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="bg-white w-[480px] rounded-xl p-6"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         {/* HEADER */}
         <div className="flex justify-between items-center mb-5">
           <h3 className="text-lg font-semibold">Add Class Routine</h3>
@@ -88,7 +99,8 @@ export default function AddRoutineModal({ onClose, onSave }: Props) {
           </button>
         </div>
 
-      </div>
-    </div>
-  );
+     </div>
+  </div>,
+  document.body
+);
 }

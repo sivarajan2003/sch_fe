@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 type Props = {
   onClose: () => void;
@@ -23,10 +24,18 @@ export default function AddLeaveModal({ onClose, onAdd }: Props) {
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6">
-
+  return createPortal(
+  <div
+    className="fixed top-0 left-0 w-screen h-screen bg-black/60 backdrop-blur-sm flex items-center justify-center"
+    style={{ zIndex: 999999 }}
+    onMouseDown={(e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}
+  >
+    <div
+      className="bg-white rounded-xl w-[420px] p-6"
+      onMouseDown={(e) => e.stopPropagation()}
+    >
         {/* HEADER */}
         <h3 className="text-lg font-semibold mb-4">
           Add Leave
@@ -96,6 +105,7 @@ export default function AddLeaveModal({ onClose, onAdd }: Props) {
           </button>
         </div>
       </div>
-    </div>
-  );
+  </div>,
+  document.body
+);
 }
