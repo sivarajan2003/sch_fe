@@ -235,13 +235,12 @@ export default function Sidebar({
             {!collapsed && openApplications && (
               <div className="ml-6 mt-2 space-y-1">
 
-                {!isPureParentPortal && (
                   <ApplicationItem
                     label="All Applications"
                     icon={FileText}
                     path={`${admissionBasePath}/all`}
                   />
-                )}
+                  
                 {!isPureParentPortal && (
                   <ApplicationItem
                     label="Application Form"
