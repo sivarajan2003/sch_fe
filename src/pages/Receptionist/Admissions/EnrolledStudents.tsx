@@ -208,7 +208,7 @@ export default function EnrolledStudents() {
 
       {/* VIEW MODAL */}
       {viewProfile && (
-<div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
+<div className="fixed inset-0 !mt-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-2xl rounded-xl overflow-hidden p-6 space-y-4">
             <div className="flex justify-between items-center border-b pb-4">
               <h2 className="text-xl font-bold">{viewProfile.name}</h2>
