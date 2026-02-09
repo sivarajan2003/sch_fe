@@ -242,20 +242,21 @@ export default function Sidebar({
                     path={`${admissionBasePath}/all`}
                   />
                 )}
-
+{!isPureParentPortal && (
                 <ApplicationItem
                   label="Application Form"
                   icon={FileText}
                   path={`${admissionBasePath}/application-form`}
                 />
+)}
 
-                {/* {!isPureParentPortal && (
+                {isPureParentPortal && (
                   <ApplicationItem
                     label="Fee Payment"
                     icon={Wallet}
                     path={`${admissionBasePath}/fee-payment`}
                   />
-                )} */}
+                )} 
 
                 {!isPureParentPortal && (
                   <ApplicationItem
@@ -273,13 +274,12 @@ export default function Sidebar({
                   />
                 )} */}
 
-                {!isPureParentPortal && (
+               
                   <ApplicationItem
                     label="Documents"
                     icon={ClipboardCheck}
                     path={`${admissionBasePath}/documents`}
                   />
-                )}
 
                 <ApplicationItem
                   label="Interviews"
