@@ -348,7 +348,7 @@ useEffect(() => {
 
       {/* MODALS */}
       {viewApp && (
-  <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 !mt-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
  <div className="bg-white w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl">
             <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
               <h3 className="font-bold">Student Details</h3>

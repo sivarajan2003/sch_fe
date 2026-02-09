@@ -1,4 +1,4 @@
-import { Lock, Unlock } from "lucide-react";
+import { Lock, Unlock, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import classallocationService from "../../../service/classallocationService.js";
 import { toast } from "react-toastify";
@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 export default function SeatAllocation() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [viewAllocated, setViewAllocated] = useState(null);
 
   // Filters
   const [streamFilter, setStreamFilter] = useState("All");
@@ -45,10 +46,18 @@ export default function SeatAllocation() {
               total: 40,
               allocated: 0,
               status: "Active",
+              students: []
             };
           }
 
-          if (row.is_active) grouped[key].allocated += 1;
+          if (row.is_active) {
+            grouped[key].allocated += 1;
+            grouped[key].students.push({
+              name: row.admission?.student_name || "Unknown",
+              id: row.admission_id,
+              admission_no: row.admission?.addmission_number || "N/A"
+            });
+          }
         });
 
         const matrix = Object.values(grouped).map((r) => ({
@@ -157,6 +166,7 @@ export default function SeatAllocation() {
                   {...row}
                   locked={row.status === "Locked"}
                   onToggle={() => toggleLock(i)}
+                  onViewAllocated={() => setViewAllocated(row)}
                 />
               ))
             )}
@@ -171,6 +181,55 @@ export default function SeatAllocation() {
         <StatCard title="Available" value={totalAvailable} color="text-green-600" />
         <StatCard title="Avg Utilization" value={`${avgUtilization}%`} color="text-orange-500" />
       </div>
+
+      {/* REUSABLE MODAL FOR ALLOCATED STUDENTS */}
+      {viewAllocated && (
+        <div className="fixed inset-0 !mt-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-lg rounded-xl overflow-hidden shadow-xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+              <h3 className="font-semibold text-lg">
+                Allocated Students - {viewAllocated.stream || "Class"}
+              </h3>
+              <button
+                onClick={() => setViewAllocated(null)}
+                className="text-gray-500 hover:text-gray-800"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto flex-1">
+              {viewAllocated.students && viewAllocated.students.length > 0 ? (
+                <ul className="space-y-2">
+                  {viewAllocated.students.map((stu, idx) => (
+                    <li key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded border">
+                      <div>
+                        <p className="font-medium text-gray-900">{stu.name}</p>
+                        <p className="text-xs text-gray-500">{stu.admission_no || "No ID"}</p>
+                      </div>
+                      <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">Allocated</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No students allocated yet.
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t bg-gray-50 flex justify-end">
+              <button
+                onClick={() => setViewAllocated(null)}
+                className="px-4 py-2 bg-white border rounded text-sm font-medium hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -207,22 +266,52 @@ function SeatRow({
   percent,
   locked,
   onToggle,
+  onViewAllocated
 }) {
+  // Progress bar color logic: < 50% Blue, < 80% Orange, >= 80% Red
+  let progressColor = "bg-blue-500";
+  if (percent >= 80) progressColor = "bg-red-500";
+  else if (percent >= 50) progressColor = "bg-orange-500";
+
   return (
-    <tr className="border-t">
-      <td className="px-4 py-3">{stream}</td>
-      <td className="px-4 py-3">{quota}</td>
-      <td className="px-4 py-3">{total}</td>
-      <td className="px-4 py-3 text-blue-600">{allocated}</td>
-      <td className="px-4 py-3">{available}</td>
-      <td className="px-4 py-3">{percent}%</td>
+    <tr className="border-t hover:bg-gray-50">
+      <td className="px-4 py-3 font-medium">{stream}</td>
+      <td className="px-4 py-3 text-gray-500">{quota}</td>
+      <td className="px-4 py-3 font-semibold">{total}</td>
+
+      {/* Clickable Allocated Count */}
       <td className="px-4 py-3">
-        {locked ? <Lock size={16} /> : <Unlock size={16} />}
+        <button
+          onClick={onViewAllocated}
+          className="text-blue-600 font-bold hover:underline hover:text-blue-800"
+          title="View Allocated Students"
+        >
+          {allocated}
+        </button>
+      </td>
+
+      <td className="px-4 py-3 text-green-600 font-semibold">{available}</td>
+
+      {/* Visual Utilization Bar */}
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium w-8">{percent}%</span>
+          <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
+              style={{ width: `${Math.min(percent, 100)}%` }}
+            />
+          </div>
+        </div>
+      </td>
+
+      <td className="px-4 py-3">
+        {locked ? <span className="flex items-center gap-1 text-red-500"><Lock size={14} /> Locked</span> : <span className="flex items-center gap-1 text-green-500"><Unlock size={14} /> Active</span>}
       </td>
       <td className="px-4 py-3">
         <button
           onClick={onToggle}
-          className="border px-3 py-1 rounded-lg"
+          className={`border px-3 py-1 rounded text-xs font-medium transition-colors ${locked ? "bg-red-50 text-red-600 border-red-200" : "bg-white hover:bg-gray-100"}`}
         >
           {locked ? "Unlock" : "Lock"}
         </button>
@@ -233,9 +322,9 @@ function SeatRow({
 
 function StatCard({ title, value, color = "text-gray-900" }) {
   return (
-    <div className="bg-white border rounded-xl p-6 text-center">
+    <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
       <p className={`text-3xl font-bold ${color}`}>{value}</p>
-      <p className="text-gray-500">{title}</p>
+      <p className="text-gray-500 text-sm mt-1">{title}</p>
     </div>
   );
 }
