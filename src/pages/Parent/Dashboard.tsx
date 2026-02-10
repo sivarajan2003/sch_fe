@@ -14,11 +14,35 @@ import H4 from "../../assets/h4.png";
 import J1 from "../../assets/j1.png";
 import J2 from "../../assets/j2.png";
 import J3 from "../../assets/j3.png";
+import Pd1 from "../../assets/gif/pd1.gif";
+import Pd2 from "../../assets/gif/pd2.gif";
+import Pd3 from "../../assets/gif/pd3.gif";
+import Pd4 from "../../assets/gif/pd4.gif";
+import { useEffect } from "react";
+import parentDashboardService from "../../service/parentdashboardService";
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 export default function ParentDashboard() {
   const navigate = useNavigate();
   const [showEditParent, setShowEditParent] = useState(false);
+const [parentDashboard, setParentDashboard] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+useEffect(() => {
+  const fetchParentDashboard = async () => {
+    try {
+      const res = await parentDashboardService.getParentDashboard();
+      setParentDashboard(res.data);
+    } catch (err) {
+      console.error("Failed to load parent dashboard", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchParentDashboard();
+}, []);
+const dashboard = parentDashboard[0]; // first child
 
 const [parentProfile, setParentProfile] = useState({
   id: "#P124556",
@@ -159,6 +183,15 @@ const [successMessage, setSuccessMessage] = useState("");
 const [showAllEventsPopup, setShowAllEventsPopup] = useState(false);
 const [showAllSubjectsPopup, setShowAllSubjectsPopup] = useState(false);
 
+const isAdmissionCompleted = false; // true = normal dashboard
+// Interview status (mock – later replace with backend data)
+const interviewStatus = {
+  status: "scheduled", // "scheduled" | "completed" | "not_completed"
+  date: "25 Feb 2026",
+  time: "10:30 AM",
+};
+
+
   const [showAllEvents, setShowAllEvents] = useState(false);
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -198,7 +231,10 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
       attendancePoints: "0,160 80,150 160,145 240,140 320,135 400,130 480,125 600,120",
     },
   };
-  
+  if (loading) {
+  return <div className="p-6">Loading dashboard...</div>;
+}
+
   return (
     //<DashboardLayout>
 <>
@@ -225,8 +261,190 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 </div>
 
       </div>
+{/* ================= QUICK STATS ================= */}
+<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
 
+  {/* Child Count */}
+  <div
+    className="relative bg-white border border-gray-200 rounded-2xl
+               px-6 py-5 min-h-[120px]
+               transition-all duration-300
+               hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+  >
+   <span
+  onClick={(e) => {
+    e.stopPropagation();
+    navigate("/parent/dashboard/admissions/all");
+  }}
+  className="absolute top-4 right-4 text-gray-400 text-xl cursor-pointer hover:text-blue-600"
+>
+  ↗
+</span> <div className="flex items-center gap-4">
+      {/* LEFT ICON */}
+      <div className="w-14 h-14 rounded-2xl bg-white-50
+                flex items-center justify-center overflow-hidden">
+  <img
+    src={Pd1}
+    alt="Child Count"
+    className="w-10 h-10 object-contain"
+  />
+</div>
+      {/* TEXT */}
+      <div>
+        <p className="text-sm text-gray-500">Child Count</p>
+        <p className="text-3xl font-semibold text-gray-900">2</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Application Status */}
+  <div
+    className="relative bg-white border border-gray-200 rounded-2xl
+               px-6 py-5 min-h-[120px]
+               transition-all duration-300
+               hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+  >
+   <span
+  onClick={(e) => {
+    e.stopPropagation();
+    navigate("/parent/dashboard/admissions/all");
+  }}
+  className="absolute top-4 right-4 text-gray-400 text-xl cursor-pointer hover:text-blue-600"
+>
+  ↗
+</span>
+    <div className="flex items-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-white-50
+                flex items-center justify-center overflow-hidden">
+  <img
+    src={Pd2}
+    alt="Application Status"
+    className="w-10 h-10 object-contain"
+  />
+</div>
+      <div>
+        <p className="text-sm text-gray-500">Application Status</p>
+<p className="text-sm font-semibold text-gray-600">
+  {dashboard?.applicationStatus || "-"}
+</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Document Verification */}
+  <div
+    className="relative bg-white border border-gray-200 rounded-2xl
+               px-6 py-5 min-h-[120px]
+               transition-all duration-300
+               hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+  >
+    <span
+  onClick={(e) => {
+    e.stopPropagation();
+    navigate("/parent/dashboard/admissions/documents");
+  }}
+  className="absolute top-4 right-4 text-gray-400 text-xl cursor-pointer hover:text-blue-600"
+>
+  ↗
+</span>
+ <div className="flex items-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-white-50
+                flex items-center justify-center overflow-hidden">
+  <img
+    src={Pd3}
+    alt="Document Verification"
+    className="w-10 h-10 object-contain"
+  />
+</div>
+      <div>
+        <p className="text-sm text-gray-500">Document Verification</p>
+<p
+  className={`text-sm font-semibold ${
+    dashboard?.documentVerification === "Completed"
+      ? "text-green-600"
+      : "text-red-500"
+  }`}
+>
+  {dashboard?.documentVerification || "-"}
+</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Interview Status */}
+  <div
+    className="relative bg-white border border-gray-200 rounded-2xl
+               px-6 py-5 min-h-[120px]
+               transition-all duration-300
+               hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+  >
+   <span
+  onClick={(e) => {
+    e.stopPropagation();
+    navigate("/parent/dashboard/admissions/interviews");
+  }}
+  className="absolute top-4 right-4 text-gray-400 text-xl cursor-pointer hover:text-blue-600"
+>
+  ↗
+</span>
+ <div className="flex items-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-white-50
+                flex items-center justify-center overflow-hidden">
+  <img
+    src={Pd4}
+    alt="Interview Status"
+    className="w-10 h-10 object-contain"
+  />
+</div>
+      <div>
+        <p className="text-sm text-gray-500">Interview Status</p>
+{dashboard?.interview?.status === "Completed" ? (
+  <p className="text-sm font-semibold text-green-600">
+    Completed
+  </p>
+) : dashboard?.interview?.status === "Scheduled" ? (
+  <div className="text-sm font-semibold text-gray-600 leading-tight">
+    <p>Scheduled</p>
+    <p className="text-xs text-gray-500">
+      {dashboard.interview.date} · {dashboard.interview.time}
+    </p>
+  </div>
+) : (
+  <p className="text-sm font-semibold text-red-500">
+    Not Completed
+  </p>
+)}
+      </div>
+    </div>
+  </div>
+
+</div>
       {/* ================= TOP GRID ================= */}
+{/* ================= LOCKED DASHBOARD WRAPPER ================= */}
+<div className="relative">
+  {!isAdmissionCompleted && (
+    <div className="
+  absolute inset-0 z-40
+  bg-white/50
+  backdrop-blur-[0.5px]
+  flex items-center justify-center
+  rounded-2xl
+">
+
+      <div className="bg-white px-6 py-4 rounded-xl shadow-md text-center">
+        <p className="text-sm font-semibold text-gray-800">
+          Complete Admission Process to Unlock Dashboard
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          Finish application, document verification & interview
+        </p>
+      </div>
+    </div>
+  )}
+  <div className={`
+    ${!isAdmissionCompleted ? "pointer-events-none select-none" : ""}
+  `}>
+
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5 items-stretch">
 
         {/* ================= PROFILE ================= */}
@@ -1517,6 +1735,8 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
     </div>
   </div>
 )}
+  </div> {/* unlock wrapper */}
+</div>   {/* relative wrapper */}
 
 </>
     //</DashboardLayout>
