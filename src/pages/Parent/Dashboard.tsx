@@ -32,7 +32,10 @@ useEffect(() => {
   const fetchParentDashboard = async () => {
     try {
       const res = await parentDashboardService.getParentDashboard();
-      setParentDashboard(res.data);
+
+      console.log("Dashboard API DATA:", res); // ✅ log correct object
+
+      setParentDashboard(res.data || []); // ✅ CORRECT
     } catch (err) {
       console.error("Failed to load parent dashboard", err);
     } finally {
@@ -42,7 +45,8 @@ useEffect(() => {
 
   fetchParentDashboard();
 }, []);
-const dashboard = parentDashboard[0]; // first child
+
+const dashboard = parentDashboard?.[0];
 
 const [parentProfile, setParentProfile] = useState({
   id: "#P124556",
@@ -185,11 +189,7 @@ const [showAllSubjectsPopup, setShowAllSubjectsPopup] = useState(false);
 
 const isAdmissionCompleted = false; // true = normal dashboard
 // Interview status (mock – later replace with backend data)
-const interviewStatus = {
-  status: "scheduled", // "scheduled" | "completed" | "not_completed"
-  date: "25 Feb 2026",
-  time: "10:30 AM",
-};
+
 
 
   const [showAllEvents, setShowAllEvents] = useState(false);
@@ -292,7 +292,9 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
       {/* TEXT */}
       <div>
         <p className="text-sm text-gray-500">Child Count</p>
-        <p className="text-3xl font-semibold text-gray-900">2</p>
+<p className="text-3xl font-semibold text-gray-900">
+  {dashboard?.childCount ?? 0}
+</p>
       </div>
     </div>
   </div>
@@ -362,7 +364,7 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   className={`text-sm font-semibold ${
     dashboard?.documentVerification === "Completed"
       ? "text-green-600"
-      : "text-red-500"
+      : "text-gray-500"
   }`}
 >
   {dashboard?.documentVerification || "-"}
@@ -397,24 +399,40 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   />
 </div>
       <div>
-        <p className="text-sm text-gray-500">Interview Status</p>
-{dashboard?.interview?.status === "Completed" ? (
-  <p className="text-sm font-semibold text-green-600">
-    Completed
-  </p>
-) : dashboard?.interview?.status === "Scheduled" ? (
-  <div className="text-sm font-semibold text-gray-600 leading-tight">
-    <p>Scheduled</p>
-    <p className="text-xs text-gray-500">
-      {dashboard.interview.date} · {dashboard.interview.time}
+  <p className="text-sm text-gray-500">Interview Status</p>
+
+  {/* 🟢 Completed */}
+  {dashboard?.interview?.status === "Completed" && (
+    <p className="text-sm font-semibold text-green-600 flex items-center gap-1">
+      ✅ Completed
     </p>
-  </div>
-) : (
-  <p className="text-sm font-semibold text-red-500">
-    Not Completed
-  </p>
-)}
+  )}
+
+  {/* 🟠 Scheduled */}
+  {dashboard?.interview?.status === "Scheduled" && (
+    <div className="text-sm font-semibold text-orange-500 flex flex-col leading-tight">
+      <div className="flex items-center gap-1">
+        <span className="animate-pulse">🕒</span>
+        Scheduled
       </div>
+
+      {dashboard?.interview?.date && dashboard?.interview?.time && (
+        <p className="text-xs text-gray-500">
+          {dashboard.interview.date} · {dashboard.interview.time}
+        </p>
+      )}
+    </div>
+  )}
+
+  {/* Not Scheduled */}
+  {dashboard?.interview?.status !== "Completed" &&
+    dashboard?.interview?.status !== "Scheduled" && (
+      <p className="text-sm font-semibold text-red-500">
+         Not Scheduled
+      </p>
+  )}
+</div>
+
     </div>
   </div>
 
@@ -425,8 +443,8 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   {!isAdmissionCompleted && (
     <div className="
   absolute inset-0 z-40
-  bg-white/50
-  backdrop-blur-[0.5px]
+  bg-white/20
+  backdrop-blur-md
   flex items-center justify-center
   rounded-2xl
 ">
