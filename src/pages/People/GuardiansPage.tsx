@@ -185,6 +185,9 @@ const guardians = [
 /* ================= PAGE ================= */
 
 export default function GuardianPage() {
+  const isLocked = true; // 🔒 enable full blur lock
+ //const userRole = "Admin";        //  change dynamically later
+  //const isLocked = userRole !== "Admin";   //  Admin bypass lock
   const today = "15 May 2020 - 24 May 2024";
   const [view, setView] = useState<"grid" | "list">("grid");
   //const [view, setView] = useState<"grid" | "list">("grid");
@@ -237,8 +240,38 @@ const downloadGuardianCSV = (guardian: any) => {
   link.click();
 };
 
-  return (
-    <div className="space-y-6">
+ return (
+  <div className="relative">
+
+    {/* 🔒 FULL PAGE BLUR LOCK */}
+    {isLocked && (
+      <div className="
+        absolute inset-0 z-50
+        bg-white/40
+        backdrop-blur-xl
+        flex items-center justify-center
+        rounded-xl
+      ">
+        <div className="bg-white px-6 py-4 rounded-xl shadow-lg text-center">
+
+          <p className="text-sm font-semibold text-gray-800">
+            Contact Atelier Creation ERP to Unlock
+          </p>
+
+          <button
+            onClick={() => window.location.href = "tel:+919999999999"}
+            className="mt-3 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg"
+          >
+            📞 Call Atelier
+          </button>
+
+        </div>
+      </div>
+    )}
+
+    {/* ===== ORIGINAL CONTENT WRAPPER ===== */}
+    <div className={`space-y-6 ${isLocked ? "pointer-events-none select-none" : ""}`}>
+
 {/* ================= HEADER ================= */}
 <div className="bg-white border rounded-xl px-5 py-4 space-y-3">
 
@@ -724,5 +757,6 @@ const downloadGuardianCSV = (guardian: any) => {
 
 
     </div>
+    </div> 
   );
 }
