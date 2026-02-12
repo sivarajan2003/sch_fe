@@ -9,17 +9,39 @@ export default function ParentInterviews() {
     const [interviewMode, setInterviewMode] = useState("In-Person");
 
     const [loading, setLoading] = useState(true);
+useEffect(() => {
+  try {
+    const saved = localStorage.getItem("admission_applications");
 
-    useEffect(() => {
-        const saved = localStorage.getItem("admission_applications");
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.length > 0) {
-                setMyApp(parsed[0]);
-            }
-        }
-        setLoading(false);
-    }, []);
+    if (!saved) {
+      setMyApp(null);
+      return;
+    }
+
+    const parsed = JSON.parse(saved);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      setMyApp(null);
+      return;
+    }
+
+    const activeApp =
+      parsed.find(
+        (app: any) =>
+          app.status === "Interview Scheduled" ||
+          app.status === "Interview Done"
+      ) || parsed[0];
+
+    setMyApp(activeApp);
+  } catch (error) {
+    console.error("Error reading applications:", error);
+    setMyApp(null);
+  } finally {
+    setLoading(false);   // 🔥 THIS WAS MISSING
+  }
+}, []);
+
+
 
     const handleSchedule = () => {
         if (!selectedDate || !selectedTime) {
@@ -41,7 +63,19 @@ export default function ParentInterviews() {
     };
 
     if (loading) return <div className="p-6">Loading...</div>;
-    if (!myApp) return <div className="p-6 text-center text-gray-500">No active application found.</div>;
+if (!myApp) {
+  return (
+    <div className="bg-white p-6 rounded shadow text-center">
+      <h2 className="text-lg font-semibold text-gray-700">
+        No Interview Scheduled
+      </h2>
+      <p className="text-gray-500 mt-2">
+        Once your application reaches the interview stage, details will appear here.
+      </p>
+    </div>
+  );
+}
+
 
     const isScheduled = myApp.status === "Interview Scheduled" || myApp.status === "Interview Done" || myApp.status === "Offer Accepted" || myApp.status === "Enrolled";
 
