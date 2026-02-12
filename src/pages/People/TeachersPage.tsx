@@ -321,7 +321,7 @@ export default function TeachersPage() {
         <div className="bg-white px-6 py-4 rounded-xl shadow-lg text-center">
 
           <p className="text-sm font-semibold text-gray-800">
-            Contact Atelier Creation ERP to Unlock
+            Subscription Upgrade Required — Contact Atelier Creation
           </p>
 
           <button

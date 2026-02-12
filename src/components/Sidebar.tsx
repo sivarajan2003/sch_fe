@@ -98,12 +98,15 @@ export default function Sidebar({
   const [openExams, setOpenExams] = useState(
     location.pathname.startsWith(`${basePath}/academic/examinations`)
   );
-  const [openManagement, setOpenManagement] = useState(true);
+  const [openManagement, setOpenManagement] = useState(false);
+const [openHRM, setOpenHRM] = useState(false);
+
+  //const [openManagement, setOpenManagement] = useState(true);
   const [openFees, setOpenFees] = useState(false);
   const [openLibrary, setOpenLibrary] = useState(false);
   const [openHostel, setOpenHostel] = useState(false);
   const [openTransport, setOpenTransport] = useState(false);
-  const [openHRM, setOpenHRM] = useState(true);
+  //const [openHRM, setOpenHRM] = useState(true);
   const [openAttendance, setOpenAttendance] = useState(false);
   const [openLeaves, setOpenLeaves] = useState(false);
   const [openReports, setOpenReports] = useState(
@@ -334,7 +337,7 @@ export default function Sidebar({
                 {/* ================= STUDENTS ================= */}
                 {!isParent && (
                   <>
-                    {/* <button
+                     <button
                       onClick={() => navigate(`${basePath}/people/students`)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg
     ${isActive(`${basePath}/people/students`)
@@ -355,10 +358,10 @@ export default function Sidebar({
 
                         <span className="text-sm font-medium">Students</span>
                       </div>
-                    </button> */}
+                    </button> 
 
 
-                    {/*{openStudents && (
+                    {openStudents && (
       <div className="ml-11 space-y-1">
         <ChildItem
           label="All Students"
@@ -371,7 +374,7 @@ export default function Sidebar({
           onClick={() => setActiveItem("student-promotion")}
         />
       </div>
-    )}*/}
+    )}
 
                     {/* ================= PARENTS ================= */}
                     {/* <button
@@ -396,7 +399,7 @@ export default function Sidebar({
                   </>
                 )}
                 {/* ================= GUARDIANS ================= */}
-                {/* <button
+                <button
                   onClick={() => {
                     navigate(`${basePath}/people/guardians`);
                     setActiveItem("guardians");
@@ -413,7 +416,7 @@ export default function Sidebar({
                   </span>
 
                   <span className="text-sm font-medium">Guardians</span>
-                </button> */}
+                </button> 
 
                 {/* ================= TEACHERS ================= */}
                 <button
@@ -512,38 +515,38 @@ export default function Sidebar({
                   icon={DoorOpen}
                   path={`${basePath}/academic/class-room`}
                 />
-                {/* {!isAdmissionAdmin && (
+                 {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Class Routine"
                     icon={CalendarDays}
                     path={`${basePath}/academic/class-routine`}
                   />
-                )} */}
-                {/* {!isAdmissionAdmin && (
+                )} 
+                 {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Subject"
                     icon={BookOpen}
                     path={`${basePath}/academic/subject`}
                   />
-                )} */}
-                {/* {!isAdmissionAdmin && (
+                )} 
+                {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Syllabus"
                     icon={FileText}
                     path={`${basePath}/academic/syllabus`}
                   />
-                )} */}
-                {/* {!isAdmissionAdmin && (
+                )} 
+                {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Time Table"
                     icon={Table}
                     path={`${basePath}/academic/time-table`}
                   />
-                )} */}
+                )} 
                 {/* ================= EXAMINATIONS (HAS CHILD) ================= */}
                 {/* {!isParent && !isAdmissionAdmin && ( */}
                 <>
-                  {/* <button
+                   <button
                       onClick={() => setOpenExams(!openExams)}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg"
                     >
@@ -597,18 +600,18 @@ export default function Sidebar({
                         onClick={() => navigate(`${basePath}/attendance`)}
                         active={location.pathname.startsWith(`${basePath}/attendance`)}
                       />
-                    )} */}
+                    )} 
 
 
                   {/* ================= SINGLE MENU ================= */}
-                  {/* {!isAdmissionAdmin && (
+                  {!isAdmissionAdmin && (
                       <MainItem
                         label="Reasons"
                         icon={HelpCircle}
                         active={location.pathname.startsWith(`${basePath}/academic/reasons`)}
                         onClick={() => navigate(`${basePath}/academic/reasons`)}
                       />
-                    )} */}
+                    )} 
 
 
                 </>
@@ -618,7 +621,7 @@ export default function Sidebar({
           </>
         )}
 
-        {/* {canAccess(["admin", "student", "teacher"]) &&
+        {canAccess(["admin", "student", "teacher"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
             <>
@@ -750,8 +753,8 @@ export default function Sidebar({
                 </div>
               )}
             </>
-          )} */}
-        {/* {canAccess(["admin", "Super Admin", "student", "teacher", "parent"]) &&
+          )} 
+         {canAccess(["admin", "Super Admin", "student", "teacher", "parent"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
             <>
@@ -897,47 +900,47 @@ export default function Sidebar({
                 </div>
               )}
             </>
-          )} */}
+          )} 
         {canAccess(["admin", "teacher", "parent", "student"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
             <>
               {/* ================= REPORTS ================= */}
-              {/* <SectionHeader
+               <SectionHeader
                 icon={FileBarChart2}
                 label="Reports"
                 collapsed={collapsed}
                 open={openReports}
                 onClick={() => setOpenReports(!openReports)}
-              /> */}
+              /> 
               {!collapsed && openReports && (
                 <div className="ml-4 mt-2 space-y-1">
 
-                  {/* <ReportItem
+                   <ReportItem
                     icon={ClipboardCheck}
                     label="Attendance Report"
                     path={`${basePath}/reports/attendance`}
-                  /> */}
-                  {/* {role === "admin" && (
+                  /> 
+                  {role === "admin" && (
                     <ReportItem
                       icon={Wallet}
                       label="Fee Collection"
                       path={`${basePath}/reports/fees`}
                     />
-                  )} */}
+                  )} 
 
-                  {/* <ReportItem
+                  <ReportItem
                     icon={FileText}
                     label="Exam Results"
                     path={`${basePath}/reports/exam-results`}
-                  /> */}
-                  {/* {role === "admin" && (
+                  /> 
+                   {role === "admin" && (
                     <ReportItem
                       icon={FileBarChart2}
                       label="Custom Reports"
                       path={`${basePath}/reports/custom`}
                     />
-                  )} */}
+                  )} 
 
                   {/* <ReportItem
       icon={GraduationCap}

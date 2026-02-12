@@ -29,6 +29,10 @@ const INITIAL_DATA = [
 
 /* ================= PAGE ================= */
 export default function Sports() {
+  const isLocked = true; // 🔒 enable full blur lock
+ //const userRole = "Admin";        //  change dynamically later
+  //const isLocked = userRole !== "Admin";   //  Admin bypass lock
+
   const navigate = useNavigate();
   const [data, setData] = useState(INITIAL_DATA);
   const [search, setSearch] = useState("");
@@ -108,8 +112,39 @@ const [selectedSport, setSelectedSport] = useState<any>(null);
     document.body.removeChild(link);
   };
   
+  // return (
+  //   <div className="space-y-6">
   return (
-    <div className="space-y-6">
+  <div className="relative">
+
+    {/* 🔒 FULL PAGE BLUR LOCK */}
+    {isLocked && (
+      <div className="
+        absolute inset-0 z-50
+        bg-white/40
+        backdrop-blur-xl
+        flex items-center justify-center
+        rounded-xl
+      ">
+        <div className="bg-white px-6 py-4 rounded-xl shadow-lg text-center">
+
+          <p className="text-sm font-semibold text-gray-800">
+            Subscription Upgrade Required — Contact Atelier Creation
+          </p>
+
+          <button
+            onClick={() => window.location.href = "tel:+919999999999"}
+            className="mt-3 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg"
+          >
+            📞 Call Atelier
+          </button>
+
+        </div>
+      </div>
+    )}
+
+    {/* ===== ORIGINAL CONTENT WRAPPER ===== */}
+    <div className={`space-y-6 ${isLocked ? "pointer-events-none select-none" : ""}`}>
 
       {/* ================= HEADER ================= */}
       <div className="bg-white border rounded-2xl px-6 py-5">
@@ -692,6 +727,7 @@ const [selectedSport, setSelectedSport] = useState<any>(null);
   </div>
 )}
 
-    </div>
+   </div>
+    </div> 
   );
 }

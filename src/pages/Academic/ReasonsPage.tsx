@@ -24,10 +24,44 @@ const reasons = [
 ];
 
 export default function ReasonsPage() {
+   const isLocked = true; // 🔒 enable full blur lock
+ //const userRole = "Admin";        //  change dynamically later
+  //const isLocked = userRole !== "Admin";   //  Admin bypass lock
+ 
   const navigate = useNavigate();
 
   return (
-<div className="p-4 sm:p-6">
+  <div className="relative">
+
+    {/* 🔒 FULL PAGE BLUR LOCK */}
+    {isLocked && (
+      <div className="
+        absolute inset-0 z-50
+        bg-white/40
+        backdrop-blur-xl
+        flex items-center justify-center
+        rounded-xl
+      ">
+        <div className="bg-white px-6 py-4 rounded-xl shadow-lg text-center">
+
+          <p className="text-sm font-semibold text-gray-800">
+           Subscription Upgrade Required — Contact Atelier Creation
+          </p>
+
+          <button
+            onClick={() => window.location.href = "tel:+919999999999"}
+            className="mt-3 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg"
+          >
+            📞 Call Atelier
+          </button>
+
+        </div>
+      </div>
+    )}
+
+    {/* ===== ORIGINAL CONTENT WRAPPER ===== */}
+    <div className={`space-y-6 ${isLocked ? "pointer-events-none select-none" : ""}`}>
+
 <h2 className="text-lg sm:text-xl font-semibold mb-1">
   Reasons
 </h2>
@@ -65,6 +99,7 @@ className="
 
       {/* 🔴 THIS IS REQUIRED */}
       <Outlet />
-    </div>
+   </div>
+    </div> 
   );
 }
