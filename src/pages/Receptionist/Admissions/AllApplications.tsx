@@ -1,6 +1,6 @@
 ﻿import { Eye, FileText, ArrowLeft, RefreshCcw, Printer, Plus, CalendarDays, Filter, ArrowUpDown } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 // @ts-ignore
 import admissionService from "../../../service/admissionService";
 import { toast } from "react-toastify";
@@ -26,6 +26,7 @@ const statusStyle = (status: string) => {
 };
 
 export default function AllApplications() {
+  const location = useLocation()
   const navigate = useNavigate();
 
   const [data, setData] = useState<any[]>([]);
@@ -162,6 +163,29 @@ export default function AllApplications() {
     return `https://ui-avatars.com/api/?name=${app.student_name}&background=random`;
   };
 
+
+  const getTitle = () => {
+    const path = location.pathname
+    if (path === "/parent/dashboard/admissions/all") {
+      return {
+        title: "Application",
+        subtitle: "Dashboard / Parent / Application",
+      }
+    } else if (path === "/admin/dashboard/receptionist/admissions/all") {
+      return {
+        title: "All Applications",
+        subtitle: "Dashboard / Admin / Applications",
+      };
+    } else {
+      return {
+        title: "All Applications",
+        subtitle: "Dashboard / Admin / Applications",
+      };
+    }
+
+  }
+
+  const { title, subtitle } = getTitle();
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* ================= HEADER ================= */}
@@ -183,10 +207,10 @@ export default function AllApplications() {
             {/* TITLE */}
             <div>
               <h2 className="text-2xl font-semibold text-gray-900">
-                All Applications
+               {title}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Dashboard / Receptionist / Applications
+                {subtitle}
               </p>
             </div>
           </div>

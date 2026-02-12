@@ -111,6 +111,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Unauthorized from "./pages/Unauthorized";
 import Settings from "./pages/Admin/Settings";
+import ParentDocumentVerificationPage from "./pages/Receptionist/Admissions/ParentDocumentVerificationPage";
 
 export default function App() {
   return (
@@ -405,7 +406,7 @@ export default function App() {
             <Route path="fee-payment" element={<FeePayment />} />
             <Route path="verification" element={<Verification />} />
             <Route path="new" element={<NewApplication />} />
-            <Route path="documents" element={<DocumentVerification />} />
+            <Route path="documents" element={<ParentDocumentVerificationPage />} />
             <Route path="interviews" element={<ParentInterviews />} />
             <Route path="offers" element={<ParentOfferLetters />} />
             <Route path="enrolled" element={<EnrolledStudents />} />
