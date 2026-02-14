@@ -214,14 +214,16 @@ export default function StudentAttendance() {
   <div className="relative">
 
     {/* 🔒 FULL PAGE BLUR LOCK */}
-    {isLocked && (
-      <div className="
-        absolute inset-0 z-50
-        bg-white/40
-        backdrop-blur-xl
-        flex items-center justify-center
-        rounded-xl
-      ">
+     {isLocked && (
+  <div
+    className="
+      absolute inset-0 z-50
+      bg-white/20
+      backdrop-blur-sm
+      flex items-center justify-center
+      rounded-xl
+    "
+  >
         <div className="bg-white px-6 py-4 rounded-xl shadow-lg text-center">
 
           <p className="text-sm font-semibold text-gray-800">

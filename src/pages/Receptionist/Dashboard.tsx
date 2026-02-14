@@ -42,6 +42,17 @@ export default function ReceptionistDashboard() {
       setLoading(false);
     }
   };
+const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+const userName =
+  storedUser?.username ||
+  storedUser?.name ||
+  "User";
+
+const userRole =
+  storedUser?.role ||
+  localStorage.getItem("role") ||
+  "";
 
   return (
     <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 md:px-6 lg:px-0">
@@ -76,8 +87,9 @@ export default function ReceptionistDashboard() {
         flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
         <div>
           <h2 className="text-lg font-semibold">
-            Welcome Back, Receptionist
-          </h2>
+  Welcome Back, {userName} ({userRole})
+</h2>
+
           <p className="text-sm text-gray-300 mt-1">
             Have a productive day at work
           </p>

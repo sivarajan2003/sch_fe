@@ -136,8 +136,13 @@ export default function Login() {
   return (
     <div className="min-h-screen flex bg-white">
       {/* LEFT ILLUSTRATION SECTION — SVG WAVE */}
-      <div className="hidden lg:flex w-[60%] relative overflow-hidden bg-white">
-        <img src={LoginWave} alt="Login Background" className="absolute top-0 right-[-0%] h-full w-[160%] object-cover" />
+     <div className="hidden lg:flex w-[70%] relative overflow-hidden">
+        {/* Wave Background */}
+        <img
+          src={LoginWave}
+          alt="Background Pattern"
+          className="absolute top-0 right-0 h-full w-full object-fit opacity-80"
+        />
         {/* ILLUSTRATION CONTENT */}
         <div className="relative z-10 flex items-center justify-end w-full pr-12">
           <img src={LeftIllustration} alt="Education Illustration" className="w-[860px] object-contain" />
@@ -149,7 +154,12 @@ export default function Login() {
         <div className="w-full max-w-[360px]">
           {/* LOGO */}
           <div className="flex items-center justify-center gap-2 mb-5">
-            <img src={PreLogo} alt="Atelier Logo" className="h-12 w-12 object-contain" />
+           <img
+  src={PreLogo}
+  alt="Atelier Logo"
+  className="h-20 w-20"
+/>
+
           </div>
 
           {/* TITLE */}
@@ -243,7 +253,7 @@ export default function Login() {
             </span>
           </p>
 
-          {/* PARENT PORTAL LINK - ADDED */}
+          {/* PARENT PORTAL LINK - ADDED 
           <div className="mt-5 pt-4 border-t border-gray-100 text-center">
             <button
               onClick={() => navigate("/parent-portal/login")}
@@ -251,7 +261,7 @@ export default function Login() {
             >
               School Parent? Login Here &rarr;
             </button>
-          </div>
+          </div>*/}
 
           <p className="mt-8 text-center text-xs text-gray-400">Copyright © 2025 - Preskool</p>
         </div>

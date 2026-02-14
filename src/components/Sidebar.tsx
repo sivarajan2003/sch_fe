@@ -7,6 +7,7 @@ import {
   FileCheck, HelpCircle, Wallet, Book, Activity,
   Building, Bus, UserCog, CalendarCheck, Briefcase, FileBarChart2, Mail,
   ClipboardCheck,
+  Lock,
   CalendarOff,
 } from "lucide-react";
 import { useState } from "react";
@@ -124,6 +125,7 @@ const [openHRM, setOpenHRM] = useState(false);
     location.pathname.startsWith(path);
   const isAdmissionAdmin =
     JSON.parse(localStorage.getItem("user") || "{}")?.admissionAdmin === true;
+const [activeSection, setActiveSection] = useState<string | null>(null);
 
   return (
     <div
@@ -229,13 +231,16 @@ const [openHRM, setOpenHRM] = useState(false);
         {canSeeAdmission && (
           <>
             <SectionHeader
-              icon={LayoutGrid}
+              icon={ClipboardList}
               label="Admission"
               collapsed={collapsed}
-              open={openApplications}
-              onClick={() => setOpenApplications(!openApplications)}
+              open={activeSection === "admission"}
+onClick={() =>
+  setActiveSection(activeSection === "admission" ? null : "admission")
+}
+
             />
-            {!collapsed && openApplications && (
+            {!collapsed && activeSection === "admission" && (
               <div className="ml-6 mt-2 space-y-1">
 
                   <ApplicationItem
@@ -329,10 +334,12 @@ const [openHRM, setOpenHRM] = useState(false);
               icon={Users}
               label="People"
               collapsed={collapsed}
-              open={openPeople}
-              onClick={() => setOpenPeople(!openPeople)}
+             open={activeSection === "people"}
+onClick={() =>
+  setActiveSection(activeSection === "people" ? null : "people")
+}
             />
-            {!collapsed && openPeople && (
+            {!collapsed && activeSection === "people" && (
               <div className="ml-6 mt-2 space-y-1">
                 {/* ================= STUDENTS ================= */}
                 {!isParent && (
@@ -357,6 +364,8 @@ const [openHRM, setOpenHRM] = useState(false);
                         </span>
 
                         <span className="text-sm font-medium">Students</span>
+                          {/* 🔒 LOCK ICON */}
+  <Lock className="w-4 h-4 text-gray-400" />
                       </div>
                     </button> 
 
@@ -377,7 +386,7 @@ const [openHRM, setOpenHRM] = useState(false);
     )}
 
                     {/* ================= PARENTS ================= */}
-                    {/* <button
+                     <button
                       onClick={() => {
                         navigate(`${basePath}/people/parents`);
                         setActiveItem("parents");
@@ -395,7 +404,9 @@ const [openHRM, setOpenHRM] = useState(false);
                       </span>
 
                       <span className="text-sm font-medium">Parents</span>
-                    </button> */}
+                        {/* 🔒 LOCK ICON */}
+  <Lock className="w-4 h-4 text-gray-400" />
+                    </button> 
                   </>
                 )}
                 {/* ================= GUARDIANS ================= */}
@@ -416,6 +427,8 @@ const [openHRM, setOpenHRM] = useState(false);
                   </span>
 
                   <span className="text-sm font-medium">Guardians</span>
+                    {/* 🔒 LOCK ICON */}
+  <Lock className="w-4 h-4 text-gray-400" />
                 </button> 
 
                 {/* ================= TEACHERS ================= */}
@@ -439,6 +452,7 @@ const [openHRM, setOpenHRM] = useState(false);
                     <span className="text-sm font-medium ">
                       Teachers
                     </span>
+                    
                   </div>
 
                   {/* <ChevronDown
@@ -473,10 +487,13 @@ const [openHRM, setOpenHRM] = useState(false);
               icon={GraduationCap}
               label="Academic"
               collapsed={collapsed}
-              open={openAcademic}
-              onClick={() => setOpenAcademic(!openAcademic)}
+              open={activeSection === "academic"}
+onClick={() =>
+  setActiveSection(activeSection === "academic" ? null : "academic")
+}
+
             />
-            {!collapsed && openAcademic && (
+            {!collapsed && activeSection === "academic" && (
               <div className="ml-4 mt-2 space-y-1">
                 {/* ================= CLASSES (HAS CHILD) ================= */}
                 {!isParent && (
@@ -520,6 +537,7 @@ const [openHRM, setOpenHRM] = useState(false);
                     label="Class Routine"
                     icon={CalendarDays}
                     path={`${basePath}/academic/class-routine`}
+                    locked
                   />
                 )} 
                  {!isAdmissionAdmin && (
@@ -527,6 +545,7 @@ const [openHRM, setOpenHRM] = useState(false);
                     label="Subject"
                     icon={BookOpen}
                     path={`${basePath}/academic/subject`}
+                    locked
                   />
                 )} 
                 {!isAdmissionAdmin && (
@@ -534,6 +553,7 @@ const [openHRM, setOpenHRM] = useState(false);
                     label="Syllabus"
                     icon={FileText}
                     path={`${basePath}/academic/syllabus`}
+                    locked
                   />
                 )} 
                 {!isAdmissionAdmin && (
@@ -541,6 +561,7 @@ const [openHRM, setOpenHRM] = useState(false);
                     label="Time Table"
                     icon={Table}
                     path={`${basePath}/academic/time-table`}
+                    locked
                   />
                 )} 
                 {/* ================= EXAMINATIONS (HAS CHILD) ================= */}
@@ -554,7 +575,11 @@ const [openHRM, setOpenHRM] = useState(false);
                         <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
                           <FileCheck className="w-4 h-4" />
                         </span>
-                        <span className="text-sm font-medium">Examinations</span>
+                        <div className="flex items-center justify-between w-full">
+  <span className="text-sm font-medium">Examinations</span>
+  <Lock className="w-4 h-4 text-gray-400" />
+</div>
+
                       </div>
 
                       <ChevronDown
@@ -605,12 +630,14 @@ const [openHRM, setOpenHRM] = useState(false);
 
                   {/* ================= SINGLE MENU ================= */}
                   {!isAdmissionAdmin && (
-                      <MainItem
-                        label="Reasons"
-                        icon={HelpCircle}
-                        active={location.pathname.startsWith(`${basePath}/academic/reasons`)}
-                        onClick={() => navigate(`${basePath}/academic/reasons`)}
-                      />
+                     <MainItem
+  label="Reasons"
+  icon={HelpCircle}
+  locked
+  active={location.pathname.startsWith(`${basePath}/academic/reasons`)}
+  onClick={() => navigate(`${basePath}/academic/reasons`)}
+/>
+
                     )} 
 
 
@@ -625,135 +652,166 @@ const [openHRM, setOpenHRM] = useState(false);
           !isPureParentPortal &&
           !isAdmissionAdmin && (
             <>
-              <SectionHeader
-                icon={Briefcase}
-                label="Management"
+             <SectionHeader
+  icon={Briefcase}
+  label="Management"
+  locked 
                 collapsed={collapsed}
-                open={openManagement}
-                onClick={() => setOpenManagement(!openManagement)}
+                open={activeSection === "management"}
+onClick={() =>
+  setActiveSection(activeSection === "management" ? null : "management")
+}
+
               />
-              {!collapsed && openManagement && (
+              {!collapsed && activeSection === "management" && (
                 <div className="ml-4 mt-2 space-y-1">
                   {role === "admin" && (
                     <button
-                      onClick={() =>
-                        navigate("/admin/dashboard/management/fees-collection")
-                      }
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
-    ${isManagementItemActive(
-                        "/admin/dashboard/management/fees-collection"
-                      )
-                          ? "bg-blue-600 text-white"
-                          : "hover:bg-gray-50 text-gray-700"
-                        }`}
-                    >
-                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center
-    ${isManagementItemActive(
-                        "/admin/dashboard/management/fees-collection"
-                      )
-                          ? "bg-white/20"
-                          : "bg-gray-100"
-                        }`}
-                      >
-                        <Wallet className="w-4 h-4" />
-                      </span>
+  onClick={() =>
+    navigate("/admin/dashboard/management/fees-collection")
+  }
+  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
+    ${isManagementItemActive("/admin/dashboard/management/fees-collection")
+      ? "bg-blue-600 text-white"
+      : "text-gray-700 hover:bg-gray-50"
+    }`}
+>
+  <span
+    className={`w-9 h-9 rounded-xl flex items-center justify-center
+      ${isManagementItemActive("/admin/dashboard/management/fees-collection")
+        ? "bg-blue-500"
+        : "bg-gray-100"
+      }`}
+  >
+    <Wallet
+      className={`w-4 h-4 ${
+        isManagementItemActive("/admin/dashboard/management/fees-collection")
+          ? "text-white"
+          : "text-gray-600"
+      }`}
+    />
+  </span>
 
-                      <span className="text-sm">Fees Collection</span>
-                    </button>
+  <span className="font-medium">Fees Collection</span>
+</button>
                   )}
 
                   
 
-                  <button
-                    onClick={() => navigate(`${basePath}/management/library`)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+                 <button
+  onClick={() => navigate(`${basePath}/management/library`)}
+  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
     ${isManagementItemActive(`${basePath}/management/library`)
-                        ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-50 text-gray-700"
-                      }`}
-                  >
-                    <span
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center
+      ? "bg-blue-600 text-white"
+      : "text-gray-700 hover:bg-gray-50"
+    }`}
+>
+  <span
+    className={`w-9 h-9 rounded-xl flex items-center justify-center
       ${isManagementItemActive(`${basePath}/management/library`)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-gray-600"
-                        }`}
-                    >
-                      <Book className="w-4 h-4" />
-                    </span>
-                    <span className="text-sm">Library Members</span>
-                  </button>
+        ? "bg-blue-500"
+        : "bg-gray-100"
+      }`}
+  >
+    <Book
+      className={`w-4 h-4 ${
+        isManagementItemActive(`${basePath}/management/library`)
+          ? "text-white"
+          : "text-gray-600"
+      }`}
+    />
+  </span>
+
+  <span className="font-medium">Library Members</span>
+</button>
 
 
-                  <button
-                    onClick={() => navigate(`${basePath}/management/sports`)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+<button
+  onClick={() => navigate(`${basePath}/management/sports`)}
+  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
     ${isManagementItemActive(`${basePath}/management/sports`)
-                        ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-50 text-gray-700"
-                      }`}
-                  >
-                    <span
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center
+      ? "bg-blue-600 text-white"
+      : "text-gray-700 hover:bg-gray-50"
+    }`}
+>
+  <span
+    className={`w-9 h-9 rounded-xl flex items-center justify-center
       ${isManagementItemActive(`${basePath}/management/sports`)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-gray-600"
-                        }`}
-                    >
-                      <Activity className="w-4 h-4" />
-                    </span>
+        ? "bg-blue-500"
+        : "bg-gray-100"
+      }`}
+  >
+    <Activity
+      className={`w-4 h-4 ${
+        isManagementItemActive(`${basePath}/management/sports`)
+          ? "text-white"
+          : "text-gray-600"
+      }`}
+    />
+  </span>
 
-                    <span className="text-sm">Sports</span>
-                  </button>
-
-
-                  <button
-                    onClick={() => navigate(`${basePath}/management/hostel`)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+  <span className="font-medium">Sports</span>
+</button>
+<button
+  onClick={() => navigate(`${basePath}/management/hostel`)}
+  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
     ${isManagementItemActive(`${basePath}/management/hostel`)
-                        ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-50 text-gray-700"
-                      }`}
-                  >
-                    <span
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center
+      ? "bg-blue-600 text-white"
+      : "text-gray-700 hover:bg-gray-50"
+    }`}
+>
+  <span
+    className={`w-9 h-9 rounded-xl flex items-center justify-center
       ${isManagementItemActive(`${basePath}/management/hostel`)
-                          ? "bg-white/20"
-                          : "bg-gray-100"
-                        }`}
-                    >
-                      <Building className="w-4 h-4" />
-                    </span>
+        ? "bg-blue-500"
+        : "bg-gray-100"
+      }`}
+  >
+    <Building
+      className={`w-4 h-4 ${
+        isManagementItemActive(`${basePath}/management/hostel`)
+          ? "text-white"
+          : "text-gray-600"
+      }`}
+    />
+  </span>
 
-                    <span className="text-sm">Hostel</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`${basePath}/management/transport`)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+  <span className="font-medium">Hostel</span>
+</button>
+<button
+  onClick={() => navigate(`${basePath}/management/transport`)}
+  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
     ${isManagementItemActive(`${basePath}/management/transport`)
-                        ? "bg-blue-600 text-white"
-                        : "hover:bg-gray-50 text-gray-700"
-                      }`}
-                  >
-                    <span
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center
+      ? "bg-blue-600 text-white"
+      : "text-gray-700 hover:bg-gray-50"
+    }`}
+>
+  <span
+    className={`w-9 h-9 rounded-xl flex items-center justify-center
       ${isManagementItemActive(`${basePath}/management/transport`)
-                          ? "bg-white/20"
-                          : "bg-gray-100"
-                        }`}
-                    >
-                      <Bus className="w-4 h-4" />
-                    </span>
+        ? "bg-blue-500"
+        : "bg-gray-100"
+      }`}
+  >
+    <Bus
+      className={`w-4 h-4 ${
+        isManagementItemActive(`${basePath}/management/transport`)
+          ? "text-white"
+          : "text-gray-600"
+      }`}
+    />
+  </span>
 
-                    <span className="text-sm">Transport</span>
-                  </button>
+  <span className="font-medium">Transport</span>
+</button>
 
 
                 </div>
               )}
             </>
           )} 
+                            {/* ================= HRM ================= */}
+
          {canAccess(["admin", "Super Admin", "student", "teacher", "parent"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (
@@ -761,11 +819,15 @@ const [openHRM, setOpenHRM] = useState(false);
               <SectionHeader
                 icon={UserCog}
                 label="HRM"
+                 locked
                 collapsed={collapsed}
-                open={openHRM}
-                onClick={() => setOpenHRM(!openHRM)}
+                open={activeSection === "hrm"}
+onClick={() =>
+  setActiveSection(activeSection === "hrm" ? null : "hrm")
+}
+
               />
-              {!collapsed && openHRM && (
+              {!collapsed && activeSection === "hrm" && (
                 <div className="ml-4 mt-2 space-y-1">
 
 
@@ -789,18 +851,23 @@ const [openHRM, setOpenHRM] = useState(false);
                   {(role === "admin" || role === "Super Admin" || role === "teacher") && (
                     <>
                       <button
-                        onClick={() => setOpenAttendance(!openAttendance)}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <IconBox Icon={CalendarCheck} />
-                          <span className="text-sm text-gray-700">Attendance</span>
-                        </div>
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform ${openAttendance ? "rotate-180" : ""
-                            }`}
-                        />
-                      </button>
+  onClick={() => setOpenAttendance(!openAttendance)}
+  className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm text-gray-700 hover:bg-gray-50"
+>
+  <div className="flex items-center gap-3">
+    <span className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+      <CalendarCheck className="w-4 h-4 text-gray-600" />
+    </span>
+
+    <span className="font-medium">Attendance</span>
+  </div>
+
+  <ChevronDown
+    className={`w-4 h-4 transition-transform ${
+      openAttendance ? "rotate-180" : ""
+    }`}
+  />
+</button>
 
                       {openAttendance && (
                         <div className="ml-11 space-y-1">
@@ -842,18 +909,23 @@ const [openHRM, setOpenHRM] = useState(false);
                   {role === "admin" && (
                     <>
                       <button
-                        onClick={() => setOpenLeaves(!openLeaves)}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <IconBox Icon={CalendarDays} />
-                          <span className="text-sm text-gray-700">Leaves</span>
-                        </div>
-                        <ChevronDown
-                          className={`w-4 h-4 text-gray-400 transition-transform ${openLeaves ? "rotate-180" : ""
-                            }`}
-                        />
-                      </button>
+  onClick={() => setOpenLeaves(!openLeaves)}
+  className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm text-gray-700 hover:bg-gray-50"
+>
+  <div className="flex items-center gap-3">
+    <span className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+      <CalendarDays className="w-4 h-4 text-gray-600" />
+    </span>
+
+    <span className="font-medium">Leaves</span>
+  </div>
+
+  <ChevronDown
+    className={`w-4 h-4 transition-transform ${
+      openLeaves ? "rotate-180" : ""
+    }`}
+  />
+</button>
 
                       {openLeaves && (
                         <div className="ml-11 space-y-1">
@@ -909,11 +981,14 @@ const [openHRM, setOpenHRM] = useState(false);
                <SectionHeader
                 icon={FileBarChart2}
                 label="Reports"
+                  locked
                 collapsed={collapsed}
-                open={openReports}
-                onClick={() => setOpenReports(!openReports)}
+                open={activeSection === "reports"}
+onClick={() =>
+  setActiveSection(activeSection === "reports" ? null : "reports")
+}
               /> 
-              {!collapsed && openReports && (
+              {!collapsed && activeSection === "reports" && (
                 <div className="ml-4 mt-2 space-y-1">
 
                    <ReportItem
@@ -1064,10 +1139,12 @@ function AcademicItem({
   label,
   icon: Icon,
   path,
+  locked,
 }: {
   label: string;
   icon: any;
   path: string;
+  locked?: boolean;
 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1096,7 +1173,16 @@ function AcademicItem({
         />
       </span>
 
-      <span className="font-medium">{label}</span>
+     <div className="flex items-center justify-between w-full">
+
+  <span className="font-medium">{label}</span>
+
+  {locked && (
+    <Lock className="w-4 h-4 text-gray-400" />
+  )}
+
+</div>
+
     </button>
   );
 }
@@ -1126,7 +1212,7 @@ function MenuItem({
         }`}
     >
 
-      <Icon className="w-5 h-5" />
+<Icon className="w-[18px] h-[18px]" />
       {!collapsed && <span className="text-sm font-medium">{label}</span>}
     </button>
   );
@@ -1136,11 +1222,13 @@ function MainItem({
   icon: Icon,
   active,
   onClick,
+  locked,
 }: {
   label: string;
   icon: any;
   active?: boolean;
   onClick?: () => void;
+  locked?: boolean;
 }) {
   return (
     <button
@@ -1154,7 +1242,10 @@ function MainItem({
       <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
         <Icon className="w-4 h-4" />
       </span>
-      {label}
+<div className="flex items-center justify-between w-full">
+  <span>{label}</span>
+  {locked && <Lock className="w-4 h-4 text-gray-400" />}
+</div>
     </button>
   );
 }
@@ -1210,19 +1301,29 @@ function HRMItem({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const active = location.pathname === path;
+  const active = location.pathname.startsWith(path);
 
   return (
     <button
       onClick={() => navigate(path)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
         ${active
           ? "bg-blue-600 text-white"
-          : "hover:bg-gray-50 text-gray-700"
+          : "text-gray-700 hover:bg-gray-50"
         }`}
     >
-      <IconBox Icon={Icon} active={active} />
-      <span className="text-sm">{label}</span>
+      <span
+        className={`w-9 h-9 rounded-xl flex items-center justify-center
+          ${active ? "bg-blue-500" : "bg-gray-100"}`}
+      >
+        <Icon
+          className={`w-4 h-4 ${
+            active ? "text-white" : "text-gray-600"
+          }`}
+        />
+      </span>
+
+      <span className="font-medium">{label}</span>
     </button>
   );
 }
@@ -1237,27 +1338,33 @@ function ReportItem({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const active = location.pathname === path;
+  const active = location.pathname.startsWith(path);
 
   return (
     <button
       onClick={() => navigate(path)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition
         ${active
           ? "bg-blue-600 text-white"
           : "text-gray-700 hover:bg-gray-50"
         }`}
     >
-      <span className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+      <span
+        className={`w-9 h-9 rounded-xl flex items-center justify-center
+          ${active ? "bg-blue-500" : "bg-gray-100"}`}
+      >
         <Icon
-          className={`w-4 h-4 ${active ? "text-blue-600" : "text-gray-500"
-            }`}
+          className={`w-4 h-4 ${
+            active ? "text-white" : "text-gray-600"
+          }`}
         />
       </span>
-      {label}
+
+      <span className="font-medium">{label}</span>
     </button>
   );
-} function ApplicationItem({
+}
+ function ApplicationItem({
   label,
   icon: Icon,
   path,
@@ -1303,12 +1410,14 @@ function SectionHeader({
   collapsed,
   onClick,
   open,
+  locked,
 }: {
   icon: any;
   label: string;
   collapsed: boolean;
   onClick?: () => void;
   open?: boolean;
+  locked?: boolean;   
 }) {
   return (
     <button
@@ -1325,7 +1434,7 @@ function SectionHeader({
           }`}
       >
         <div title={collapsed ? label : undefined}>
-          <Icon className="w-5 h-5 text-gray-600" />
+          <Icon className="w-[18px] h-[18px] text-gray-600" />
         </div>
 
         {!collapsed && (
@@ -1335,12 +1444,24 @@ function SectionHeader({
         )}
       </div>
 
-      {!collapsed && open !== undefined && (
-        <ChevronDown
-          className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""
-            }`}
-        />
-      )}
+     {!collapsed && (
+  <div className="flex items-center gap-2">
+
+    {locked && (
+      <Lock className="w-4 h-4 text-gray-400" />
+    )}
+
+    {open !== undefined && (
+      <ChevronDown
+        className={`w-4 h-4 transition-transform ${
+          open ? "rotate-180" : ""
+        }`}
+      />
+    )}
+
+  </div>
+)}
+
     </button>
   );
 }

@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import i1 from "../../../assets/gif/i1.gif";
 import i2 from "../../../assets/gif/i2.gif";
 import i3 from "../../../assets/gif/i3.gif";
+import interviewService from "../../../service/interviewService";
 
 const statusStyle = (status: string) => {
   switch (status) {
@@ -85,7 +86,7 @@ export default function Interviews() {
 
       if (statusFilter !== "All") filters.admission_status = statusFilter;
 
-      const res = await admissionService.getAdmissions({
+      const res = await interviewService.getInterviews({
         page: currentPage,
         limit: rowsPerPage,
         search,
