@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+// @ts-ignore
+import admissionService from "../../../service/admissionService";
+
 import { Download, Smartphone, Mail, Globe } from "lucide-react";
 
 export default function ParentOfferLetters() {
@@ -6,16 +9,45 @@ export default function ParentOfferLetters() {
 
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const saved = localStorage.getItem("admission_applications");
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.length > 0) {
-                setMyApp(parsed[0]);
+   useEffect(() => {
+    const loadParentOffer = async () => {
+        try {
+            const res = await admissionService.getAdmissions();
+
+            const rows = res?.rows || res?.data?.rows || [];
+
+            console.log("🔥 Parent admissions:", rows);
+
+            // pick offer-ready application
+            const offer = rows.find(
+                (r:any) =>
+                    r.admission_status === "Offer Sent" ||
+                    r.admission_status === "Offer Accepted" ||
+                    r.admission_status === "Enrolled"
+            );
+
+            if (offer) {
+                setMyApp({
+                    id: offer.addmission_number || offer.id,
+                    name: offer.student_name,
+                    class: offer.class_name,
+                    parentName: offer.parent_name,
+                    address: offer.address,
+                    status: offer.admission_status
+                });
+            } else {
+                setMyApp(null);
             }
+
+        } catch (error) {
+            console.log("Parent Offer Error:", error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
-    }, []);
+    };
+
+    loadParentOffer();
+}, []);
 
     const handlePrint = () => {
         window.print();
@@ -24,7 +56,10 @@ export default function ParentOfferLetters() {
     if (loading) return <div className="p-6">Loading...</div>;
     if (!myApp) return <div className="p-6 text-center text-gray-500">No active application found.</div>;
 
-    const isReady = myApp.status === "Offer Accepted" || myApp.status === "Enrolled";
+const isReady =
+    myApp.status === "Offer Sent" ||
+    myApp.status === "Offer Accepted" ||
+    myApp.status === "Enrolled";
 
     if (!isReady) {
         return (

@@ -86,18 +86,26 @@ export default function Interviews() {
 
       if (statusFilter !== "All") filters.admission_status = statusFilter;
 
-      const res = await interviewService.getInterviews({
-        page: currentPage,
-        limit: rowsPerPage,
-        search,
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
-        order: JSON.stringify([['createdAt', sortOrder.toUpperCase()]]),
-        filters: JSON.stringify(filters)
-      });
+     const res = await admissionService.getAdmissions({
+  page: currentPage,
+  limit: rowsPerPage,
+  search,
+  startDate: startDate || undefined,
+  endDate: endDate || undefined,
+  order: JSON.stringify([['createdAt', sortOrder.toUpperCase()]])
+});
+// console.log("🔥 FULL API RESPONSE:", res);
 
+const rows = res?.rows || res?.data?.rows || [];
+
+// 👉 filter only interview records
+const interviewRows = rows.filter(
+  (r:any) => r.admission_status === "Interview Scheduled" ||
+             r.admission_status === "Interview Done"
+);
       if (res.success && res.rows) {
-        const mapped = res.rows.map((item: any) => {
+        const mapped = interviewRows.map((item:any) => {
+
           // Calculate documents count
           const docs = [
             item.birth_certificate,
@@ -107,6 +115,30 @@ export default function Interviews() {
           ];
           const uploadedCount = docs.filter(d => d && d !== 'null').length;
           const totalDocs = 4; // Based on known requirements
+const [interviews, setInterviews] = useState([]);
+useEffect(() => {
+  const loadInterviews = async () => {
+    try {
+      const res = await admissionService.getAdmissions();
+
+      const rows = res?.rows || res?.data?.rows || [];
+
+      const filtered = rows.filter(
+        (r) =>
+          r.admission_status === "Interview Scheduled" ||
+          r.admission_status === "Interview Done"
+      );
+
+      console.log("🔥 Parent interviews:", filtered);
+
+      setInterviews(filtered);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  loadInterviews();
+}, []);
 
           return {
             id: item.addmission_number || item.id,

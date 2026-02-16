@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+// @ts-ignore
+import admissionService from "../../../service/admissionService";
+
 import { Calendar, MapPin, CheckCircle, AlertCircle, ChevronRight } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -10,57 +13,67 @@ export default function ParentInterviews() {
 
     const [loading, setLoading] = useState(true);
 useEffect(() => {
-  try {
-    const saved = localStorage.getItem("admission_applications");
+  const loadParentInterview = async () => {
+    try {
+      const res = await admissionService.getAdmissions();
 
-    if (!saved) {
-      setMyApp(null);
-      return;
+      const rows = res?.rows || res?.data?.rows || [];
+
+      console.log("🔥 Parent interview rows:", rows);
+
+      const interviewApp = rows.find(
+        (r:any) =>
+          r.admission_status === "Interview Scheduled" ||
+          r.admission_status === "Interview Done" ||
+          r.admission_status === "Offer Accepted" ||
+          r.admission_status === "Enrolled"
+      );
+
+      if (interviewApp) {
+        setMyApp({
+          id: interviewApp.addmission_number || interviewApp.id,
+          name: interviewApp.student_name,
+          status: interviewApp.admission_status,
+          interviewDate: interviewApp.interview_date,
+          interviewTime: interviewApp.interview_time,
+          interviewMode: interviewApp.interview_mode || "In-Person"
+        });
+      } else {
+        setMyApp(null);
+      }
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const parsed = JSON.parse(saved);
-
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      setMyApp(null);
-      return;
-    }
-
-    const activeApp =
-      parsed.find(
-        (app: any) =>
-          app.status === "Interview Scheduled" ||
-          app.status === "Interview Done"
-      ) || parsed[0];
-
-    setMyApp(activeApp);
-  } catch (error) {
-    console.error("Error reading applications:", error);
-    setMyApp(null);
-  } finally {
-    setLoading(false);   // 🔥 THIS WAS MISSING
-  }
+  loadParentInterview();
 }, []);
 
 
 
-    const handleSchedule = () => {
-        if (!selectedDate || !selectedTime) {
-            toast.error("Please select both date and time.");
-            return;
-        }
+    const handleSchedule = async () => {
+  if (!selectedDate || !selectedTime) {
+    toast.error("Please select both date and time.");
+    return;
+  }
 
-        // Update Local Storage
-        const saved = localStorage.getItem("admission_applications");
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            const updatedList = parsed.map((app: any) =>
-                app.id === myApp.id ? { ...app, status: "Interview Scheduled", interviewDate: selectedDate, interviewTime: selectedTime, interviewMode } : app
-            );
-            localStorage.setItem("admission_applications", JSON.stringify(updatedList));
-            setMyApp({ ...myApp, status: "Interview Scheduled", interviewDate: selectedDate, interviewTime: selectedTime, interviewMode });
-            toast.success("Interview Scheduled Successfully!");
-        }
-    };
+  try {
+    await admissionService.updateAdmission(myApp.id, {
+      admission_status: "Interview Scheduled",
+      interview_date: selectedDate,
+      interview_time: selectedTime,
+      interview_mode: interviewMode
+    });
+
+    toast.success("Interview Scheduled Successfully!");
+
+  } catch (e) {
+    console.log(e);
+  }
+};
 
     if (loading) return <div className="p-6">Loading...</div>;
 if (!myApp) {

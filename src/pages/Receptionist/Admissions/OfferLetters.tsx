@@ -76,8 +76,10 @@ export default function OfferLetters() {
         filters: JSON.stringify(filters)
       });
 
-      if (res.success && res.rows) {
-        const mapped = res.rows.map((item: any) => ({
+const rows = res?.rows || res?.data?.rows || [];
+
+if (res.success) {
+  const mapped = rows.map((item: any) => ({
           id: item.addmission_number || item.id,
           name: item.student_name,
           email: item.parent_email,
