@@ -14,6 +14,7 @@ export default function ClassCapacity() {
   const fetchCapacity = async () => {
     try {
       const res = await admissionDashboardService.getClassCapacity();
+      console.log("res from class cap",res)
       if (res.success) {
         // Backend already returns clean structure
         // {

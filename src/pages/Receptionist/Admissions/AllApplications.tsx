@@ -88,11 +88,13 @@ export default function AllApplications() {
       }
     } catch (error) {
       console.error("Error fetching applications:", error);
-      toast.error("Failed to load applications");
+      // toast.error("Failed to load applications");
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const handleDelete = async () => {
     if (!deleteApp) return;
@@ -184,6 +186,18 @@ export default function AllApplications() {
     }
 
   }
+
+const filteredData = data.filter((app) => {
+  const searchText = search.toLowerCase();
+
+  return (
+    app.addmission_number?.toLowerCase().includes(searchText) ||
+    app.student_name?.toLowerCase().includes(searchText) ||
+    app.parent_number?.toLowerCase().includes(searchText) ||
+    app.parent_email?.toLowerCase().includes(searchText) ||
+    app.class_name?.toLowerCase().includes(searchText)
+  );
+});
 
   const { title, subtitle } = getTitle();
   return (
@@ -406,10 +420,10 @@ export default function AllApplications() {
           <tbody className="divide-y">
             {loading ? (
               <tr><td colSpan={7} className="text-center py-10">Loading...</td></tr>
-            ) : data.length === 0 ? (
+            ) : filteredData.length === 0 ? (
               <tr><td colSpan={7} className="text-center py-10 text-gray-500">No applications found.</td></tr>
             ) : (
-              data.map((app) => (
+              filteredData.map((app) => (
                 <tr key={app.id} className="hover:bg-gray-50">
                   <td
                     onClick={() => setViewApp(app)}
