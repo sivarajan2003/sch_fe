@@ -295,7 +295,7 @@ function SeatRow({
       {/* Visual Utilization Bar */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium w-8">{percent}%</span>
+          <span className="text-xs font-medium w-auto">{percent}%</span>
           <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${progressColor}`}

@@ -115,6 +115,24 @@ export const getSeatAllocation = async () => {
   return res.data;
 };
 
+/**
+ * GET OFFER LETTER TEMPLATE
+ * GET /admission/settings/offer-letter
+ */
+export const getOfferLetterTemplate = async () => {
+  const res = await api.get("/admission/settings/offer-letter");
+  return res.data;
+};
+
+/**
+ * SAVE OFFER LETTER TEMPLATE
+ * POST /admission/settings/offer-letter
+ */
+export const saveOfferLetterTemplate = async (data) => {
+  const res = await api.post("/admission/settings/offer-letter", data);
+  return res.data;
+};
+
 /* ----------------------------------------
    EXPORTS
 ---------------------------------------- */
@@ -127,4 +145,6 @@ export default {
   verifyAdmissionDocuments, // 👈 NEW
   deleteAdmission,
   getSeatAllocation,
+  getOfferLetterTemplate,
+  saveOfferLetterTemplate
 };
