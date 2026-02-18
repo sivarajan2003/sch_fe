@@ -115,30 +115,30 @@ const interviewRows = rows.filter(
           ];
           const uploadedCount = docs.filter(d => d && d !== 'null').length;
           const totalDocs = 4; // Based on known requirements
-const [interviews, setInterviews] = useState([]);
-useEffect(() => {
-  const loadInterviews = async () => {
-    try {
-      const res = await admissionService.getAdmissions();
+// const [interviews, setInterviews] = useState([]);
+// useEffect(() => {
+//   const loadInterviews = async () => {
+//     try {
+//       const res = await admissionService.getAdmissions();
 
-      const rows = res?.rows || res?.data?.rows || [];
+//       const rows = res?.rows || res?.data?.rows || [];
 
-      const filtered = rows.filter(
-        (r) =>
-          r.admission_status === "Interview Scheduled" ||
-          r.admission_status === "Interview Done"
-      );
+//       const filtered = rows.filter(
+//         (r) =>
+//           r.admission_status === "Interview Scheduled" ||
+//           r.admission_status === "Interview Done"
+//       );
 
-      console.log("🔥 Parent interviews:", filtered);
+//       console.log("🔥 Parent interviews:", filtered);
 
-      setInterviews(filtered);
-    } catch (e) {
-      console.log(e);
-    }
-  };
+//       setInterviews(filtered);
+//     } catch (e) {
+//       console.log(e);
+//     }
+//   };
 
-  loadInterviews();
-}, []);
+//   loadInterviews();
+// }, []);
 
           return {
             id: item.addmission_number || item.id,
