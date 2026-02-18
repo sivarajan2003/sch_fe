@@ -11,15 +11,17 @@ export default function Step3PreviousSchool({
   onNext,
   onBack,
 }: Props) {
-  const [form, setForm] = useState({
-    schoolName: "",
-    lastClass: "",
-    yearCompleted: "",
-    reason: "",
-    ...data,
-  });
+const isNursery = !!data?.isNursery;
+console.log(isNursery)
+const [form, setForm] = useState({
+  schoolName: "",
+  lastClass: "",
+  yearCompleted: "",
+  reason: "",
+});
 
   const [errors, setErrors] = useState<any>({});
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -29,6 +31,7 @@ export default function Step3PreviousSchool({
   };
 
   const validate = () => {
+    if (isNursery) return true;
     const newErrors: any = {};
 
     if (!form.schoolName)
@@ -46,15 +49,24 @@ export default function Step3PreviousSchool({
 
   const handleNext = () => {
     if (validate()) {
-      onNext(form);
+      if (isNursery) {
+        onNext({
+          schoolName: null,
+          lastClass: null,
+          yearCompleted: null,
+          reason: null,
+        });
+      } else {
+        onNext(form);
+      }
     }
   };
 
   return (
-<div className="bg-white border rounded-xl overflow-hidden">
+    <div className="bg-white border rounded-xl overflow-hidden">
       {/* BODY */}
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <h2 className="text-base sm:text-lg font-semibold">
+        <h2 className="text-base sm:text-lg font-semibold">
           Previous School History
         </h2>
 
@@ -65,10 +77,10 @@ export default function Step3PreviousSchool({
           </label>
           <input
             name="schoolName"
-            value={form.schoolName}
+            value={isNursery ? "null" : form.schoolName || ""}
             onChange={handleChange}
-            placeholder="Enter school name"
-            className="w-full border rounded-lg px-4 py-2"
+            disabled={isNursery}
+            className="w-full border rounded-lg px-4 py-2 disabled:bg-gray-100 disabled:text-gray-500"
           />
           {errors.schoolName && (
             <p className="text-xs text-red-500 mt-1">
@@ -86,10 +98,10 @@ export default function Step3PreviousSchool({
             </label>
             <input
               name="lastClass"
-              value={form.lastClass}
+              value={isNursery ? "null" : form.lastClass || ""}
               onChange={handleChange}
-              placeholder="e.g., Grade 5"
-              className="w-full border rounded-lg px-4 py-2"
+              disabled={isNursery}
+              className="w-full border rounded-lg px-4 py-2 disabled:bg-gray-100 disabled:text-gray-500"
             />
             {errors.lastClass && (
               <p className="text-xs text-red-500 mt-1">
@@ -105,10 +117,10 @@ export default function Step3PreviousSchool({
             </label>
             <input
               name="yearCompleted"
-              value={form.yearCompleted}
+              value={isNursery ? "null" : form.yearCompleted || ""}
               onChange={handleChange}
-              placeholder="e.g., 2025"
-              className="w-full border rounded-lg px-4 py-2"
+              disabled={isNursery}
+              className="w-full border rounded-lg px-4 py-2 disabled:bg-gray-100 disabled:text-gray-500"
             />
             {errors.yearCompleted && (
               <p className="text-xs text-red-500 mt-1">
@@ -125,11 +137,11 @@ export default function Step3PreviousSchool({
           </label>
           <textarea
             name="reason"
-            value={form.reason}
+            value={isNursery ? "null" : form.reason || ""}
             onChange={handleChange}
+            disabled={isNursery}
             rows={4}
-            placeholder="Briefly explain the reason"
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-2 disabled:bg-gray-100 disabled:text-gray-500"
           />
         </div>
       </div>

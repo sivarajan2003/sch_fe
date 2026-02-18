@@ -137,7 +137,10 @@ fee_remark: formData.fees.fee_remark ?? null,
 
       {step === 3 && (
         <Step3PreviousSchool
-          data={formData.previousSchool}
+            data={{
+    ...formData.previousSchool,
+    isNursery: formData.academic?.isNursery,
+  }}
           onBack={prevStep}
           onNext={(data: any) => {
             setFormData({ ...formData, previousSchool: data });

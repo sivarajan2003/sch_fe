@@ -52,12 +52,27 @@ export default function Step2Academic({ data, onNext, onBack }: Props) {
     fetchClasses();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
+const handleChange = (
+  e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>
+) => {
+if (e.target.name === "applyingClass") {
+  const selectedId = e.target.value;
+
+  const selectedClass = classes.find(
+    (cls) => cls.id === selectedId
+  );
+
+  setForm({
+    ...form,
+    applyingClass: selectedId,
+    applyingClassName: selectedClass?.name || "",
+  });
+} else {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-  };
+  }
+
+  setErrors({ ...errors, [e.target.name]: "" });
+};
 
   const validate = () => {
     const newErrors: any = {};
@@ -70,11 +85,19 @@ export default function Step2Academic({ data, onNext, onBack }: Props) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    if (validate()) {
-      onNext(form);
-    }
-  };
+const handleNext = () => {
+  if (validate()) {
+    console.log(form.applyingClassName)
+    const isNursery =
+      form.applyingClassName === "PreKG" ||
+      form.applyingClassName === "LKG";
+
+    onNext({
+      ...form,
+      isNursery,
+    });
+  }
+};
 
   return (
     <div className="bg-white border rounded-xl overflow-hidden">
@@ -110,7 +133,7 @@ export default function Step2Academic({ data, onNext, onBack }: Props) {
                 }
 
                 return (
-                  <option key={cls.id} value={cls.id}>
+                 <option key={cls.id} value={cls.id}>
                     {displayName}
                   </option>
                 );
