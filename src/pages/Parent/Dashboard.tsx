@@ -28,14 +28,26 @@ export default function ParentDashboard() {
   const [showEditParent, setShowEditParent] = useState(false);
 const [parentDashboard, setParentDashboard] = useState<any[]>([]);
 const [loading, setLoading] = useState(true);
+
+const [loggedInEmail, setLoggedInEmail] = useState<string | null>(null);
+
 useEffect(() => {
   const fetchParentDashboard = async () => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+
+    const parsedUser = JSON.parse(storedUser);
+    const email = parsedUser.email;
+    console.log(email)
+    setLoggedInEmail(email);
+
     try {
       const res = await parentDashboardService.getParentDashboard();
+      const allData = res.data || [];
 
-      console.log("Dashboard API DATA:", res); // ✅ log correct object
-
-      setParentDashboard(res.data || []); // ✅ CORRECT
+      const filteredData = allData.filter((item: any) => item.fullData.parent_email === email);
+      console.log("FILTERED DATA:", filteredData);
+      setParentDashboard(filteredData);
     } catch (err) {
       console.error("Failed to load parent dashboard", err);
     } finally {
@@ -47,6 +59,7 @@ useEffect(() => {
 }, []);
 
 const dashboard = parentDashboard?.[0];
+const childCount = parentDashboard.length;
 
 const [parentProfile, setParentProfile] = useState({
   id: "#P124556",
@@ -293,7 +306,7 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
       <div>
         <p className="text-sm text-gray-500">Child Count</p>
 <p className="text-3xl font-semibold text-gray-900">
-  {dashboard?.childCount ?? 0}
+  {childCount}
 </p>
       </div>
     </div>
