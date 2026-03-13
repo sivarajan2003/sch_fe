@@ -29,7 +29,7 @@ export default function EnrolledStudents() {
 
   useEffect(() => {
     fetchEnrolled();
-  }, [currentPage, rowsPerPage, sortOrder, startDate, endDate, statusFilter]);
+  }, [currentPage, rowsPerPage, sortOrder, startDate, endDate, statusFilter,search ]);
 
   const fetchEnrolled = async () => {
     setLoading(true);

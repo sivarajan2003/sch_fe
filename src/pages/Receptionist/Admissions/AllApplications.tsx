@@ -81,7 +81,7 @@ export default function AllApplications() {
         order: JSON.stringify([['createdAt', sortOrder.toUpperCase()]]),
         filters: JSON.stringify(filters)
       });
-
+      console.log(res)
       if (res.success) {
         setData(res.rows);
         setTotalCount(res.count);
