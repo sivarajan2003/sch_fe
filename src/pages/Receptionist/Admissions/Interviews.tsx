@@ -235,17 +235,27 @@ const interviewRows = rows.filter(
   // We should fetch stats or use the `getAdmissionStats` I added!
   const [stats, setStats] = useState({ scheduled: 0, completed: 0 });
 
-  useEffect(() => {
-    admissionService.getAdmissionStats().then((res: any) => {
-      if (res.success) {
-        const counts = res.data.counts || {};
+ useEffect(() => {
+  const loadStats = async () => {
+    try {
+      const res: any = await admissionService.getAdmissionStats();
+
+      if (res?.success) {
+        const counts = res.data?.counts || {};
+
         setStats({
-          scheduled: counts['Interview Scheduled'] || 0,
-          completed: counts['Interview Done'] || 0
+          scheduled: counts["Interview Scheduled"] || 0,
+          completed: counts["Interview Done"] || 0,
         });
       }
-    });
-  }, []);
+    } catch (err) {
+      console.log("Stats API failed — ignoring", err);
+    }
+  };
+
+  loadStats();
+}, []);
+
 useEffect(() => {
   if (viewApp || scheduleApp) {
     document.body.style.overflow = "hidden";

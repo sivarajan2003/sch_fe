@@ -61,7 +61,7 @@ export const uploadToSpaces = async (file: File, folder: string = 'admission'): 
             Body: fileUint8Array, // Use Uint8Array instead of File
             ACL: 'public-read' as const,
             ContentType: file.type,
-            ContentLength: file.size,
+            //ContentLength: file.size,
         };
 
         // Upload to Spaces
