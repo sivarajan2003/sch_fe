@@ -78,6 +78,8 @@ import LeaveList from "./pages/HRM/Leaves/LeaveList";
 import ApproveLeave from "./pages/HRM/Leaves/ApproveLeave";
 import Holidays from "./pages/HRM/Holidays";
 import Payroll from "./pages/HRM/Payroll";
+import Candidates from "./pages/HRM/Candidates";
+
 
 import AttendanceReport from "./pages/Reports/AttendanceReport";
 import ClassReport from "./pages/Reports/ClassReport";
@@ -191,6 +193,7 @@ export default function App() {
 
           {/* ACADEMIC */}
           <Route path="academic/classes" element={<ClassesPage />} />
+           <Route path="hr/candidates" element={<Candidates />} />
           <Route path="academic/class-room" element={<ClassRoomPage />} />
           <Route path="academic/class-routine" element={<ClassRoutinePage />} />
           <Route
@@ -239,6 +242,7 @@ export default function App() {
 
           <Route path="hrm/holidays" element={<Holidays />} />
           <Route path="hrm/payroll" element={<Payroll />} />
+          
           <Route path="reports/attendance" element={<AttendanceReport />}>
             <Route index element={<AttendanceMain />} />
             <Route path="student-type" element={<StudentAttendanceType />} />

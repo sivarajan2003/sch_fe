@@ -811,6 +811,30 @@ onClick={() =>
             </>
           )} 
                             {/* ================= HRM ================= */}
+                            {/* ================= HR ================= */}
+<SectionHeader
+  icon={User}
+  label="HR"
+  collapsed={collapsed}
+  open={activeSection === "hr"}
+  onClick={() =>
+    setActiveSection(activeSection === "hr" ? null : "hr")
+  }
+/>
+
+{!collapsed && activeSection === "hr" && (
+  <div className="ml-4 mt-2 space-y-1">
+
+    <MenuItem
+      icon={UserCheck}
+      label="Candidates"
+      onClick={() => navigate("/admin/dashboard/hr/candidates")}
+      active={location.pathname.startsWith("/admin/dashboard/hr/candidates")}
+      collapsed={collapsed}
+    />
+
+  </div>
+)}
 
          {canAccess(["admin", "Super Admin", "student", "teacher", "parent"]) &&
           !isPureParentPortal &&

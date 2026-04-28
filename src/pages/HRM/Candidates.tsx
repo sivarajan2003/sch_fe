@@ -1,0 +1,360 @@
+import {
+  RefreshCcw,
+  Plus,
+  Filter,
+  ArrowUpDown,
+  UserCheck,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import hrService from "../../service/hrService";
+import { toast } from "react-toastify";
+
+type Candidate = {
+  id: string;  
+  name: string;
+  email: string;
+  status: string;
+};
+
+const statusStyle = (status: string) => {
+  switch (status) {
+    case "Selected":
+      return "bg-green-100 text-green-700";
+    case "Rejected":
+      return "bg-red-100 text-red-700";
+    default:
+      return "bg-yellow-100 text-yellow-700";
+  }
+};
+
+export default function HRCandidatesDashboard() {
+  const [data, setData] = useState<Candidate[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // filters
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // pagination
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // form
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    status: "Interview",
+  });
+
+  useEffect(() => {
+    loadCandidates();
+  }, [currentPage, rowsPerPage, sortOrder, statusFilter]);
+
+  const loadCandidates = async () => {
+    try {
+      setLoading(true);
+      const res = await hrService.getHR();
+      setData(res?.data?.data || []);
+    } catch {
+      toast.error("Failed to load candidates");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      await hrService.createHR(form);
+      toast.success("Candidate Added ✅");
+      setForm({ name: "", email: "", status: "Interview" });
+      loadCandidates();
+    } catch {
+      toast.error("Failed to add candidate");
+    }
+  };
+
+  const handleSelect = async (id: number) => {
+    try {
+      await hrService.selectHR(id);
+      toast.success("Converted to Teacher 🎉");
+      loadCandidates();
+    } catch {
+      toast.error("Failed");
+    }
+  };
+
+  const filteredData = data.filter((item) => {
+  const text = search.toLowerCase();
+
+  const matchesSearch =
+    item.name.toLowerCase().includes(text) ||
+    item.email.toLowerCase().includes(text);
+
+  const matchesStatus =
+    statusFilter === "All" || item.status === statusFilter;
+
+  return matchesSearch && matchesStatus;
+});
+
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  return (
+    <div className="space-y-6">
+
+      {/* ================= HEADER ================= */}
+      <div className="bg-white border border-gray-200 rounded-2xl px-6 py-6">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+    {/* LEFT */}
+    <div>
+      <h2 className="text-2xl font-semibold text-gray-900">
+        HR Candidates
+      </h2>
+      <p className="text-sm text-gray-500 mt-1">
+        Dashboard / Admin / Candidates
+      </p>
+    </div>
+
+    {/* RIGHT */}
+    <div className="flex items-center gap-3">
+      <button
+        onClick={loadCandidates}
+        className="p-2.5 border rounded-lg hover:bg-gray-50"
+      >
+        <RefreshCcw size={16} />
+      </button>
+    </div>
+
+  </div>
+</div>
+      {/* ================= FORM ================= */}
+     <div className="bg-white border rounded-2xl p-6">
+  <form
+    onSubmit={handleSubmit}
+    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+  >
+    <input
+      placeholder="Name"
+      className="border rounded-lg px-3 py-2 text-sm"
+      value={form.name}
+      onChange={(e) =>
+        setForm({ ...form, name: e.target.value })
+      }
+    />
+
+    <input
+      placeholder="Email"
+      className="border rounded-lg px-3 py-2 text-sm"
+      value={form.email}
+      onChange={(e) =>
+        setForm({ ...form, email: e.target.value })
+      }
+    />
+
+    <select
+      className="border rounded-lg px-3 py-2 text-sm"
+      value={form.status}
+      onChange={(e) =>
+        setForm({ ...form, status: e.target.value })
+      }
+    >
+      <option>Interview</option>
+      <option>Selected</option>
+      <option>Rejected</option>
+    </select>
+
+    <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center justify-center gap-2">
+      <Plus size={14} />
+      Add Candidate
+    </button>
+  </form>
+</div>
+      {/* ================= SUB HEADER ================= */}
+     <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5">
+
+  {/* TOP ROW */}
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+    <h3 className="text-lg font-semibold text-gray-900">
+      Candidates ({filteredData.length})
+    </h3>
+
+    <div className="flex items-center gap-3 flex-wrap">
+
+      {/* FILTER */}
+      <select
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+        className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
+      >
+        <option>All</option>
+        <option>Interview</option>
+        <option>Selected</option>
+        <option>Rejected</option>
+      </select>
+
+      {/* SORT */}
+      <button
+        onClick={() =>
+          setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+        }
+        className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
+      >
+        <ArrowUpDown size={16} />
+        Sort {sortOrder === "asc" ? "Oldest" : "Newest"}
+      </button>
+
+    </div>
+  </div>
+
+  {/* BOTTOM ROW */}
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-3">
+
+    {/* LEFT */}
+    <div className="flex items-center gap-2 text-sm text-gray-600">
+      Row Per Page
+      <select
+        value={rowsPerPage}
+        onChange={(e) => setRowsPerPage(Number(e.target.value))}
+        className="border rounded px-2 py-1"
+      >
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+        <option value={50}>50</option>
+      </select>
+      Entries
+    </div>
+
+    {/* RIGHT */}
+    <input
+      type="text"
+      placeholder="Search by name or email..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="border rounded-lg px-4 py-2 text-sm w-full sm:w-60"
+    />
+
+  </div>
+
+</div>
+      {/* ================= TABLE ================= */}
+      <div className="bg-white border rounded-xl overflow-hidden">
+
+        <table className="w-full text-sm hidden md:table">
+          <thead className="bg-gray-50">
+            <tr>
+             <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">NAME</th>
+             <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">EMAIL</th>
+              <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">STATUS</th>
+              <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">ACTION</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={4} className="text-center py-5">
+                  Loading...
+                </td>
+              </tr>
+            ) : paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center py-5">
+                  No Data
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((item) => (
+                <tr key={item.id} className="border-t">
+                  <td className="p-3">{item.name}</td>
+                  <td className="p-3">{item.email}</td>
+
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${statusStyle(
+                        item.status
+                      )}`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+
+                  <td className="p-3 text-center">
+                    {item.status !== "Selected" && (
+                      <button
+                        onClick={() => handleSelect(item.id)}
+                        className="bg-green-600 text-white px-3 py-1 rounded"
+                      >
+                        Select
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* MOBILE VIEW */}
+        <div className="md:hidden p-3 space-y-3">
+          {paginatedData.map((item) => (
+            <div
+              key={item.id}
+              className="border rounded-lg p-3 space-y-2"
+            >
+              <p className="font-medium">{item.name}</p>
+              <p className="text-sm text-gray-500">{item.email}</p>
+
+              <span
+                className={`px-2 py-1 text-xs rounded ${statusStyle(
+                  item.status
+                )}`}
+              >
+                {item.status}
+              </span>
+
+              {item.status !== "Selected" && (
+                <button
+                  onClick={() => handleSelect(item.id)}
+                  className="bg-green-600 text-white w-full py-1 rounded"
+                >
+                  Select
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ================= PAGINATION ================= */}
+      <div className="flex justify-end gap-2">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+          className="px-3 py-1 border rounded"
+        >
+          Prev
+        </button>
+
+        <span>
+          {currentPage} / {totalPages || 1}
+        </span>
+
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((p) => p + 1)}
+          className="px-3 py-1 border rounded"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
