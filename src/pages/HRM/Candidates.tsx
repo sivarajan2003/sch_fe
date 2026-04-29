@@ -1,3 +1,4 @@
+//candidates.tsx
 import {
   RefreshCcw,
   Plus,
@@ -8,7 +9,11 @@ import {
 import { useEffect, useState } from "react";
 import hrService from "../../service/hrService";
 import { toast } from "react-toastify";
-
+import {
+  Eye,        
+  Pencil,     
+  Trash2      
+} from "lucide-react";
 type Candidate = {
   id: string;  
   name: string;
@@ -39,7 +44,10 @@ export default function HRCandidatesDashboard() {
   // pagination
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [editModal, setEditModal] = useState(false);
+const [editData, setEditData] = useState<any>(null);
+const [viewModal, setViewModal] = useState(false);
+const [viewData, setViewData] = useState<any>(null);
   // form
   const [form, setForm] = useState({
     name: "",
@@ -55,8 +63,9 @@ export default function HRCandidatesDashboard() {
     try {
       setLoading(true);
       const res = await hrService.getHR();
-      setData(res?.data?.data || []);
+      setData(res?.data || []);
     } catch {
+      console.log("LOAD ERROR:", err);
       toast.error("Failed to load candidates");
     } finally {
       setLoading(false);
@@ -70,12 +79,13 @@ export default function HRCandidatesDashboard() {
       toast.success("Candidate Added ✅");
       setForm({ name: "", email: "", status: "Interview" });
       loadCandidates();
-    } catch {
-      toast.error("Failed to add candidate");
-    }
+    } catch (err: any) {
+  console.log("ADD ERROR:", err?.response?.data); // 👈 IMPORTANT
+  toast.error(err?.response?.data?.message || "Failed to add candidate");
+}
   };
 
-  const handleSelect = async (id: number) => {
+  const handleSelect = async (id: string) => {
     try {
       await hrService.selectHR(id);
       toast.success("Converted to Teacher 🎉");
@@ -84,7 +94,17 @@ export default function HRCandidatesDashboard() {
       toast.error("Failed");
     }
   };
-
+const handleUpdate = async () => {
+  try {
+    await hrService.updateHR(editData.id, editData);
+    toast.success("Updated ✅");
+    setEditModal(false);
+    loadCandidates();
+  } catch (err) {
+    console.log("UPDATE ERROR:", err);
+    toast.error("Update failed");
+  }
+};
   const filteredData = data.filter((item) => {
   const text = search.toLowerCase();
 
@@ -104,7 +124,29 @@ export default function HRCandidatesDashboard() {
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
+const handleView = (item: Candidate) => {
+  setViewData(item);
+  setViewModal(true);
+};
+const handleEdit = (item: Candidate) => {
+  setEditData(item);
+  setEditModal(true);
+};
 
+const handleDelete = async (id: string) => {
+  const confirmDelete = window.confirm("Are you sure you want to delete this candidate?");
+
+  if (!confirmDelete) return;
+
+  try {
+    await hrService.deleteHR(id);
+    toast.success("Deleted ✅");
+    loadCandidates();
+  } catch (err) {
+    console.log("DELETE ERROR:", err);
+    toast.error("Delete failed");
+  }
+};
   return (
     <div className="space-y-6">
 
@@ -253,7 +295,7 @@ export default function HRCandidatesDashboard() {
              <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">NAME</th>
              <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">EMAIL</th>
               <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">STATUS</th>
-              <th className="px-4 py-3 text-left text-gray-600 text-xs uppercase">ACTION</th>
+              <th className="px-4 py-3 text-center text-gray-600 text-xs uppercase">ACTION</th>
             </tr>
           </thead>
 
@@ -286,16 +328,45 @@ export default function HRCandidatesDashboard() {
                     </span>
                   </td>
 
-                  <td className="p-3 text-center">
-                    {item.status !== "Selected" && (
-                      <button
-                        onClick={() => handleSelect(item.id)}
-                        className="bg-green-600 text-white px-3 py-1 rounded"
-                      >
-                        Select
-                      </button>
-                    )}
-                  </td>
+                 <td className="p-3 text-center">
+  <div className="flex items-center justify-center gap-3">
+    
+    {/* VIEW */}
+    <button
+      onClick={() => handleView(item)}
+      className="text-gray-400 hover:text-blue-600 transition"
+    >
+      <Eye size={18} />
+    </button>
+
+    {/* EDIT */}
+    <button
+      onClick={() => handleEdit(item)}
+      className="text-gray-400 hover:text-yellow-500 transition"
+    >
+      <Pencil size={18} />
+    </button>
+
+    {/* DELETE */}
+    <button
+      onClick={() => handleDelete(item.id)}
+      className="text-gray-400 hover:text-red-600 transition"
+    >
+      <Trash2 size={18} />
+    </button>
+
+    {/* SELECT */}
+    {item.status !== "Selected" && (
+      <button
+        onClick={() => handleSelect(item.id)}
+        className="bg-green-600 text-white px-2 py-1 rounded text-xs"
+      >
+        Select
+      </button>
+    )}
+
+  </div>
+</td>
                 </tr>
               ))
             )}
@@ -355,6 +426,105 @@ export default function HRCandidatesDashboard() {
           Next
         </button>
       </div>
+      {editModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl w-80 space-y-4">
+
+      <h2 className="text-lg font-semibold">Edit Candidate</h2>
+
+      <input
+        className="w-full border px-3 py-2 rounded"
+        value={editData?.name}
+        onChange={(e) =>
+          setEditData({ ...editData, name: e.target.value })
+        }
+      />
+
+      <input
+        className="w-full border px-3 py-2 rounded"
+        value={editData?.email}
+        onChange={(e) =>
+          setEditData({ ...editData, email: e.target.value })
+        }
+      />
+
+      <select
+        className="w-full border px-3 py-2 rounded"
+        value={editData?.status}
+        onChange={(e) =>
+          setEditData({ ...editData, status: e.target.value })
+        }
+      >
+        <option>Interview</option>
+        <option>Selected</option>
+        <option>Rejected</option>
+      </select>
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => setEditModal(false)}
+          className="px-3 py-1 border rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleUpdate}
+          className="px-3 py-1 bg-blue-600 text-white rounded"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{viewModal && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+
+    {/* CARD */}
+    <div className="bg-white w-[360px] rounded-2xl shadow-2xl p-6 
+                    transform transition-all duration-300 scale-95 animate-fadeIn">
+
+      {/* HEADER */}
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        👁 View Candidate
+      </h2>
+
+      {/* CONTENT */}
+      <div className="space-y-3 text-sm">
+
+        <div className="flex justify-between">
+          <span className="text-gray-500">Name</span>
+          <span className="font-medium text-gray-800">{viewData?.name}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="text-gray-500">Email</span>
+          <span className="font-medium text-gray-800">{viewData?.email}</span>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <span className="text-gray-500">Status</span>
+          <span className={`px-2 py-1 rounded text-xs ${statusStyle(viewData?.status)}`}>
+            {viewData?.status}
+          </span>
+        </div>
+
+      </div>
+
+      {/* BUTTON */}
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={() => setViewModal(false)}
+          className="px-4 py-2 rounded-lg border hover:bg-gray-100 transition"
+        >
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

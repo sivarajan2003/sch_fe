@@ -174,3 +174,17 @@ body.modal-open::before {
   background: rgba(0, 0, 0, 0.4); /* same grey as img-1 */
   z-index: 999; /* BELOW modal, ABOVE header */
 }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
