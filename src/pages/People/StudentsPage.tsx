@@ -151,7 +151,7 @@ const students = [
 /* ================= MAIN PAGE ================= */
 
 export default function StudentsPage() {
-   const isLocked = true; // 🔒 enable full blur lock
+   const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
     const [view, setView] = useState<"grid" | "table">("grid");

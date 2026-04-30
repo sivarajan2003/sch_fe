@@ -91,7 +91,7 @@ const INITIAL_DATA = [
 /* ================= PAGE ================= */
 export default function FeesCollection() {
   const navigate = useNavigate();
-  const isLocked = true; // 🔒 enable full blur lock
+  const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 

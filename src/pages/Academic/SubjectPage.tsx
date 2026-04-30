@@ -27,7 +27,7 @@ const INITIAL_DATA = [
 /* ================= PAGE ================= */
 
 export default function SubjectPage() {
-  const isLocked = true; // 🔒 enable full blur lock
+  const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
  

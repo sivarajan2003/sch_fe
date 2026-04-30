@@ -24,7 +24,7 @@ const reasons = [
 ];
 
 export default function ReasonsPage() {
-   const isLocked = true; // 🔒 enable full blur lock
+   const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
  

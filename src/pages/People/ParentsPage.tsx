@@ -152,7 +152,7 @@ const parents = [
 
 export default function ParentsPage() {
   const [openDate, setOpenDate] = useState(false);
-   const isLocked = true; // 🔒 enable full blur lock
+   const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 const [startDate, setStartDate] = useState("2020-05-15");

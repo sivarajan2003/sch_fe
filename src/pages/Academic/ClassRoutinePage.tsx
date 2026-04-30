@@ -142,7 +142,8 @@ const ROUTINES = [
 /* ================= PAGE ================= */
 
 export default function ClassRoutinePage() {
-  const isLocked = true; // 🔒 enable full blur lock
+  //const isLocked = true; 
+   const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
   const STORAGE_KEY = "academic_class_routines";
