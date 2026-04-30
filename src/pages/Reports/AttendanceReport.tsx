@@ -21,7 +21,7 @@ const TABS = [
 ];
 
 export default function AttendanceReport() {
-   const isLocked = true; // 🔒 enable full blur lock
+  const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
   const navigate = useNavigate();
