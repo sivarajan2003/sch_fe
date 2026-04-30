@@ -365,7 +365,7 @@ onClick={() =>
 
                         <span className="text-sm font-medium">Students</span>
                           {/* 🔒 LOCK ICON */}
-  <Lock className="w-4 h-4 text-gray-400" />
+  {/* <Lock className="w-4 h-4 text-gray-400" /> */}
                       </div>
                     </button> 
 
@@ -405,7 +405,7 @@ onClick={() =>
 
                       <span className="text-sm font-medium">Parents</span>
                         {/* 🔒 LOCK ICON */}
-  <Lock className="w-4 h-4 text-gray-400" />
+  {/* <Lock className="w-4 h-4 text-gray-400" /> */}
                     </button> 
                   </>
                 )}
@@ -428,7 +428,7 @@ onClick={() =>
 
                   <span className="text-sm font-medium">Guardians</span>
                     {/* 🔒 LOCK ICON */}
-  <Lock className="w-4 h-4 text-gray-400" />
+  {/* <Lock className="w-4 h-4 text-gray-400" /> */}
                 </button> 
 
                 {/* ================= TEACHERS ================= */}
@@ -577,7 +577,7 @@ onClick={() =>
                         </span>
                         <div className="flex items-center justify-between w-full">
   <span className="text-sm font-medium">Examinations</span>
-  <Lock className="w-4 h-4 text-gray-400" />
+  {/* <Lock className="w-4 h-4 text-gray-400" /> */}
 </div>
 
                       </div>
@@ -1201,9 +1201,9 @@ function AcademicItem({
 
   <span className="font-medium">{label}</span>
 
-  {locked && (
+  {/* {locked && (
     <Lock className="w-4 h-4 text-gray-400" />
-  )}
+  )} */}
 
 </div>
 
@@ -1268,7 +1268,7 @@ function MainItem({
       </span>
 <div className="flex items-center justify-between w-full">
   <span>{label}</span>
-  {locked && <Lock className="w-4 h-4 text-gray-400" />}
+  {/* {locked && <Lock className="w-4 h-4 text-gray-400" />} */}
 </div>
     </button>
   );
@@ -1471,9 +1471,9 @@ function SectionHeader({
      {!collapsed && (
   <div className="flex items-center gap-2">
 
-    {locked && (
+    {/* {locked && (
       <Lock className="w-4 h-4 text-gray-400" />
-    )}
+    )} */}
 
     {open !== undefined && (
       <ChevronDown
