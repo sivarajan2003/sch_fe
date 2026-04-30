@@ -72,19 +72,44 @@ const [viewData, setViewData] = useState<any>(null);
     }
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    try {
-      await hrService.createHR(form);
-      toast.success("Candidate Added ✅");
-      setForm({ name: "", email: "", status: "Interview" });
-      loadCandidates();
-    } catch (err: any) {
-  console.log("ADD ERROR:", err?.response?.data); // 👈 IMPORTANT
-  toast.error(err?.response?.data?.message || "Failed to add candidate");
-}
-  };
+const handleSubmit = async (e: any) => {
+  e.preventDefault();
 
+  // 🔥 ADD THIS BLOCK
+  if (!form.name.trim()) {
+    toast.error("Name is required");
+    return;
+  }
+
+  if (!form.email.trim()) {
+    toast.error("Email is required");
+    return;
+  }
+
+  if (!form.email.includes("@")) {
+    toast.error("Enter valid email");
+    return;
+  }
+
+  try {
+    await hrService.createHR(form);
+    toast.success("Candidate Added ✅");
+    setForm({ name: "", email: "", status: "Interview" });
+    loadCandidates();
+  } catch (err: any) {
+    console.log("ADD ERROR:", err?.response?.data);
+
+    const errorData = err?.response?.data;
+
+    if (errorData?.errors?.length) {
+      toast.error(errorData.errors[0]);
+    } else if (errorData?.message) {
+      toast.error(errorData.message);
+    } else {
+      toast.error("Failed to add candidate");
+    }
+  }
+};
   const handleSelect = async (id: string) => {
     try {
       await hrService.selectHR(id);

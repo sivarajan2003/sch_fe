@@ -832,6 +832,13 @@ onClick={() =>
       active={location.pathname.startsWith("/admin/dashboard/hr/candidates")}
       collapsed={collapsed}
     />
+<MenuItem
+  icon={Wallet}
+  label="Salary"
+  onClick={() => navigate("/admin/dashboard/hr/salary")}
+  active={location.pathname.startsWith("/admin/dashboard/hr/salary")}
+  collapsed={collapsed}
+/>
 
   </div>
 )}
