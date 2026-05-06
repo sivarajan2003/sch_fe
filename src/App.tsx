@@ -81,6 +81,7 @@ import Payroll from "./pages/HRM/Payroll";
 import Candidates from "./pages/HRM/Candidates";
 //import Payrolls from "./pages/HRM/Payrolls";
 import Salary from "./pages/HRM/Salary";
+import Teachers from "./pages/HRM/Teachers";
 
 import AttendanceReport from "./pages/Reports/AttendanceReport";
 import ClassReport from "./pages/Reports/ClassReport";
@@ -195,6 +196,7 @@ export default function App() {
           {/* ACADEMIC */}
           <Route path="academic/classes" element={<ClassesPage />} />
            <Route path="hr/candidates" element={<Candidates />} />
+           <Route path="hr/teachers" element={<Teachers />} />
           <Route path="hr/salary" element={<Salary />} />
           <Route path="academic/class-room" element={<ClassRoomPage />} />
           <Route path="academic/class-routine" element={<ClassRoutinePage />} />

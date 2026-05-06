@@ -832,6 +832,13 @@ onClick={() =>
       active={location.pathname.startsWith("/admin/dashboard/hr/candidates")}
       collapsed={collapsed}
     />
+    <MenuItem
+  icon={Users}
+  label="Teachers"
+  onClick={() => navigate("/admin/dashboard/hr/teachers")}
+  active={location.pathname.startsWith("/admin/dashboard/hr/teachers")}
+  collapsed={collapsed}
+/>
 <MenuItem
   icon={Wallet}
   label="Salary"

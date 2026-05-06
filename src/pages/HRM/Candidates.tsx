@@ -110,15 +110,21 @@ const handleSubmit = async (e: any) => {
     }
   }
 };
-  const handleSelect = async (id: string) => {
-    try {
-      await hrService.selectHR(id);
-      toast.success("Converted to Teacher 🎉");
-      loadCandidates();
-    } catch {
-      toast.error("Failed");
-    }
-  };
+ const handleSelect = async (id: string) => {
+  try {
+
+    const res = await hrService.selectHR(id);
+
+    console.log("SELECT RESPONSE:", res);
+
+    toast.success("Candidate Selected");
+
+    loadCandidates();
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 const handleUpdate = async () => {
   try {
     await hrService.updateHR(editData.id, editData);
@@ -225,13 +231,12 @@ const handleDelete = async (id: string) => {
       }
     />
 
-    <select
-      className="border rounded-lg px-3 py-2 text-sm"
-      value={form.status}
-      onChange={(e) =>
-        setForm({ ...form, status: e.target.value })
-      }
-    >
+   <select
+  value={form.status}
+  onChange={(e) =>
+    setForm({ ...form, status: e.target.value })
+  }
+>
       <option>Interview</option>
       <option>Selected</option>
       <option>Rejected</option>
@@ -339,7 +344,7 @@ const handleDelete = async (id: string) => {
               </tr>
             ) : (
               paginatedData.map((item) => (
-                <tr key={item.id} className="border-t">
+                <tr key={item.id} className="border-t hover:bg-blue-50 transition-all duration-200">
                   <td className="p-3">{item.name}</td>
                   <td className="p-3">{item.email}</td>
 
@@ -403,7 +408,7 @@ const handleDelete = async (id: string) => {
           {paginatedData.map((item) => (
             <div
               key={item.id}
-              className="border rounded-lg p-3 space-y-2"
+              className="border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-white space-y-2"
             >
               <p className="font-medium">{item.name}</p>
               <p className="text-sm text-gray-500">{item.email}</p>
