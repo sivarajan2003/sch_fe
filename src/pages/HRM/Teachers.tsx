@@ -27,10 +27,11 @@ export default function Teachers() {
 
 const loadTeachers = async () => {
   try {
-    const res = await getTeachers();
+   const res = await getTeachers();
 
-    setTeachers(res?.data || []);
+console.log("Teachers Response:", res);
 
+setTeachers(res.data || []);
   } catch (err) {
     console.log("TEACHER LOAD ERROR:", err);
   }
@@ -84,7 +85,7 @@ const loadTeachers = async () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-                  Teacher
+                  Name
                 </th>
 
                 <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">

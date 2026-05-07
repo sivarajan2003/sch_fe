@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import hrService from "../../service/hrService";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   Eye,        
@@ -33,6 +34,7 @@ const statusStyle = (status: string) => {
 };
 
 export default function HRCandidatesDashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -60,17 +62,17 @@ const [viewData, setViewData] = useState<any>(null);
   }, [currentPage, rowsPerPage, sortOrder, statusFilter]);
 
   const loadCandidates = async () => {
-    try {
-      setLoading(true);
-      const res = await hrService.getHR();
-      setData(res?.data || []);
-    } catch {
-      console.log("LOAD ERROR:", err);
-      toast.error("Failed to load candidates");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const res = await hrService.getHR();
+    setData(res?.data || []);
+  } catch (err) {
+    console.log("LOAD ERROR:", err);
+    toast.error("Failed to load candidates");
+  } finally {
+    setLoading(false);
+  }
+};
 
 const handleSubmit = async (e: any) => {
   e.preventDefault();
@@ -112,7 +114,6 @@ const handleSubmit = async (e: any) => {
 };
  const handleSelect = async (id: string) => {
   try {
-
     const res = await hrService.selectHR(id);
 
     console.log("SELECT RESPONSE:", res);
@@ -121,6 +122,7 @@ const handleSubmit = async (e: any) => {
 
     loadCandidates();
 
+    navigate("/admin/dashboard/hr/teachers");
   } catch (err) {
     console.log(err);
   }
@@ -242,10 +244,13 @@ const handleDelete = async (id: string) => {
       <option>Rejected</option>
     </select>
 
-    <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center justify-center gap-2">
-      <Plus size={14} />
-      Add Candidate
-    </button>
+    <button
+  type="submit"
+  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center justify-center gap-2"
+>
+  <Plus size={14} />
+  Add Candidate
+</button>
   </form>
 </div>
       {/* ================= SUB HEADER ================= */}
