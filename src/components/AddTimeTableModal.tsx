@@ -8,6 +8,8 @@ export type TimeTableItem = {
   subject: string;
   teacher: string;
   time: string;
+
+  periodType: string;
 };
 
 export default function AddTimeTableModal({
@@ -21,6 +23,7 @@ export default function AddTimeTableModal({
   const [date, setDate] = useState("");
   const [subject, setSubject] = useState("");
   const [teacher, setTeacher] = useState("");
+  const [periodType, setPeriodType] = useState("CLASS");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -31,12 +34,13 @@ export default function AddTimeTableModal({
     }
 
     onSave({
-      day,
-      date,
-      subject,
-      teacher,
-      time: `${from} - ${to}`,
-    });
+  day,
+  date,
+  subject,
+  teacher,
+  time: `${from} - ${to}`,
+  periodType,
+});
 
     onClose();
   };
@@ -68,7 +72,16 @@ export default function AddTimeTableModal({
               <option key={d}>{d}</option>
             ))}
           </select>
-
+          {/* PERIOD TYPE */}
+<select
+  value={periodType}
+  onChange={(e) => setPeriodType(e.target.value)}
+  className="w-full border rounded-lg px-3 py-2 text-sm"
+>
+  <option value="CLASS">Class Period</option>
+  <option value="BREAK">Break</option>
+  <option value="LUNCH">Lunch Break</option>
+</select>
           {/* DATE */}
           <input
             type="date"
@@ -79,19 +92,21 @@ export default function AddTimeTableModal({
 
           {/* SUBJECT */}
           <input
-            placeholder="Subject Name"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
+  disabled={periodType !== "CLASS"}
+  placeholder="Subject Name"
+  value={subject}
+  onChange={(e) => setSubject(e.target.value)}
+  className="w-full border rounded-lg px-3 py-2 text-sm"
+/>
 
           {/* TEACHER */}
-          <input
-            placeholder="Teacher Name"
-            value={teacher}
-            onChange={(e) => setTeacher(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
+        <input
+  disabled={periodType !== "CLASS"}
+  placeholder="Teacher Name"
+  value={teacher}
+  onChange={(e) => setTeacher(e.target.value)}
+  className="w-full border rounded-lg px-3 py-2 text-sm"
+/>
 
           {/* TIME */}
           <div className="grid grid-cols-2 gap-3">

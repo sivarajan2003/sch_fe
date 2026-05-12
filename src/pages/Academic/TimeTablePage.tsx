@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   RefreshCcw,
   Printer,
@@ -10,7 +10,7 @@ import {
 import AddTimeTableModal, {
   TimeTableItem,
 } from "../../components/AddTimeTableModal";
-
+import timetableService from "../../service/timetableService";
 
 /* ================= DATA ================= */
 
@@ -110,7 +110,21 @@ const handleExport = () => {
   link.click();
   document.body.removeChild(link);
 };
+useEffect(() => {
+  fetchTimeTables();
+}, []);
 
+const fetchTimeTables = async () => {
+  try {
+    const data =
+      await timetableService.getAllTimetables();
+
+    console.log(data);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
   // return (
   //   <div className="space-y-6">
 
@@ -323,15 +337,23 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
       {openAdd && (
   <AddTimeTableModal
     onClose={() => setOpenAdd(false)}
-    onSave={(newItem: TimeTableItem) => {
-      timetable[newItem.day].unshift({
-        time: newItem.time,
-        subject: newItem.subject,
-        teacher: newItem.teacher,
-        color: "bg-blue-50",
-      });
-      setOpenAdd(false);
-    }}
+    onSave={async (
+  newItem: TimeTableItem
+) => {
+  try {
+
+    await timetableService.createTimetable(
+      newItem
+    );
+
+    await fetchTimeTables();
+
+    setOpenAdd(false);
+
+  } catch (error) {
+    console.error(error);
+  }
+}}
   />
 )}
 

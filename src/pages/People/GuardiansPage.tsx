@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   RefreshCcw,
   Printer,
@@ -10,7 +10,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-
+import guardianService from "../../service/guardianService";
 import p1 from "../../assets/par/p1.png";
 import p2 from "../../assets/par/p2.png";
 import p3 from "../../assets/par/p3.png";
@@ -185,6 +185,7 @@ const guardians = [
 /* ================= PAGE ================= */
 
 export default function GuardianPage() {
+//const [guardians, setGuardians] = useState<any[]>([]);
   const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
@@ -192,7 +193,7 @@ export default function GuardianPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
   //const [view, setView] = useState<"grid" | "list">("grid");
   const [mode, setMode] = useState<"view" | "edit">("view");
-
+       
   const [openDate, setOpenDate] = useState(false);
   const [startDate, setStartDate] = useState("2020-05-15");
   const [endDate, setEndDate] = useState("2024-05-24");
@@ -204,7 +205,18 @@ export default function GuardianPage() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 const [deleteId, setDeleteId] = useState<string | null>(null);
 const [selectedGuardian, setSelectedGuardian] = useState<any>(null);
+const fetchGuardians = async () => {
+  try {
+    const res = await guardianService.getGuardians();
+    setGuardians(res.rows || []);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
+useEffect(() => {
+  fetchGuardians();
+}, []);
 const filteredGuardians = guardians.filter((g) => {
   if (filterBy === "ID") {
     return g.id.startsWith("G");
@@ -569,11 +581,13 @@ const downloadGuardianCSV = (guardian: any) => {
         </button>
 
         <button
-          onClick={() => {
-            // remove from list
-            alert(`Deleted ${deleteId}`);
-            setDeleteId(null);
-          }}
+          onClick={async () => {
+  await guardianService.deleteGuardian(deleteId);
+
+  fetchGuardians();
+
+  setDeleteId(null);
+}}
           className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg"
         >
           Delete
@@ -735,10 +749,16 @@ const downloadGuardianCSV = (guardian: any) => {
 
         {mode === "edit" && (
           <button
-            onClick={() => {
-              alert("Saved successfully");
-              setSelectedGuardian(null);
-            }}
+            onClick={async () => {
+  await guardianService.updateGuardian(
+    selectedGuardian.id,
+    selectedGuardian
+  );
+
+  fetchGuardians();
+
+  setSelectedGuardian(null);
+}}
             className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
           >
             Save

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import AddSubjectModal from "../../components/AddSubjectModal";
 import { useEffect } from "react";
-
+import subjectService from "../../service/subjectService";
 /* ================= DATA ================= */
 
 const INITIAL_DATA = [
@@ -31,7 +31,7 @@ export default function SubjectPage() {
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
  
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +46,21 @@ export default function SubjectPage() {
 const [openDate, setOpenDate] = useState(false);
 const [startDate, setStartDate] = useState("2020-05-15");
 const [endDate, setEndDate] = useState("2024-05-24");
+useEffect(() => {
+  fetchSubjects();
+}, []);
 
+const fetchSubjects = async () => {
+  try {
+    const res =
+      await subjectService.getSubjects();
+
+    setData(res.rows);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 useEffect(() => {
   const closeMenu = () => {
     setOpenDate(false); // keep this if you still use date dropdown
@@ -454,9 +468,21 @@ useEffect(() => {
       {openAdd && (
   <AddSubjectModal
     onClose={() => setOpenAdd(false)}
-    onAdd={(subject) =>
-      setData((prev) => [subject, ...prev])
-    }
+   onAdd={async (subject) => {
+  try {
+
+    await subjectService.createSubject(
+      subject
+    );
+
+    await fetchSubjects();
+
+    setOpenAdd(false);
+
+  } catch (error) {
+    console.error(error);
+  }
+}}
   />
 )}
 
@@ -490,12 +516,20 @@ useEffect(() => {
         </button>
 
         <button
-          onClick={() => {
-            setData((prev) =>
-              prev.filter((item) => item.id !== confirmDeleteId)
-            );
-            setConfirmDeleteId(null);
-          }}
+          onClick={async () => {
+  try {
+    await subjectService.deleteSubject(
+      confirmDeleteId
+    );
+
+    await fetchSubjects();
+
+    setConfirmDeleteId(null);
+
+  } catch (error) {
+    console.error(error);
+  }
+}}
           className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
         >
           Delete
@@ -615,16 +649,21 @@ useEffect(() => {
         </button>
 
         <button
-          onClick={() => {
-            setData((prev) =>
-              prev.map((item) =>
-                item.id === selectedSubject.id
-                  ? selectedSubject
-                  : item
-              )
-            );
-            setOpenEditSubject(false);
-          }}
+          onClick={async () => {
+  try {
+    await subjectService.updateSubject(
+      selectedSubject.id,
+      selectedSubject
+    );
+
+    await fetchSubjects();
+
+    setOpenEditSubject(false);
+
+  } catch (error) {
+    console.error(error);
+  }
+}}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
         >
           Update

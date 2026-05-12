@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import AddSubjectGroupModal from "../../components/AddSubjectGroupModal";
 import { useEffect } from "react";
-
+import syllabusService from "../../service/syllabusService";
 
 
 //import AddSyllabusGroupModal from "../../components/AddSyllabusGroupModal";
@@ -70,6 +70,28 @@ export default function SyllabusPage() {
       window.removeEventListener("click", handleClickOutside);
     };
   }, []);
+  useEffect(() => {
+  loadSyllabus();
+}, []);
+
+const loadSyllabus =
+  async () => {
+
+    try {
+
+      const res =
+        await syllabusService.getSyllabus();
+
+      setData(
+        res.data || []
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+};
   /* 🔄 REFRESH */
   const handleRefresh = () => {
     setData(INITIAL_DATA);
@@ -541,9 +563,14 @@ onClick={(e) => {
         {openAdd && (
   <AddSubjectGroupModal
     onClose={() => setOpenAdd(false)}
-    onAdd={(group) =>
-      setData((prev) => [group, ...prev])
-    }
+    onAdd={async (group) => {
+
+  await syllabusService
+    .createSyllabus(group);
+
+  loadSyllabus();
+
+}}
   />
 )}
 {deleteId !== null && (
@@ -569,14 +596,17 @@ onClick={(e) => {
         </button>
 
         <button
-          onClick={() => {
-            setData(prev => prev.filter(item => item.id !== deleteId));
-            setDeleteId(null);
-          }}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
-        >
-          Delete
-        </button>
+  onClick={async () => {
+    await syllabusService.deleteSyllabus(deleteId);
+
+    loadSyllabus();
+
+    setDeleteId(null);
+  }}
+  className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+>
+  Delete
+</button>   
       </div>
 
     </div>
