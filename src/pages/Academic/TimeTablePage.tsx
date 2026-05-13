@@ -336,25 +336,50 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
       </div>
       {openAdd && (
   <AddTimeTableModal
-    onClose={() => setOpenAdd(false)}
-    onSave={async (
-  newItem: TimeTableItem
-) => {
-  try {
-
-    await timetableService.createTimetable(
-      newItem
-    );
-
-    await fetchTimeTables();
-
-    setOpenAdd(false);
-
-  } catch (error) {
-    console.error(error);
+  onClose={() =>
+    setOpenAdd(false)
   }
-}}
-  />
+
+  onSave={async (
+    newItem
+  ) => {
+    try {
+
+      console.log(
+        "saving...",
+        newItem
+      );
+
+      const res =
+        await timetableService.createTimetable(
+          newItem
+        );
+
+      console.log(
+        "saved",
+        res
+      );
+
+      await fetchTimeTables();
+
+      setOpenAdd(false);
+
+      alert(
+        "Saved successfully"
+      );
+
+    } catch (error) {
+
+      console.log(
+        error.response?.data
+      );
+
+      alert(
+        "Save failed"
+      );
+    }
+  }}
+/>
 )}
 
     </div>

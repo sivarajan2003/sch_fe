@@ -3,15 +3,19 @@ import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 
 export type TimeTableItem = {
-  day: string;
-  date: string;
-  subject: string;
-  teacher: string;
-  time: string;
+  class_id: string;
+  subject_id: string;
+  academicyear_id: string;
+  teacher_id: string;
 
-  periodType: string;
+  day_of_week: string;
+  period_number: string;
+
+  start_time: string;
+  end_time: string;
+
+  period_type: string;
 };
-
 export default function AddTimeTableModal({
   onClose,
   onSave,
@@ -34,15 +38,21 @@ export default function AddTimeTableModal({
     }
 
     onSave({
-  day,
-  date,
-  subject,
-  teacher,
-  time: `${from} - ${to}`,
-  periodType,
+  class_id: "PUT_REAL_CLASS_UUID",
+  subject_id: "PUT_REAL_SUBJECT_UUID",
+  academicyear_id: "PUT_REAL_YEAR_UUID",
+  teacher_id: "PUT_REAL_TEACHER_UUID",
+
+  day_of_week: day,
+  period_number: "1st",
+
+  start_time: from,
+  end_time: to,
+
+  period_type: periodType,
 });
 
-    onClose();
+    //onClose();
   };
 
   return createPortal(
