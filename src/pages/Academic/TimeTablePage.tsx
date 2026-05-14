@@ -165,7 +165,7 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
 <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5 space-y-4">
 
   {/* TOP ROW */}
-  <div className="flex items-center justify-between">
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
     <div>
       <h2 className="text-2xl font-semibold">
         Time Table
@@ -176,7 +176,7 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
     </div>
 
     {/* ACTION BUTTONS */}
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-2">
 
       {/* REFRESH */}
       <button
@@ -216,13 +216,13 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
   </div>
 </div>
 {/* ================= SUB HEADER (CORRECT PLACE) ================= */}
-<div className="bg-white border rounded-xl px-5 py-4 flex items-center justify-between">
+<div className="bg-white border rounded-xl px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
 
 <h3 className="text-sm font-semibold text-gray-800">
   Time Table
 </h3>
 
-<div className="flex items-center gap-3">
+<div className="flex flex-wrap items-center gap-2">
 
   {/* CLASS DROPDOWN */}
   <div className="relative">
@@ -284,7 +284,7 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
 </div>
 
       {/* GRID */}
-      <div className="grid grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {days.map((day) => (
           <div key={day}>
             <h4 className="text-sm font-semibold mb-3">{day}</h4>
@@ -320,7 +320,7 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
       </div>
 
       {/* BREAKS */}
-      <div className="grid grid-cols-3 gap-4 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
         {[
           { title: "Morning Break", time: "10:30 to 10:45 AM", color: "bg-blue-50" },
           { title: "Lunch", time: "10:30 to 10:45 AM", color: "bg-yellow-50" },

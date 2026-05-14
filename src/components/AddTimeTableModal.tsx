@@ -1,3 +1,4 @@
+//addtimetablemodel.tsx
 import { useState } from "react";
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -7,6 +8,8 @@ export type TimeTableItem = {
   subject_id: string;
   academicyear_id: string;
   teacher_id: string;
+
+  date: string;
 
   day_of_week: string;
   period_number: string;
@@ -43,7 +46,8 @@ export default function AddTimeTableModal({
   academicyear_id: "PUT_REAL_YEAR_UUID",
   teacher_id: "PUT_REAL_TEACHER_UUID",
 
-  day_of_week: day,
+ date: date,
+day_of_week: day,
   period_number: "1st",
 
   start_time: from,
@@ -60,7 +64,7 @@ export default function AddTimeTableModal({
     className="fixed top-0 left-0 w-screen h-screen bg-black/60 backdrop-blur-sm flex items-center justify-center"
     style={{ zIndex: 999999 }}
   >
-   <div className="bg-white rounded-xl w-[520px] p-6 max-h-[90vh] overflow-auto">
+   <div className="bg-white rounded-xl w-[95%] sm:w-[520px] p-6 max-h-[90vh] overflow-auto">
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h3 className="text-lg font-semibold">Add Time Table</h3>
