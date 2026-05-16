@@ -40,14 +40,14 @@ export default function AddTimeTableModal({
       return;
     }
 
-    onSave({
-  class_id: "PUT_REAL_CLASS_UUID",
-  subject_id: "PUT_REAL_SUBJECT_UUID",
-  academicyear_id: "PUT_REAL_YEAR_UUID",
-  teacher_id: "PUT_REAL_TEACHER_UUID",
+   onSave({
+  class_id: "550e8400-e29b-41d4-a716-446655440000",
+  subject_id: "550e8400-e29b-41d4-a716-446655440001",
+  academicyear_id: "550e8400-e29b-41d4-a716-446655440002",
+  teacher_id: "550e8400-e29b-41d4-a716-446655440003",
 
- date: date,
-day_of_week: day,
+  date: date,
+  day_of_week: day,
   period_number: "1st",
 
   start_time: from,
@@ -55,7 +55,6 @@ day_of_week: day,
 
   period_type: periodType,
 });
-
     //onClose();
   };
 

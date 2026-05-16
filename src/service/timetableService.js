@@ -1,5 +1,3 @@
-//timetableservice.js
-
 import axios from "axios";
 import BASE_API from "../api/baseurl";
 import { getAccessToken } from "../utils/token";
@@ -31,72 +29,56 @@ api.interceptors.request.use(
    TIMETABLE APIs
 ---------------------------------------- */
 
-/**
- * GET ALL TIMETABLES
- * GET /timetable
- */
+// GET ALL
 export const getAllTimetables = async (params = {}) => {
-  const res = await api.get("/timetable", {
-    params,
-  });
+  const res = await api.get(
+    "/timetable",
+    { params }
+  );
 
   return res.data;
 };
 
-/**
- * GET TIMETABLE BY ID
- * GET /timetable/:id
- */
+// GET BY ID
 export const getTimetableById = async (id) => {
-  const res = await api.get(`/timetable/${id}`);
+  const res = await api.get(
+    `timetable/${id}`
+  );
 
   return res.data;
 };
 
-/**
- * CREATE TIMETABLE
- * POST /timetable
- */
+// CREATE
 export const createTimetable = async (payload) => {
   const res = await api.post(
-    "/timetable",
+    "/school/timetable",
     payload
   );
 
   return res.data;
 };
 
-/**
- * UPDATE TIMETABLE
- * PUT /timetable/:id
- */
+// UPDATE
 export const updateTimetable = async (
   id,
   payload
 ) => {
   const res = await api.put(
-    `/timetable/${id}`,
+    `/school/timetable/${id}`,
     payload
   );
 
   return res.data;
 };
 
-/**
- * DELETE TIMETABLE
- * DELETE /timetable/:id
- */
+// DELETE
 export const deleteTimetable = async (id) => {
   const res = await api.delete(
-    `/timetable/${id}`
+    `/school/timetable/${id}`
   );
 
   return res.data;
 };
-
-/* ----------------------------------------
-   EXPORT
----------------------------------------- */
 
 export default {
   getAllTimetables,
