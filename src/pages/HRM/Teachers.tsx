@@ -1,3 +1,4 @@
+//teachers.tsx
 import {
   Users,
   Search,
@@ -7,7 +8,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 //import hrTeacherService from "../../service/hrTeacherService";
-import { getTeachers } from "../../service/hrTeacherService";
+//import { getTeachers } from "../../service/hrTeacherService";
+import hrService from "../../service/hrService";
 type Teacher = {
   id: string;
   name: string;
@@ -27,11 +29,17 @@ export default function Teachers() {
 
 const loadTeachers = async () => {
   try {
-   const res = await getTeachers();
+    const res = await hrService.getHR();
 
-console.log("Teachers Response:", res);
+    console.log("HR Response:", res);
 
-setTeachers(res.data || []);
+    // Only selected candidates
+    const selectedTeachers = (res.data || []).filter(
+      (item: any) => item.status === "Selected"
+    );
+
+    setTeachers(selectedTeachers);
+
   } catch (err) {
     console.log("TEACHER LOAD ERROR:", err);
   }
