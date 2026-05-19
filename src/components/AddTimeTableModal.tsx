@@ -7,8 +7,7 @@ export type TimeTableItem = {
   class_id: string;
   subject_id: string;
   academicyear_id: string;
-  teacher_id: string;
-
+  teacher_id?: string;
   date: string;
 
   day_of_week: string;
@@ -35,7 +34,7 @@ export default function AddTimeTableModal({
   const [to, setTo] = useState("");
 
   const handleSave = () => {
-    if (!day || !date || !subject || !teacher || !from || !to) {
+    if (!day || !date || !from || !to) {
       alert("Please fill all fields");
       return;
     }
@@ -44,7 +43,7 @@ export default function AddTimeTableModal({
   class_id: "550e8400-e29b-41d4-a716-446655440000",
   subject_id: "550e8400-e29b-41d4-a716-446655440001",
   academicyear_id: "550e8400-e29b-41d4-a716-446655440002",
-  teacher_id: "550e8400-e29b-41d4-a716-446655440003",
+  //teacher_id: "550e8400-e29b-41d4-a716-446655440003",
 
   date: date,
   day_of_week: day,
