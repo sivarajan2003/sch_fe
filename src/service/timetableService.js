@@ -30,9 +30,10 @@ api.interceptors.request.use(
 ---------------------------------------- */
 
 // GET ALL
+// GET ALL
 export const getAllTimetables = async (params = {}) => {
   const res = await api.get(
-    "/timetable",
+    "/school/timetable",
     { params }
   );
 
@@ -42,7 +43,7 @@ export const getAllTimetables = async (params = {}) => {
 // GET BY ID
 export const getTimetableById = async (id) => {
   const res = await api.get(
-    `timetable/${id}`
+    `/school/timetable/${id}`
   );
 
   return res.data;
@@ -59,10 +60,7 @@ export const createTimetable = async (payload) => {
 };
 
 // UPDATE
-export const updateTimetable = async (
-  id,
-  payload
-) => {
+export const updateTimetable = async (id, payload) => {
   const res = await api.put(
     `/school/timetable/${id}`,
     payload
