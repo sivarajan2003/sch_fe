@@ -101,6 +101,7 @@ export default function Sidebar({
   );
   const [openManagement, setOpenManagement] = useState(false);
 const [openHRM, setOpenHRM] = useState(false);
+const [openHostelManagement, setOpenHostelManagement] = useState(false);
 
   //const [openManagement, setOpenManagement] = useState(true);
   const [openFees, setOpenFees] = useState(false);
@@ -1011,6 +1012,80 @@ onClick={() =>
               )}
             </>
           )} 
+          {/* ================= HOSTEL MANAGEMENT ================= */}
+
+{canAccess([
+  "admin",
+  "teacher",
+  "receptionist",
+  "Super Admin",
+  
+]) && (
+  <>
+    <SectionHeader
+      icon={Building}
+      label="Hostel Management"
+      collapsed={collapsed}
+      open={activeSection === "hostelmanagement"}
+      onClick={() =>
+        setActiveSection(
+          activeSection === "hostelmanagement"
+            ? null
+            : "hostelmanagement"
+        )
+      }
+    />
+
+    {!collapsed &&
+      activeSection === "hostelmanagement" && (
+        <div className="ml-4 mt-2 space-y-1">
+
+          <HRMItem
+            icon={Building}
+            label="Hostel Setup"
+            path="/admin/dashboard/hostel-management/setup"
+          />
+
+          <HRMItem
+            icon={DoorOpen}
+            label="Room Management"
+            path="/admin/dashboard/hostel-management/room-management"
+          />
+
+          <HRMItem
+            icon={Users}
+            label="Student Hostel Allocation"
+            path="/admin/dashboard/hostel-management/student-allocation"
+          />
+
+          <HRMItem
+            icon={Wallet}
+            label="Hostel Fee Management"
+            path="/admin/dashboard/hostel-management/fee-management"
+          />
+
+          <HRMItem
+            icon={CalendarCheck}
+            label="Attendance & Entry Tracking"
+            path="/admin/dashboard/hostel-management/attendance-entry"
+          />
+
+          <HRMItem
+            icon={ClipboardCheck}
+            label="Complaints & Maintenance"
+            path="/admin/dashboard/hostel-management/complaints-maintenance"
+          />
+
+          <HRMItem
+            icon={FileBarChart2}
+            label="Hostel Reports"
+            path="/admin/dashboard/hostel-management/reports"
+          />
+
+        </div>
+      )}
+  </>
+)}
         {canAccess(["admin", "teacher", "parent", "student"]) &&
           !isPureParentPortal &&
           !isAdmissionAdmin && (

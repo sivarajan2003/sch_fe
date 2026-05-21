@@ -101,7 +101,14 @@ import FeesReport from "./pages/Reports/FeesReport";
 import ExamResultsReport from "./pages/Reports/ExamResultsReport";
 import PayrollReport from "./pages/Reports/PayrollReport";
 import CustomReport from "./pages/Reports/CustomReport";
-
+//Hostel management 
+import HostelSetup from "./pages/HostelManagement/HostelSetup";
+import RoomManagement from "./pages/HostelManagement/RoomManagement";
+import StudentHostelAllocation from "./pages/HostelManagement/StudentHostelAllocation";
+import HostelFeeManagement from "./pages/HostelManagement/HostelFeeManagement";
+import AttendanceEntryTracking from "./pages/HostelManagement/AttendanceEntryTracking";
+import ComplaintsMaintenance from "./pages/HostelManagement/ComplaintsMaintenance";
+import HostelReports from "./pages/HostelManagement/HostelReports";
 //upevent
 
 // Auth
@@ -271,6 +278,43 @@ export default function App() {
           <Route path="management/sports" element={<Sports />} />
           <Route path="management/hostel" element={<Hostel />} />
           <Route path="management/transport" element={<Transport />} />
+            {/* Hostel*/}
+          
+
+<Route
+  path="hostel-management/setup"
+  element={<HostelSetup />}
+/>
+
+<Route
+  path="hostel-management/room-management"
+  element={<RoomManagement />}
+/>
+
+<Route
+  path="hostel-management/student-allocation"
+  element={<StudentHostelAllocation />}
+/>
+
+<Route
+  path="hostel-management/fee-management"
+  element={<HostelFeeManagement />}
+/>
+
+<Route
+  path="hostel-management/attendance-entry"
+  element={<AttendanceEntryTracking />}
+/>
+
+<Route
+  path="hostel-management/complaints-maintenance"
+  element={<ComplaintsMaintenance />}
+/>
+
+<Route
+  path="hostel-management/reports"
+  element={<HostelReports />}
+/>
         </Route>
 
 
