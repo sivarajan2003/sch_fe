@@ -1,4 +1,6 @@
+//hostelsetup.tsx
 import { useState } from "react";
+import { useEffect } from "react";
 import {
   Building,
   BedDouble,
@@ -12,39 +14,45 @@ import {
   Printer,
   ArrowUpDown,
 } from "lucide-react";
-
-const INITIAL_DATA = [
-  {
-    id: "HS1001",
-    name: "Boys Hostel A",
-    type: "Boys",
-    rooms: 40,
-    capacity: 160,
-    warden: "Mr. Kumar",
-    status: "Active",
-  },
-  {
-    id: "HS1002",
-    name: "Girls Hostel B",
-    type: "Girls",
-    rooms: 35,
-    capacity: 140,
-    warden: "Mrs. Priya",
-    status: "Active",
-  },
-  {
-    id: "HS1003",
-    name: "Staff Hostel",
-    type: "Staff",
-    rooms: 20,
-    capacity: 60,
-    warden: "Mr. Raj",
-    status: "Active",
-  },
-];
+import {
+  createHostel,
+  getHostels,
+  updateHostel,
+  deleteHostel,
+} from "../../service/hostelService";
+// const INITIAL_DATA = [
+//   {
+//     id: "HS1001",
+//     name: "Boys Hostel A",
+//     type: "Boys",
+//     rooms: 40,
+//     capacity: 160,
+//     warden: "Mr. Kumar",
+//     status: "Active",
+//   },
+//   {
+//     id: "HS1002",
+//     name: "Girls Hostel B",
+//     type: "Girls",
+//     rooms: 35,
+//     capacity: 140,
+//     warden: "Mrs. Priya",
+//     status: "Active",
+//   },
+//   {
+//     id: "HS1003",
+//     name: "Staff Hostel",
+//     type: "Staff",
+//     rooms: 20,
+//     capacity: 60,
+//     warden: "Mr. Raj",
+//     status: "Active",
+//   },
+// ];
 
 export default function HostelSetup() {
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [allData, setAllData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -66,16 +74,16 @@ const [newHostel, setNewHostel] = useState({
 });
   /* SEARCH */
   const filtered = data.filter(
-    (d) =>
+  (d: any) =>
       d.name.toLowerCase().includes(search.toLowerCase()) ||
       d.id.toLowerCase().includes(search.toLowerCase())
   );
 
   /* REFRESH */
-  const handleRefresh = () => {
-    setData(INITIAL_DATA);
-    setSearch("");
-  };
+  const handleRefresh = async () => {
+  await fetchHostels();
+  setSearch("");
+};
 
   /* EXPORT */
   const handleExport = () => {
@@ -98,7 +106,7 @@ const [newHostel, setNewHostel] = useState({
 
   /* SORT */
   const handleSort = () => {
-    setData((prev) =>
+    setData((prev: any) =>
       [...prev].sort((a, b) =>
         sortAsc
           ? a.name.localeCompare(b.name)
@@ -111,11 +119,23 @@ const [newHostel, setNewHostel] = useState({
 
   /* FILTER */
   const handleFilter = () => {
-    setData(
-      INITIAL_DATA.filter((d) => d.status === "Active")
-    );
-  };
+  setData(
+    allData.filter((d: any) => d.status === "Active")
+  );
+};
+useEffect(() => {
+  fetchHostels();
+}, []);
 
+const fetchHostels = async () => {
+  try {
+    const res = await getHostels();
+    setData(res.rows || []);
+setAllData(res.rows || []);
+  } catch (err) {
+    console.log(err);
+  }
+};
   return (
     <div className="space-y-6">
 
@@ -266,7 +286,7 @@ const [newHostel, setNewHostel] = useState({
       <button
         onClick={() => {
           setSelectedFilter("All");
-          setData(INITIAL_DATA);
+          setData(allData);
           setOpenFilter(false);
         }}
         className="w-full text-left px-4 py-3 hover:bg-gray-50 text-sm"
@@ -278,8 +298,8 @@ const [newHostel, setNewHostel] = useState({
         onClick={() => {
           setSelectedFilter("Boys");
           setData(
-            INITIAL_DATA.filter((d) => d.type === "Boys")
-          );
+  allData.filter((d: any) => d.type === "Boys")
+);
           setOpenFilter(false);
         }}
         className="w-full text-left px-4 py-3 hover:bg-gray-50 text-sm"
@@ -291,8 +311,8 @@ const [newHostel, setNewHostel] = useState({
         onClick={() => {
           setSelectedFilter("Girls");
           setData(
-            INITIAL_DATA.filter((d) => d.type === "Girls")
-          );
+  allData.filter((d: any) => d.type === "Girls")
+);
           setOpenFilter(false);
         }}
         className="w-full text-left px-4 py-3 hover:bg-gray-50 text-sm"
@@ -304,8 +324,8 @@ const [newHostel, setNewHostel] = useState({
         onClick={() => {
           setSelectedFilter("Staff");
           setData(
-            INITIAL_DATA.filter((d) => d.type === "Staff")
-          );
+  allData.filter((d: any) => d.type === "Staff")
+);
           setOpenFilter(false);
         }}
         className="w-full text-left px-4 py-3 hover:bg-gray-50 text-sm"
@@ -315,9 +335,9 @@ const [newHostel, setNewHostel] = useState({
 
       <button
         onClick={() => {
-          setData(
-            INITIAL_DATA.filter((d) => d.status === "Active")
-          );
+         setData(
+  allData.filter((d: any) => d.status === "Active")
+);
           setOpenFilter(false);
         }}
         className="w-full text-left px-4 py-3 hover:bg-gray-50 text-sm"
@@ -702,17 +722,20 @@ const [newHostel, setNewHostel] = useState({
               </button>
 
               <button
-                onClick={() => {
-                  setData((prev) =>
-                    prev.map((item) =>
-                      item.id === selectedHostel.id
-                        ? selectedHostel
-                        : item
-                    )
-                  );
+                onClick={async () => {
+  try {
+    await updateHostel(
+      selectedHostel.id,
+      selectedHostel
+    );
 
-                  setOpenEdit(false);
-                }}
+    await fetchHostels();
+
+    setOpenEdit(false);
+  } catch (err) {
+    console.log(err);
+  }
+}}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
               >
                 Save
@@ -834,29 +857,26 @@ const [newHostel, setNewHostel] = useState({
         </button>
 
         <button
-          onClick={() => {
+          onClick={async () => {
+  try {
+    await createHostel(newHostel);
 
-            const newItem = {
-  ...newHostel,
-  id: `HS${Math.floor(1000 + Math.random() * 9000)}`,
-};
+    await fetchHostels();
 
-            setData((prev: any) => [
-              ...prev,
-              newItem,
-            ]);
+    setOpenAdd(false);
 
-            setOpenAdd(false);
-
-            setNewHostel({
-  name: "",
-  type: "Boys",
-  rooms: 0,
-  capacity: 0,
-  warden: "",
-  status: "Active",
-});
-          }}
+    setNewHostel({
+      name: "",
+      type: "Boys",
+      rooms: 0,
+      capacity: 0,
+      warden: "",
+      status: "Active",
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
         >
           Save
@@ -891,15 +911,17 @@ const [newHostel, setNewHostel] = useState({
               </button>
 
               <button
-                onClick={() => {
-                  setData((prev) =>
-                    prev.filter(
-                      (item) => item.id !== confirmDeleteId
-                    )
-                  );
+                onClick={async () => {
+  try {
+    await deleteHostel(confirmDeleteId);
 
-                  setConfirmDeleteId(null);
-                }}
+    await fetchHostels();
+
+    setConfirmDeleteId(null);
+  } catch (err) {
+    console.log(err);
+  }
+}}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
               >
                 Delete

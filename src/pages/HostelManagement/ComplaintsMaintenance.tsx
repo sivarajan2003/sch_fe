@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Wrench,
   Clock3,
@@ -16,8 +16,14 @@ import {
 
 export default function ComplaintsMaintenance() {
   const [search, setSearch] = useState("");
+const [showModal, setShowModal] = useState(false);
 
-  const complaintData = [
+const [viewData, setViewData] = useState<any>(null);
+
+const [filterStatus, setFilterStatus] = useState("");
+
+const [sortOrder, setSortOrder] = useState("asc");
+  const defaultComplaintData = [
     {
       id: "CMP-1001",
       student: "Siva Kumar",
@@ -58,13 +64,76 @@ export default function ComplaintsMaintenance() {
       color: "orange",
     },
   ];
+const [complaintData, setComplaintData] =
+  useState<any[]>(() => {
+    const saved = localStorage.getItem("complaintData");
 
-  const filtered = complaintData.filter(
+    return saved
+      ? JSON.parse(saved)
+      : defaultComplaintData;
+  });
+  const filtered = complaintData
+  .filter(
     (d) =>
-      d.student.toLowerCase().includes(search.toLowerCase()) ||
-      d.regNo.toLowerCase().includes(search.toLowerCase())
+      d.student
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      d.regNo
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  )
+  .filter((d) =>
+    filterStatus
+      ? d.status === filterStatus
+      : true
+  )
+  .sort((a, b) =>
+    sortOrder === "asc"
+      ? a.student.localeCompare(b.student)
+      : b.student.localeCompare(a.student)
   );
+useEffect(() => {
+  localStorage.setItem(
+    "complaintData",
+    JSON.stringify(complaintData)
+  );
+}, [complaintData]);
+const [formData, setFormData] = useState({
+  student: "",
+  hostel: "",
+  room: "",
+  issue: "",
+  priority: "",
+  date: "",
+});
+const handleSave = () => {
+  const newComplaint = {
+    id: `CMP-${Date.now()}`,
+    initial: formData.student
+      .substring(0, 2)
+      .toUpperCase(),
+    regNo: "AUTO",
+    status: "Pending",
+    color: "blue",
+    ...formData,
+  };
 
+  setComplaintData([
+    ...complaintData,
+    newComplaint,
+  ]);
+
+  setFormData({
+    student: "",
+    hostel: "",
+    room: "",
+    issue: "",
+    priority: "",
+    date: "",
+  });
+
+  setShowModal(false);
+};
   return (
     <div className="space-y-6">
 
@@ -97,7 +166,11 @@ export default function ComplaintsMaintenance() {
               Export
             </button>
 
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm">
+<button
+  onClick={() => setShowModal(true)}
+  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm"
+>
+
               <Plus size={16} />
               Add Complaint
             </button>
@@ -210,15 +283,29 @@ export default function ComplaintsMaintenance() {
 
           <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
 
-            <button className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm">
-              <Filter size={14} />
-              Filter
-            </button>
+<select
+  value={filterStatus}
+  onChange={(e) =>
+    setFilterStatus(e.target.value)
+  }
+  className="px-3 py-2 border rounded-lg text-sm"
+>
+  <option value="">All Status</option>
+  <option value="Pending">Pending</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Resolved">Resolved</option>
+</select>
 
-            <button className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm">
-              <ArrowUpDown size={14} />
-              Sort By
-            </button>
+            <select
+  value={sortOrder}
+  onChange={(e) =>
+    setSortOrder(e.target.value)
+  }
+  className="px-3 py-2 border rounded-lg text-sm"
+>
+  <option value="asc">A-Z</option>
+  <option value="desc">Z-A</option>
+</select>
 
           </div>
         </div>
@@ -367,7 +454,10 @@ export default function ComplaintsMaintenance() {
 
                   <div className="flex items-center justify-center gap-3">
 
-                    <button className="text-blue-600 hover:text-blue-800">
+                    <button
+  onClick={() => setViewData(d)}
+  className="text-blue-600 hover:text-blue-800"
+>
                       <Eye size={18} />
                     </button>
 
@@ -385,6 +475,188 @@ export default function ComplaintsMaintenance() {
           </tbody>
         </table>
       </div>
+      {/* ADD COMPLAINT MODAL */}
+
+{showModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+    <div className="bg-white rounded-2xl w-full max-w-3xl p-6">
+
+      <div className="flex justify-between items-center mb-5">
+
+        <h2 className="text-xl font-semibold">
+          Add Complaint
+        </h2>
+
+        <button
+          onClick={() => setShowModal(false)}
+          className="text-xl"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <input
+          placeholder="Student"
+          value={formData.student}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              student: e.target.value,
+            })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          placeholder="Hostel"
+          value={formData.hostel}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              hostel: e.target.value,
+            })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          placeholder="Room"
+          value={formData.room}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              room: e.target.value,
+            })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          placeholder="Issue Type"
+          value={formData.issue}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              issue: e.target.value,
+            })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <select
+          value={formData.priority}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              priority: e.target.value,
+            })
+          }
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="">Select Priority</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+
+        <input
+          type="date"
+          value={formData.date}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              date: e.target.value,
+            })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={() => setShowModal(false)}
+          className="px-4 py-2 border rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+{/* VIEW MODAL */}
+
+{viewData && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+    <div className="bg-white rounded-2xl w-full max-w-2xl p-6">
+
+      <div className="flex justify-between items-center mb-5">
+
+        <h2 className="text-xl font-semibold">
+          Complaint Details
+        </h2>
+
+        <button
+          onClick={() => setViewData(null)}
+          className="text-xl"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+
+        <div>
+          <p className="text-gray-500">Student</p>
+          <h3>{viewData.student}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Hostel</p>
+          <h3>{viewData.hostel}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Room</p>
+          <h3>{viewData.room}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Issue</p>
+          <h3>{viewData.issue}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Priority</p>
+          <h3>{viewData.priority}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Date</p>
+          <h3>{viewData.date}</h3>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

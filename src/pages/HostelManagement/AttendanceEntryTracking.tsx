@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CalendarCheck,
   ScanLine,
@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 
 export default function AttendanceEntryTracking() {
-  const [search, setSearch] = useState("");
 
   const attendanceData = [
     {
@@ -31,42 +30,67 @@ export default function AttendanceEntryTracking() {
       color: "blue",
       year: "Final Year",
     },
-    {
-      id: "AT1002",
-      student: "Priya R",
-      initial: "PR",
-      regNo: "22ISR112",
-      hostel: "Girls Hostel B",
-      room: "G-204",
-      checkIn: "08:00 AM",
-      checkOut: "06:30 PM",
-      status: "Outside",
-      entryType: "Check Out",
-      color: "pink",
-      year: "III Year",
-    },
-    {
-      id: "AT1003",
-      student: "Arun Raj",
-      initial: "AR",
-      regNo: "20ISR087",
-      hostel: "Boys Hostel A",
-      room: "A-305",
-      checkIn: "10:45 PM",
-      checkOut: "-",
-      status: "Late Entry",
-      entryType: "Late Check In",
-      color: "orange",
-      year: "II Year",
-    },
   ];
 
-  const filtered = attendanceData.filter(
+  const [search, setSearch] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [attendanceList, setAttendanceList] = useState<any[]>(() => {
+  const savedData = localStorage.getItem("attendanceData");
+
+  return savedData
+    ? JSON.parse(savedData)
+    : attendanceData;
+});
+
+const [viewData, setViewData] = useState<any>(null);
+
+  const [formData, setFormData] = useState({
+    student: "",
+    regNo: "",
+    hostel: "",
+    room: "",
+    checkIn: "",
+    checkOut: "",
+    status: "",
+    entryType: "",
+  });
+  const filtered = attendanceList.filter(
     (d) =>
       d.student.toLowerCase().includes(search.toLowerCase()) ||
       d.regNo.toLowerCase().includes(search.toLowerCase())
   );
+const handleSave = () => {
+  const newData = {
+    id: `AT${Date.now()}`,
+    initial: formData.student.substring(0, 2).toUpperCase(),
+    year: "Hosteller",
+    color: "blue",
+    ...formData,
+  };
 
+  setAttendanceList([...attendanceList, newData]);
+
+  setFormData({
+    student: "",
+    regNo: "",
+    hostel: "",
+    room: "",
+    checkIn: "",
+    checkOut: "",
+    status: "",
+    entryType: "",
+  });
+
+  setShowModal(false);
+};
+useEffect(() => {
+  localStorage.setItem(
+    "attendanceData",
+    JSON.stringify(attendanceList)
+  );
+}, [attendanceList]);
   return (
     <div className="space-y-6">
 
@@ -99,8 +123,11 @@ export default function AttendanceEntryTracking() {
               Export
             </button>
 
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm">
-              <Plus size={16} />
+<button
+  onClick={() => setShowModal(true)}
+  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm"
+>
+                <Plus size={16} />
               Mark Attendance
             </button>
 
@@ -365,7 +392,10 @@ export default function AttendanceEntryTracking() {
 
                   <div className="flex items-center justify-center gap-3">
 
-                    <button className="text-blue-600 hover:text-blue-800">
+                    <button
+  onClick={() => setViewData(d)}
+  className="text-blue-600 hover:text-blue-800"
+>
                       <Eye size={18} />
                     </button>
 
@@ -379,6 +409,198 @@ export default function AttendanceEntryTracking() {
           </tbody>
         </table>
       </div>
+      {/* ================= MODAL ================= */}
+
+{showModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+    <div className="bg-white rounded-2xl w-full max-w-3xl p-6">
+
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-xl font-semibold">
+          Mark Attendance
+        </h2>
+
+        <button
+          onClick={() => setShowModal(false)}
+          className="text-gray-500 text-xl"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <input
+          placeholder="Student Name"
+          value={formData.student}
+          onChange={(e) =>
+            setFormData({ ...formData, student: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          placeholder="Register No"
+          value={formData.regNo}
+          onChange={(e) =>
+            setFormData({ ...formData, regNo: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          placeholder="Hostel"
+          value={formData.hostel}
+          onChange={(e) =>
+            setFormData({ ...formData, hostel: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          placeholder="Room No"
+          value={formData.room}
+          onChange={(e) =>
+            setFormData({ ...formData, room: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          type="time"
+          value={formData.checkIn}
+          onChange={(e) =>
+            setFormData({ ...formData, checkIn: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <input
+          type="time"
+          value={formData.checkOut}
+          onChange={(e) =>
+            setFormData({ ...formData, checkOut: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        />
+
+        <select
+          value={formData.status}
+          onChange={(e) =>
+            setFormData({ ...formData, status: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="">Select Status</option>
+          <option value="Present">Present</option>
+          <option value="Outside">Outside</option>
+          <option value="Late Entry">Late Entry</option>
+        </select>
+
+        <select
+          value={formData.entryType}
+          onChange={(e) =>
+            setFormData({ ...formData, entryType: e.target.value })
+          }
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="">Select Entry Type</option>
+          <option value="Check In">Check In</option>
+          <option value="Check Out">Check Out</option>
+          <option value="Late Check In">Late Check In</option>
+        </select>
+
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={() => setShowModal(false)}
+          className="px-4 py-2 border rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Save
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+{/* VIEW MODAL */}
+
+{viewData && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+    <div className="bg-white rounded-2xl w-full max-w-2xl p-6">
+
+      <div className="flex justify-between items-center mb-5">
+
+        <h2 className="text-xl font-semibold">
+          Student Details
+        </h2>
+
+        <button
+          onClick={() => setViewData(null)}
+          className="text-xl"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+
+        <div>
+          <p className="text-gray-500">Student</p>
+          <h3>{viewData.student}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Register No</p>
+          <h3>{viewData.regNo}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Hostel</p>
+          <h3>{viewData.hostel}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Room</p>
+          <h3>{viewData.room}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Check In</p>
+          <h3>{viewData.checkIn}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Check Out</p>
+          <h3>{viewData.checkOut}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Status</p>
+          <h3>{viewData.status}</h3>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Entry Type</p>
+          <h3>{viewData.entryType}</h3>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
