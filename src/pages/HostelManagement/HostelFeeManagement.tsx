@@ -1,4 +1,5 @@
-import { useState } from "react";
+//hostelfeemanagement.tsx
+import { useState, useEffect } from "react";
 import {
   IndianRupee,
   Users,
@@ -14,64 +15,176 @@ import {
   CheckCircle,
   Clock3,
 } from "lucide-react";
-
+import {
+  getFees,
+  createFee,
+  updateFee,
+  deleteFee,
+} from '../../service/hostelfeemanagementService';
 export default function HostelFeeManagement() {
   const [search, setSearch] = useState("");
+  const [feeData, setFeeData] =
+  useState<any[]>([]);
 
-  const feeData = [
-    {
-      id: "HF1001",
-      student: "Siva Kumar",
-      initial: "SK",
-      regNo: "21ISR049",
-      hostel: "Boys Hostel A",
-      room: "A-101",
-      total: "₹45,000",
-      paid: "₹45,000",
-      balance: "₹0",
-      dueDate: "12 Jun 2026",
-      status: "Paid",
-      color: "blue",
-      year: "Final Year",
-    },
-    {
-      id: "HF1002",
-      student: "Priya R",
-      initial: "PR",
-      regNo: "22ISR112",
-      hostel: "Girls Hostel B",
-      room: "G-204",
-      total: "₹40,000",
-      paid: "₹25,000",
-      balance: "₹15,000",
-      dueDate: "25 Jun 2026",
-      status: "Partial",
-      color: "pink",
-      year: "III Year",
-    },
-    {
-      id: "HF1003",
-      student: "Arun Raj",
-      initial: "AR",
-      regNo: "20ISR087",
-      hostel: "Boys Hostel A",
-      room: "A-305",
-      total: "₹42,000",
-      paid: "₹0",
-      balance: "₹42,000",
-      dueDate: "10 Jun 2026",
-      status: "Overdue",
-      color: "orange",
-      year: "II Year",
-    },
-  ];
+  // const feeData = [
+  //   {
+  //     id: "HF1001",
+  //     student: "Siva Kumar",
+  //     initial: "SK",
+  //     regNo: "21ISR049",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-101",
+  //     total: "₹45,000",
+  //     paid: "₹45,000",
+  //     balance: "₹0",
+  //     dueDate: "12 Jun 2026",
+  //     status: "Paid",
+  //     color: "blue",
+  //     year: "Final Year",
+  //   },
+  //   {
+  //     id: "HF1002",
+  //     student: "Priya R",
+  //     initial: "PR",
+  //     regNo: "22ISR112",
+  //     hostel: "Girls Hostel B",
+  //     room: "G-204",
+  //     total: "₹40,000",
+  //     paid: "₹25,000",
+  //     balance: "₹15,000",
+  //     dueDate: "25 Jun 2026",
+  //     status: "Partial",
+  //     color: "pink",
+  //     year: "III Year",
+  //   },
+  //   {
+  //     id: "HF1003",
+  //     student: "Arun Raj",
+  //     initial: "AR",
+  //     regNo: "20ISR087",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-305",
+  //     total: "₹42,000",
+  //     paid: "₹0",
+  //     balance: "₹42,000",
+  //     dueDate: "10 Jun 2026",
+  //     status: "Overdue",
+  //     color: "orange",
+  //     year: "II Year",
+  //   },
+  // ];
+ 
 
-  const filtered = feeData.filter(
+
+const filtered = feeData
+  .filter(
     (d) =>
-      d.student.toLowerCase().includes(search.toLowerCase()) ||
-      d.regNo.toLowerCase().includes(search.toLowerCase())
-  );
+      d.student
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
+      d.regNo
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+  )
 
+  .filter((d) =>
+    filterStatus
+      ? d.status === filterStatus
+      : true
+  )
+
+  .sort((a, b) =>
+    sortOrder === "asc"
+      ? (a.student || "").localeCompare(
+          b.student || ""
+        )
+      : (b.student || "").localeCompare(
+          a.student || ""
+        )
+  );
+  const [showModal, setShowModal] =
+  useState(false);
+
+const [filterStatus, setFilterStatus] =
+  useState("");
+
+const [sortOrder, setSortOrder] =
+  useState("asc");
+
+const [viewData, setViewData] =
+  useState<any>(null);
+
+const [formData, setFormData] =
+  useState({
+    student: "",
+    regNo: "",
+    hostel: "",
+    room: "",
+    total: "",
+    paid: "",
+    balance: "",
+    dueDate: "",
+    status: "Paid",
+    year: "",
+  });
+useEffect(() => {
+  fetchFees();
+}, []);
+
+const fetchFees = async () => {
+
+  try {
+
+    const res = await getFees();
+
+    setFeeData(res.data.data);
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+};
+const handleSave = async () => {
+
+  try {
+
+    const payload = {
+      ...formData,
+      total: Number(formData.total),
+      paid: Number(formData.paid),
+      balance: Number(formData.balance),
+    };
+
+    const res =
+      await createFee(payload);
+
+    setFeeData([
+      res.data.data,
+      ...feeData,
+    ]);
+
+    setFormData({
+      student: "",
+      regNo: "",
+      hostel: "",
+      room: "",
+      total: "",
+      paid: "",
+      balance: "",
+      dueDate: "",
+      status: "Paid",
+      year: "",
+    });
+
+    setShowModal(false);
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+};
   return (
     <div className="space-y-6">
 
@@ -92,7 +205,10 @@ export default function HostelFeeManagement() {
 
           <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
 
-            <button className="p-2.5 border rounded-lg">
+            <button
+  onClick={fetchFees}
+  className="p-2.5 border rounded-lg"
+>
               <RefreshCcw size={16} />
             </button>
 
@@ -100,11 +216,22 @@ export default function HostelFeeManagement() {
               <Printer size={16} />
             </button>
 
-            <button className="px-4 py-2 border rounded-lg text-sm">
+            <button
+  onClick={() =>
+    window.print()
+  }
+  className="px-4 py-2 border rounded-lg text-sm"
+>
               Export
             </button>
 
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm">
+<button
+  onClick={() =>
+    setShowModal(true)
+  }
+  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm"
+>
+
               <Plus size={16} />
               Add Fee
             </button>
@@ -126,7 +253,12 @@ export default function HostelFeeManagement() {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-green-600">
-                ₹12.5L
+                ₹{
+  feeData.reduce(
+    (a, b) => a + b.paid,
+    0
+  )
+}
               </h3>
             </div>
 
@@ -147,7 +279,12 @@ export default function HostelFeeManagement() {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-blue-600">
-                420
+               {
+  feeData.filter(
+    (d) =>
+      d.status === "Paid"
+  ).length
+}
               </h3>
             </div>
 
@@ -168,7 +305,12 @@ export default function HostelFeeManagement() {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-orange-600">
-                85
+               {
+  feeData.filter(
+    (d) =>
+      d.status === "Partial"
+  ).length
+}
               </h3>
             </div>
 
@@ -189,7 +331,12 @@ export default function HostelFeeManagement() {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-red-600">
-                24
+                {
+  feeData.filter(
+    (d) =>
+      d.status === "Overdue"
+  ).length
+}
               </h3>
             </div>
 
@@ -213,15 +360,45 @@ export default function HostelFeeManagement() {
 
           <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
 
-            <button className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm">
-              <Filter size={14} />
-              Filter
-            </button>
+            <select
+  value={filterStatus}
+  onChange={(e) =>
+    setFilterStatus(e.target.value)
+  }
+  className="px-3 py-2 border rounded-lg text-sm"
+>
+  <option value="">
+    All Status
+  </option>
 
-            <button className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm">
-              <ArrowUpDown size={14} />
-              Sort By
-            </button>
+  <option value="Paid">
+    Paid
+  </option>
+
+  <option value="Partial">
+    Partial
+  </option>
+
+  <option value="Overdue">
+    Overdue
+  </option>
+</select>
+
+           <select
+  value={sortOrder}
+  onChange={(e) =>
+    setSortOrder(e.target.value)
+  }
+  className="px-3 py-2 border rounded-lg text-sm"
+>
+  <option value="asc">
+    A-Z
+  </option>
+
+  <option value="desc">
+    Z-A
+  </option>
+</select>
 
           </div>
         </div>
@@ -272,7 +449,22 @@ export default function HostelFeeManagement() {
 
           <tbody>
 
-            {filtered.map((d) => (
+            {filtered.length === 0 ? (
+
+<tr>
+
+  <td
+    colSpan={10}
+    className="text-center py-10 text-gray-500"
+  >
+    No Data Found
+  </td>
+
+</tr>
+
+) : (
+
+filtered.map((d) => (
               <tr
                 key={d.id}
                 className="border-t hover:bg-gray-50"
@@ -358,7 +550,12 @@ export default function HostelFeeManagement() {
 
                   <div className="flex items-center justify-center gap-3">
 
-                    <button className="text-blue-600 hover:text-blue-800">
+                   <button
+  onClick={() =>
+    setViewData(d)
+  }
+  className="text-blue-600 hover:text-blue-800"
+>
                       <Eye size={18} />
                     </button>
 
@@ -371,11 +568,321 @@ export default function HostelFeeManagement() {
                 </td>
 
               </tr>
-            ))}
+         ))
+
+)}
 
           </tbody>
         </table>
       </div>
+      {/* ADD FEE MODAL */}
+
+{showModal && (
+
+<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+  <div className="bg-white rounded-2xl w-full max-w-4xl p-6">
+
+    <div className="flex justify-between items-center mb-5">
+
+      <h2 className="text-xl font-semibold">
+        Add Fee
+      </h2>
+
+      <button
+        onClick={() =>
+          setShowModal(false)
+        }
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <input
+        placeholder="Student"
+        value={formData.student}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            student:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        placeholder="Register No"
+        value={formData.regNo}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            regNo:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        placeholder="Hostel"
+        value={formData.hostel}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            hostel:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        placeholder="Room"
+        value={formData.room}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            room:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        placeholder="Total Fee"
+        value={formData.total}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            total:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        placeholder="Paid"
+        value={formData.paid}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            paid:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        placeholder="Balance"
+        value={formData.balance}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            balance:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        type="date"
+        value={formData.dueDate}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            dueDate:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <select
+        value={formData.status}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            status:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      >
+        <option value="Paid">
+          Paid
+        </option>
+
+        <option value="Partial">
+          Partial
+        </option>
+
+        <option value="Overdue">
+          Overdue
+        </option>
+      </select>
+
+      <input
+        placeholder="Year"
+        value={formData.year}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            year:
+              e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+    </div>
+
+    <div className="flex justify-end gap-3 mt-6">
+
+      <button
+        onClick={() =>
+          setShowModal(false)
+        }
+        className="px-4 py-2 border rounded-lg"
+      >
+        Cancel
+      </button>
+
+      <button
+        onClick={handleSave}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+      >
+        Save
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
+{/* VIEW MODAL */}
+
+{viewData && (
+
+<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+  <div className="bg-white rounded-2xl w-full max-w-2xl p-6">
+
+    <div className="flex justify-between items-center mb-5">
+
+      <h2 className="text-xl font-semibold">
+        Fee Details
+      </h2>
+
+      <button
+        onClick={() =>
+          setViewData(null)
+        }
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div className="grid grid-cols-2 gap-4">
+
+      <div>
+        <p className="text-gray-500">
+          Student
+        </p>
+
+        <h3>
+          {viewData?.student}
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Register No
+        </p>
+
+        <h3>
+          {viewData?.regNo}
+
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Hostel
+        </p>
+
+        <h3>
+          {viewData?.hostel}
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Room
+        </p>
+
+        <h3>
+         {viewData?.room}
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Total
+        </p>
+
+        <h3>
+          ₹{viewData?.total}
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Paid
+        </p>
+
+        <h3>
+          ₹{viewData?.paid}
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Balance
+        </p>
+
+        <h3>
+          ₹{viewData?.balance}
+        </h3>
+      </div>
+
+      <div>
+        <p className="text-gray-500">
+          Due Date
+        </p>
+
+        <h3>
+          {viewData?.dueDate}
+        </h3>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
     </div>
   );
 }

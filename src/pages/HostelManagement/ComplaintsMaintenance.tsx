@@ -13,73 +13,77 @@ import {
   Printer,
   ArrowUpDown,
 } from "lucide-react";
-
+import {
+  getComplaints,
+  createComplaint,
+  updateComplaint,
+  deleteComplaint,
+} from '../../service/complaintsmaintenanceService';
 export default function ComplaintsMaintenance() {
   const [search, setSearch] = useState("");
 const [showModal, setShowModal] = useState(false);
 
 const [viewData, setViewData] = useState<any>(null);
+const [editData, setEditData] =
+  useState<any>(null);
+
+const [deleteId, setDeleteId] =
+  useState<string | null>(null);
 
 const [filterStatus, setFilterStatus] = useState("");
 
 const [sortOrder, setSortOrder] = useState("asc");
-  const defaultComplaintData = [
-    {
-      id: "CMP-1001",
-      student: "Siva Kumar",
-      initial: "SK",
-      regNo: "21ISR049",
-      hostel: "Boys Hostel A",
-      room: "A-101",
-      issue: "Water Leakage",
-      priority: "High",
-      date: "12 Jun 2026",
-      status: "Pending",
-      color: "blue",
-    },
-    {
-      id: "CMP-1002",
-      student: "Priya R",
-      initial: "PR",
-      regNo: "22ISR112",
-      hostel: "Girls Hostel B",
-      room: "G-204",
-      issue: "Fan Repair",
-      priority: "Medium",
-      date: "13 Jun 2026",
-      status: "In Progress",
-      color: "pink",
-    },
-    {
-      id: "CMP-1003",
-      student: "Arun Raj",
-      initial: "AR",
-      regNo: "20ISR087",
-      hostel: "Boys Hostel A",
-      room: "A-305",
-      issue: "WiFi Issue",
-      priority: "Low",
-      date: "14 Jun 2026",
-      status: "Resolved",
-      color: "orange",
-    },
-  ];
+  // const defaultComplaintData = [
+  //   {
+  //     id: "CMP-1001",
+  //     student: "Siva Kumar",
+  //     initial: "SK",
+  //     regNo: "21ISR049",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-101",
+  //     issue: "Water Leakage",
+  //     priority: "High",
+  //     date: "12 Jun 2026",
+  //     status: "Pending",
+  //     color: "blue",
+  //   },
+  //   {
+  //     id: "CMP-1002",
+  //     student: "Priya R",
+  //     initial: "PR",
+  //     regNo: "22ISR112",
+  //     hostel: "Girls Hostel B",
+  //     room: "G-204",
+  //     issue: "Fan Repair",
+  //     priority: "Medium",
+  //     date: "13 Jun 2026",
+  //     status: "In Progress",
+  //     color: "pink",
+  //   },
+  //   {
+  //     id: "CMP-1003",
+  //     student: "Arun Raj",
+  //     initial: "AR",
+  //     regNo: "20ISR087",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-305",
+  //     issue: "WiFi Issue",
+  //     priority: "Low",
+  //     date: "14 Jun 2026",
+  //     status: "Resolved",
+  //     color: "orange",
+  //   },
+  // ];
 const [complaintData, setComplaintData] =
-  useState<any[]>(() => {
-    const saved = localStorage.getItem("complaintData");
-
-    return saved
-      ? JSON.parse(saved)
-      : defaultComplaintData;
-  });
+  useState<any[]>([]);
   const filtered = complaintData
   .filter(
     (d) =>
       d.student
         .toLowerCase()
         .includes(search.toLowerCase()) ||
-      d.regNo
-        .toLowerCase()
+      (d.regNo || "")
+  .toLowerCase()
         .includes(search.toLowerCase())
   )
   .filter((d) =>
@@ -93,11 +97,17 @@ const [complaintData, setComplaintData] =
       : b.student.localeCompare(a.student)
   );
 useEffect(() => {
-  localStorage.setItem(
-    "complaintData",
-    JSON.stringify(complaintData)
-  );
-}, [complaintData]);
+  fetchComplaints();
+}, []);
+const fetchComplaints = async () => {
+  try {
+    const res = await getComplaints();
+
+    setComplaintData(res.data.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
 const [formData, setFormData] = useState({
   student: "",
   hostel: "",
@@ -106,33 +116,46 @@ const [formData, setFormData] = useState({
   priority: "",
   date: "",
 });
-const handleSave = () => {
-  const newComplaint = {
-    id: `CMP-${Date.now()}`,
-    initial: formData.student
-      .substring(0, 2)
-      .toUpperCase(),
-    regNo: "AUTO",
-    status: "Pending",
-    color: "blue",
-    ...formData,
-  };
+const handleSave = async () => {
 
-  setComplaintData([
-    ...complaintData,
-    newComplaint,
-  ]);
+  try {
 
-  setFormData({
-    student: "",
-    hostel: "",
-    room: "",
-    issue: "",
-    priority: "",
-    date: "",
-  });
+    const payload = {
+      student: formData.student,
+      hostel: formData.hostel,
+      room: formData.room,
+      issue: formData.issue,
+      priority: formData.priority,
+      date: formData.date,
+      regNo: "AUTO",
+    };
 
-  setShowModal(false);
+    console.log(payload);
+
+    const res =
+      await createComplaint(payload);
+
+    console.log(res.data);
+
+    fetchComplaints();
+
+    setFormData({
+      student: "",
+      hostel: "",
+      room: "",
+      issue: "",
+      priority: "",
+      date: "",
+    });
+
+    setShowModal(false);
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
 };
   return (
     <div className="space-y-6">
@@ -154,9 +177,12 @@ const handleSave = () => {
 
           <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
 
-            <button className="p-2.5 border rounded-lg">
-              <RefreshCcw size={16} />
-            </button>
+            <button
+  onClick={fetchComplaints}
+  className="p-2.5 border rounded-lg"
+>
+  <RefreshCcw size={16} />
+</button>
 
             <button className="p-2.5 border rounded-lg">
               <Printer size={16} />
@@ -193,7 +219,7 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-blue-600">
-                124
+                {complaintData.length}
               </h3>
             </div>
 
@@ -215,7 +241,11 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-orange-600">
-                28
+                {
+  complaintData.filter(
+    (d) => d.status === "Pending"
+  ).length
+}
               </h3>
             </div>
 
@@ -237,7 +267,11 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-yellow-600">
-                14
+               {
+  complaintData.filter(
+    (d) => d.status === "In Progress"
+  ).length
+}
               </h3>
             </div>
 
@@ -259,7 +293,11 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-green-600">
-                82
+               {
+  complaintData.filter(
+    (d) => d.status === "Resolved"
+  ).length
+}
               </h3>
             </div>
 
@@ -355,14 +393,27 @@ const handleSave = () => {
 
           <tbody>
 
-            {filtered.map((d) => (
+            {filtered.length === 0 ? (
+
+<tr>
+  <td
+    colSpan={9}
+    className="text-center py-10 text-gray-500"
+  >
+    No Data Found
+  </td>
+</tr>
+
+) : (
+
+filtered.map((d) => (
               <tr
                 key={d.id}
                 className="border-t hover:bg-gray-50"
               >
 
                 <td className="px-4 py-3 text-center text-blue-600 font-medium">
-                  {d.id}
+                 {d.complaint_id}
                 </td>
 
                 <td className="px-4 py-3">
@@ -461,16 +512,28 @@ const handleSave = () => {
                       <Eye size={18} />
                     </button>
 
-                    <button className="text-yellow-600 hover:text-yellow-800">
+                    <button
+  onClick={() => setEditData(d)}
+  className="text-yellow-600 hover:text-yellow-800"
+>
                       <Edit size={18} />
+
                     </button>
+                    <button
+  onClick={() => setDeleteId(d.id)}
+  className="text-red-600 hover:text-red-800"
+>
+  Delete
+</button>
 
                   </div>
 
                 </td>
 
               </tr>
-            ))}
+            ))
+
+)}
 
           </tbody>
         </table>
@@ -656,6 +719,172 @@ const handleSave = () => {
 
     </div>
   </div>
+)}
+{editData && (
+
+<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+  <div className="bg-white rounded-2xl w-full max-w-3xl p-6">
+
+    <div className="flex justify-between items-center mb-5">
+
+      <h2 className="text-xl font-semibold">
+        Edit Complaint
+      </h2>
+
+      <button
+        onClick={() => setEditData(null)}
+        className="text-xl"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <input
+        value={editData.student}
+        onChange={(e) =>
+          setEditData({
+            ...editData,
+            student: e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        value={editData.hostel}
+        onChange={(e) =>
+          setEditData({
+            ...editData,
+            hostel: e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        value={editData.room}
+        onChange={(e) =>
+          setEditData({
+            ...editData,
+            room: e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+      <input
+        value={editData.issue}
+        onChange={(e) =>
+          setEditData({
+            ...editData,
+            issue: e.target.value,
+          })
+        }
+        className="border rounded-lg px-3 py-2"
+      />
+
+    </div>
+
+    <div className="flex justify-end gap-3 mt-6">
+
+      <button
+        onClick={() => setEditData(null)}
+        className="px-4 py-2 border rounded-lg"
+      >
+        Cancel
+      </button>
+
+      <button
+        onClick={async () => {
+
+          try {
+
+            await updateComplaint(
+              editData.id,
+              editData
+            );
+
+            fetchComplaints();
+
+            setEditData(null);
+
+          } catch (err) {
+
+            console.log(err);
+
+          }
+
+        }}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+      >
+        Update
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
+{deleteId && (
+
+<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+  <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+
+    <h2 className="text-lg font-semibold">
+      Delete Complaint
+    </h2>
+
+    <p className="text-sm text-gray-500 mt-2">
+      Are you sure want to delete?
+    </p>
+
+    <div className="flex justify-end gap-3 mt-6">
+
+      <button
+        onClick={() => setDeleteId(null)}
+        className="px-4 py-2 border rounded-lg"
+      >
+        Cancel
+      </button>
+
+      <button
+        onClick={async () => {
+
+          try {
+
+            await deleteComplaint(
+              deleteId
+            );
+
+            fetchComplaints();
+
+            setDeleteId(null);
+
+          } catch (err) {
+
+            console.log(err);
+
+          }
+
+        }}
+        className="px-4 py-2 bg-red-600 text-white rounded-lg"
+      >
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 )}
     </div>
   );
