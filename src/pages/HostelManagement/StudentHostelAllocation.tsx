@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Users,
   BedDouble,
@@ -12,7 +12,12 @@ import {
   Printer,
   ArrowUpDown,
 } from "lucide-react";
-
+import {
+  getAllocations,
+  createAllocation,
+  updateAllocation,
+  deleteAllocation,
+} from "../../service/studentallocationService";
 export default function StudentHostelAllocation() {
   const [search, setSearch] = useState("");
 const [openModal, setOpenModal] = useState(false);
@@ -33,51 +38,74 @@ const [formData, setFormData] = useState({
   date: "",
   status: "Active",
 });
-  const [allocationData, setAllocationData] = useState([
-    {
-      id: "AL1001",
-      student: "Siva Kumar",
-      initial: "SK",
-      regNo: "21049",
-      className: "8-B",
-      hostel: "Boys Hostel A",
-      room: "A-101",
-      bed: "Bed 2",
-      date: "12 Jun 2026",
-      status: "Active",
-      color: "blue",
+const [allocationData, setAllocationData] =
+  useState<any[]>([]);
+  
+  // const [allocationData, setAllocationData] = useState([
+  //   {
+  //     id: "AL1001",
+  //     student: "Siva Kumar",
+  //     initial: "SK",
+  //     regNo: "21049",
+  //     className: "8-B",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-101",
+  //     bed: "Bed 2",
+  //     date: "12 Jun 2026",
+  //     status: "Active",
+  //     color: "blue",
      
-    },
-    {
-      id: "AL1002",
-      student: "Priya R",
-      initial: "PR",
-      regNo: "22ISR112",
-      className: "9-A",
-      hostel: "Girls Hostel B",
-      room: "G-204",
-      bed: "Bed 5",
-      date: "14 Jun 2026",
-      status: "Active",
-      color: "pink",
+  //   },
+  //   {
+  //     id: "AL1002",
+  //     student: "Priya R",
+  //     initial: "PR",
+  //     regNo: "22ISR112",
+  //     className: "9-A",
+  //     hostel: "Girls Hostel B",
+  //     room: "G-204",
+  //     bed: "Bed 5",
+  //     date: "14 Jun 2026",
+  //     status: "Active",
+  //     color: "pink",
      
-    },
-    {
-      id: "AL1003",
-      student: "Arun Raj",
-      initial: "AR",
-      regNo: "20ISR087",
-      className: "9-A",
-      hostel: "Boys Hostel A",
-      room: "A-305",
-      bed: "Bed 1",
-      date: "20 Jun 2026",
-      status: "Pending",
-      color: "orange",
+  //   },
+  //   {
+  //     id: "AL1003",
+  //     student: "Arun Raj",
+  //     initial: "AR",
+  //     regNo: "20ISR087",
+  //     className: "9-A",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-305",
+  //     bed: "Bed 1",
+  //     date: "20 Jun 2026",
+  //     status: "Pending",
+  //     color: "orange",
       
-    },
-  ]);
+  //   },
+  // ]);
+useEffect(() => {
+  fetchAllocations();
+}, []);
 
+const fetchAllocations = async () => {
+
+  try {
+
+    const res =
+      await getAllocations();
+
+    setAllocationData(
+      res.data.rows || []
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+};
   const filtered = allocationData
   .filter((d) => {
     const matchesSearch =
@@ -99,55 +127,97 @@ const [formData, setFormData] = useState({
       return b.student.localeCompare(a.student);
     }
   });
-const handleSave = () => {
+// const handleSave = () => {
 
-  if (editId) {
+//   if (editId) {
 
-    const updated = allocationData.map((item) =>
-      item.id === editId
-        ? {
-            ...formData,
-            id: editId,
-            initial: formData.student
-              .split(" ")
-              .map((n) => n[0])
-              .join(""),
-            color: item.color,
-          }
-        : item
-    );
+//     const updated = allocationData.map((item) =>
+//       item.id === editId
+//         ? {
+//             ...formData,
+//             id: editId,
+//             initial: formData.student
+//               .split(" ")
+//               .map((n) => n[0])
+//               .join(""),
+//             color: item.color,
+//           }
+//         : item
+//     );
 
-    setAllocationData(updated);
+//     setAllocationData(updated);
 
-  } else {
+//   } else {
 
-    const newAllocation = {
-      id: `AL${Date.now()}`,
-      initial: formData.student
-        .split(" ")
-        .map((n) => n[0])
-        .join(""),
-      color: "blue",
-      ...formData,
-    };
+//     const newAllocation = {
+//       id: `AL${Date.now()}`,
+//       initial: formData.student
+//         .split(" ")
+//         .map((n) => n[0])
+//         .join(""),
+//       color: "blue",
+//       ...formData,
+//     };
 
-    setAllocationData([...allocationData, newAllocation]);
+//     setAllocationData([...allocationData, newAllocation]);
+//   }
+
+//   setOpenModal(false);
+
+//   setEditId(null);
+
+//   setFormData({
+//     student: "",
+//     regNo: "",
+//     className: "",
+//     hostel: "",
+//     room: "",
+//     bed: "",
+//     date: "",
+//     status: "Active",
+//   });
+// };
+const handleSave = async () => {
+
+  try {
+
+    if (editId) {
+
+      await updateAllocation(
+        editId,
+        formData
+      );
+
+    } else {
+
+      await createAllocation(
+        formData
+      );
+
+    }
+
+    fetchAllocations();
+
+    setOpenModal(false);
+
+    setEditId(null);
+
+    setFormData({
+      student: "",
+      regNo: "",
+      className: "",
+      hostel: "",
+      room: "",
+      bed: "",
+      date: "",
+      status: "Active",
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
   }
-
-  setOpenModal(false);
-
-  setEditId(null);
-
-  setFormData({
-    student: "",
-    regNo: "",
-    className: "",
-    hostel: "",
-    room: "",
-    bed: "",
-    date: "",
-    status: "Active",
-  });
 };
   return (
     <div className="space-y-6">
@@ -221,7 +291,7 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2">
-                540
+              {allocationData.length}
               </h3>
             </div>
 
@@ -242,7 +312,13 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-indigo-600">
-                310
+               {
+  allocationData.filter((d) =>
+    d.hostel
+      ?.toLowerCase()
+      .includes("boys")
+  ).length
+}
               </h3>
             </div>
 
@@ -263,7 +339,13 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-pink-600">
-                230
+               {
+  allocationData.filter((d) =>
+    d.hostel
+      ?.toLowerCase()
+      .includes("girls")
+  ).length
+}
               </h3>
             </div>
 
@@ -284,7 +366,11 @@ const handleSave = () => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-green-600">
-                45
+              {
+  allocationData.filter(
+    (d) => d.status === "Pending"
+  ).length
+}
               </h3>
             </div>
 
@@ -379,7 +465,22 @@ const handleSave = () => {
 
           <tbody>
 
-            {filtered.map((d) => (
+  {filtered.length === 0 ? (
+
+    <tr>
+
+      <td
+        colSpan={9}
+        className="text-center py-10 text-gray-500"
+      >
+        No Data Found
+      </td>
+
+    </tr>
+
+  ) : (
+
+    filtered.map((d) => (
               <tr
                 key={d.id}
                 className="border-t hover:bg-gray-50"
@@ -459,14 +560,14 @@ const handleSave = () => {
 
                   <div className="flex items-center justify-center gap-3">
 
-                    <button
+<button
   onClick={() => setViewData(d)}
   className="text-blue-600 hover:text-blue-800"
 >
-                      <Eye size={18} />
-                    </button>
+  <Eye size={18} />
+</button>
 
-                   <button
+<button
   onClick={() => {
     setFormData(d);
     setEditId(d.id);
@@ -474,15 +575,29 @@ const handleSave = () => {
   }}
   className="text-yellow-600 hover:text-yellow-800"
 >
-                      <Edit size={18} />
-                    </button>
+  <Edit size={18} />
+</button>
+  <button
+    onClick={async () => {
 
-                  </div>
+      await deleteAllocation(d.id);
+
+      fetchAllocations();
+
+    }}
+    className="text-red-600 hover:text-red-800"
+  >
+    Delete
+  </button>
+
+</div>
 
                 </td>
 
-              </tr>
-            ))}
+             </tr>
+))
+
+)}
 
           </tbody>
         </table>

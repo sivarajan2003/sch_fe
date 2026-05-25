@@ -6,43 +6,54 @@ import {
   Filter,
   Plus,
   Eye,
+Edit,
   CheckCircle,
   AlertTriangle,
   RefreshCcw,
   Printer,
   ArrowUpDown,
 } from "lucide-react";
-
+import {
+  getAttendanceEntries,
+  createAttendanceEntry,
+  updateAttendanceEntry,
+  deleteAttendanceEntry,
+} from "../../service/attendanceEntryService";
 export default function AttendanceEntryTracking() {
 
-  const attendanceData = [
-    {
-      id: "AT1001",
-      student: "Siva Kumar",
-      initial: "SK",
-      regNo: "21ISR049",
-      hostel: "Boys Hostel A",
-      room: "A-101",
-      checkIn: "07:15 AM",
-      checkOut: "-",
-      status: "Present",
-      entryType: "Check In",
-      color: "blue",
-      year: "Final Year",
-    },
-  ];
+  // const attendanceData = [
+  //   {
+  //     id: "AT1001",
+  //     student: "Siva Kumar",
+  //     initial: "SK",
+  //     regNo: "21ISR049",
+  //     hostel: "Boys Hostel A",
+  //     room: "A-101",
+  //     checkIn: "07:15 AM",
+  //     checkOut: "-",
+  //     status: "Present",
+  //     entryType: "Check In",
+  //     color: "blue",
+  //     year: "Final Year",
+  //   },
+  // ];
 
   const [search, setSearch] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [attendanceList, setAttendanceList] =
+  useState<any[]>([]);
 
-  const [attendanceList, setAttendanceList] = useState<any[]>(() => {
-  const savedData = localStorage.getItem("attendanceData");
+const [editId, setEditId] =
+  useState<string | null>(null);
 
-  return savedData
-    ? JSON.parse(savedData)
-    : attendanceData;
-});
+//   const [attendanceList, setAttendanceList] = useState<any[]>(() => {
+//   const savedData = localStorage.getItem("attendanceData");
+
+//   return savedData
+//     ? JSON.parse(savedData)
+//     : attendanceData;
+// });
 
 const [viewData, setViewData] = useState<any>(null);
 
@@ -56,41 +67,80 @@ const [viewData, setViewData] = useState<any>(null);
     status: "",
     entryType: "",
   });
+  useEffect(() => {
+  fetchAttendance();
+}, []);
+
+const fetchAttendance = async () => {
+
+  try {
+
+    const res =
+      await getAttendanceEntries();
+
+    setAttendanceList(
+      res.data.rows || []
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+};
   const filtered = attendanceList.filter(
     (d) =>
       d.student.toLowerCase().includes(search.toLowerCase()) ||
       d.regNo.toLowerCase().includes(search.toLowerCase())
   );
-const handleSave = () => {
-  const newData = {
-    id: `AT${Date.now()}`,
-    initial: formData.student.substring(0, 2).toUpperCase(),
-    year: "Hosteller",
-    color: "blue",
-    ...formData,
-  };
+const handleSave = async () => {
 
-  setAttendanceList([...attendanceList, newData]);
+  try {
 
-  setFormData({
-    student: "",
-    regNo: "",
-    hostel: "",
-    room: "",
-    checkIn: "",
-    checkOut: "",
-    status: "",
-    entryType: "",
-  });
+    if (editId) {
 
-  setShowModal(false);
+      await updateAttendanceEntry(
+        editId,
+        formData
+      );
+
+    } else {
+
+      await createAttendanceEntry(
+        formData
+      );
+
+    }
+
+    fetchAttendance();
+
+    setShowModal(false);
+
+    setEditId(null);
+
+    setFormData({
+      student: "",
+      regNo: "",
+      hostel: "",
+      room: "",
+      checkIn: "",
+      checkOut: "",
+      status: "",
+      entryType: "",
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
 };
-useEffect(() => {
-  localStorage.setItem(
-    "attendanceData",
-    JSON.stringify(attendanceList)
-  );
-}, [attendanceList]);
+// useEffect(() => {
+//   localStorage.setItem(
+//     "attendanceData",
+//     JSON.stringify(attendanceList)
+//   );
+// }, [attendanceList]);
   return (
     <div className="space-y-6">
 
@@ -149,7 +199,11 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-green-600">
-                520
+                {
+  attendanceList.filter(
+    (d) => d.status === "Present"
+  ).length
+}
               </h3>
             </div>
 
@@ -171,7 +225,11 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-orange-600">
-                42
+                {
+  attendanceList.filter(
+    (d) => d.status === "Outside"
+  ).length
+}
               </h3>
             </div>
 
@@ -193,7 +251,11 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-red-600">
-                12
+              {
+  attendanceList.filter(
+    (d) => d.status === "Late Entry"
+  ).length
+}
               </h3>
             </div>
 
@@ -215,7 +277,11 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-blue-600">
-                480
+              {
+  attendanceList.filter(
+    (d) => d.entryType === "Check In"
+  ).length
+}
               </h3>
             </div>
 
@@ -297,7 +363,22 @@ useEffect(() => {
 
           <tbody>
 
-            {filtered.map((d) => (
+{filtered.length === 0 ? (
+
+<tr>
+
+<td
+  colSpan={9}
+  className="text-center py-10 text-gray-500"
+>
+  No Data Found
+</td>
+
+</tr>
+
+) : (
+
+filtered.map((d) => (
               <tr
                 key={d.id}
                 className="border-t hover:bg-gray-50"
@@ -392,19 +473,63 @@ useEffect(() => {
 
                   <div className="flex items-center justify-center gap-3">
 
-                    <button
-  onClick={() => setViewData(d)}
-  className="text-blue-600 hover:text-blue-800"
->
-                      <Eye size={18} />
-                    </button>
+  {/* VIEW BUTTON */}
+  <button
+    onClick={() => setViewData(d)}
+    className="text-blue-600 hover:text-blue-800"
+  >
+    <Eye size={18} />
+  </button>
 
-                  </div>
+  {/* EDIT BUTTON */}
+  <button
+    onClick={() => {
+
+      setFormData({
+        student: d.student,
+        regNo: d.regNo,
+        hostel: d.hostel,
+        room: d.room,
+        checkIn: d.checkIn,
+        checkOut: d.checkOut,
+        status: d.status,
+        entryType: d.entryType,
+      });
+
+      setEditId(d.id);
+
+      setShowModal(true);
+
+    }}
+    className="text-yellow-600 hover:text-yellow-800"
+  >
+    <Edit size={18} />
+  </button>
+
+  {/* DELETE BUTTON */}
+  <button
+    onClick={async () => {
+
+      await deleteAttendanceEntry(
+        d.id
+      );
+
+      fetchAttendance();
+
+    }}
+    className="text-red-600 hover:text-red-800"
+  >
+    Delete
+  </button>
+
+</div>
 
                 </td>
 
               </tr>
-            ))}
+            ))
+
+)}
 
           </tbody>
         </table>

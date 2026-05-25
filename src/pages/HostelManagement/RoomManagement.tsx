@@ -1,3 +1,5 @@
+//roommanagement.tsx
+
 import { useEffect, useState } from "react";
 import {
   BedDouble,
@@ -13,48 +15,59 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-
+import {
+  getRooms,
+  createRoom,
+  updateRoom,
+  deleteRoom,
+} from "../../service/roommanagementService";
 export default function RoomManagement() {
 
  
 
   // ✅ FIRST INITIAL DATA
-  const INITIAL_DATA = [
-    {
-      id: "RM1001",
-      roomNo: "A-101",
-      hostel: "Boys Hostel",
-      floor: "1st Floor",
-      capacity: 4,
-      occupied: 3,
-      type: "AC Room",
-      status: "Available",
-    },
-    {
-      id: "RM1002",
-      roomNo: "G-204",
-      hostel: "Girls Hostel",
-      floor: "2nd Floor",
-      capacity: 6,
-      occupied: 6,
-      type: "Non AC",
-      status: "Full",
-    },
-  ];
+  // const INITIAL_DATA = [
+  //   {
+  //     id: "RM1001",
+  //     roomNo: "A-101",
+  //     hostel: "Boys Hostel",
+  //     floor: "1st Floor",
+  //     capacity: 4,
+  //     occupied: 3,
+  //     type: "AC Room",
+  //     status: "Available",
+  //   },
+  //   {
+  //     id: "RM1002",
+  //     roomNo: "G-204",
+  //     hostel: "Girls Hostel",
+  //     floor: "2nd Floor",
+  //     capacity: 6,
+  //     occupied: 6,
+  //     type: "Non AC",
+  //     status: "Full",
+  //   },
+  // ];
  const [search, setSearch] = useState("");
   // ✅ AFTER THAT USESTATE
- const [data, setData] = useState<any[]>(INITIAL_DATA);
+ const [data, setData] = useState<any[]>([]);
 
-useEffect(() => {
-
-  const saved =
-    localStorage.getItem("roomData");
-
-  if (saved) {
-    setData(JSON.parse(saved));
-  }
-
+ useEffect(() => {
+  fetchRooms();
 }, []);
+
+const fetchRooms = async () => {
+  try {
+
+    const res = await getRooms();
+
+    setData(res.data.rows);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 
   const [openAdd, setOpenAdd] = useState(false);
 const [openEdit, setOpenEdit] = useState(false);
@@ -84,14 +97,7 @@ const [sortAsc, setSortAsc] =
       d.roomNo.toLowerCase().includes(search.toLowerCase()) ||
       d.id.toLowerCase().includes(search.toLowerCase())
   );
-useEffect(() => {
 
-  localStorage.setItem(
-    "roomData",
-    JSON.stringify(data)
-  );
-
-}, [data]);
   return (
     <div className="space-y-6">
 
@@ -148,8 +154,8 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2">
-                120
-              </h3>
+  {data.length}
+</h3>
             </div>
 
             <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -169,8 +175,12 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-green-600">
-                42
-              </h3>
+  {
+    data.filter(
+      (d) => d.status === "Available"
+    ).length
+  }
+</h3>
             </div>
 
             <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
@@ -190,8 +200,12 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-orange-600">
-                78
-              </h3>
+  {
+    data.filter(
+      (d) => d.status === "Full"
+    ).length
+  }
+</h3>
             </div>
 
             <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
@@ -211,8 +225,12 @@ useEffect(() => {
               </p>
 
               <h3 className="text-2xl font-semibold mt-2 text-red-600">
-                8
-              </h3>
+  {
+    data.filter(
+      (d) => d.status === "Maintenance"
+    ).length
+  }
+</h3>
             </div>
 
             <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
@@ -253,10 +271,10 @@ useEffect(() => {
     onClick={() => {
 
       setData(
-        INITIAL_DATA.filter(
-          (d) => d.status === "Available"
-        )
-      );
+  data.filter(
+    (d) => d.status === "Available"
+  )
+);
 
       setOpenFilter(false);
     }}
@@ -269,10 +287,10 @@ useEffect(() => {
     onClick={() => {
 
       setData(
-        INITIAL_DATA.filter(
-          (d) => d.status === "Full"
-        )
-      );
+  data.filter(
+    (d) => d.status === "Full"
+  )
+);
 
       setOpenFilter(false);
     }}
@@ -284,7 +302,7 @@ useEffect(() => {
   <button
     onClick={() => {
 
-      setData(INITIAL_DATA);
+      fetchRooms();
 
       setOpenFilter(false);
     }}
@@ -363,7 +381,23 @@ useEffect(() => {
           </thead>
 
           <tbody>
-            {filtered.map((d: any) => (
+
+{filtered.length === 0 ? (
+
+<tr>
+
+  <td
+    colSpan={9}
+    className="text-center py-10 text-gray-500"
+  >
+    No Data Found
+  </td>
+
+</tr>
+
+) : (
+
+filtered.map((d: any) => (
               <tr
                 key={d.id}
                 className="border-t hover:bg-gray-50"
@@ -445,8 +479,11 @@ useEffect(() => {
 
                 </td>
               </tr>
-            ))}
-          </tbody>
+           ))
+
+)}
+
+</tbody>
 
         </table>
       </div>
@@ -454,7 +491,15 @@ useEffect(() => {
 
 <div className="lg:hidden space-y-4">
 
-  {filtered.map((d: any) =>(
+{filtered.length === 0 ? (
+
+<div className="bg-white border rounded-2xl p-10 text-center text-gray-500">
+  No Data Found
+</div>
+
+) : (
+
+filtered.map((d: any) =>(
 
     <div
       key={d.id}
@@ -568,7 +613,9 @@ useEffect(() => {
       </div>
 
     </div>
-  ))}
+  ))
+
+)}
 
 </div>
 {/* ================= ADD ROOM MODAL ================= */}
@@ -754,33 +801,32 @@ useEffect(() => {
       </button>
 
       {/* SAVE */}
-      <button
-        onClick={() => {
+      {/* SAVE */}
+<button
+  onClick={async () => {
+          try {
 
-          const newItem = {
-            ...newRoom,
+  await createRoom(newRoom);
 
-            id: `RM${Math.floor(
-              1000 + Math.random() * 9000
-            )}`,
-          };
+  fetchRooms();
 
-          setData((prev: any) => [
-            ...prev,
-            newItem,
-          ]);
+  setNewRoom({
+    roomNo: "",
+    hostel: "",
+    floor: "",
+    capacity: 0,
+    occupied: 0,
+    type: "",
+    status: "Available",
+  });
 
-          setNewRoom({
-            roomNo: "",
-            hostel: "",
-            floor: "",
-            capacity: 0,
-            occupied: 0,
-            type: "",
-            status: "Available",
-          });
+  setOpenAdd(false);
 
-          setOpenAdd(false);
+} catch (err) {
+
+  console.log(err);
+
+}
         }}
         className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm"
       >
@@ -906,17 +952,24 @@ useEffect(() => {
       </button>
 
       <button
-        onClick={() => {
+  onClick={async () => {
 
-          setData((prev) =>
-            prev.map((item) =>
-              item.id === selectedRoom.id
-                ? selectedRoom
-                : item
-            )
-          );
+          try {
 
-          setOpenEdit(false);
+  await updateRoom(
+    selectedRoom.id,
+    selectedRoom
+  );
+
+  fetchRooms();
+
+  setOpenEdit(false);
+
+} catch (err) {
+
+  console.log(err);
+
+}
         }}
         className="px-5 py-2.5 bg-blue-600 text-white rounded-xl"
       >
@@ -957,16 +1010,20 @@ useEffect(() => {
       </button>
 
       <button
-        onClick={() => {
+  onClick={async () => {
+         try {
 
-          setData((prev) =>
-            prev.filter(
-              (item) =>
-                item.id !== confirmDeleteId
-            )
-          );
+  await deleteRoom(confirmDeleteId);
 
-          setConfirmDeleteId(null);
+  fetchRooms();
+
+  setConfirmDeleteId(null);
+
+} catch (err) {
+
+  console.log(err);
+
+}
         }}
         className="px-5 py-2 bg-red-600 text-white rounded-xl"
       >
