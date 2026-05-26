@@ -1,59 +1,53 @@
-import axios from "axios";
+import api from '../api/client';
 
-const API_URL = "http://localhost:5000/api/attendance";
-
-// Create attendance
+// Generic
 const createAttendance = async (payload) => {
-  const response = await axios.post(API_URL, payload);
-  return response.data;
+  const res = await api.post('/attendance', payload);
+  return res.data;
 };
 
-// Get all attendance
 const getAttendance = async (params = {}) => {
-  const response = await axios.get(API_URL, {
-    params,
-  });
-
-  return response.data;
+  const res = await api.get('/attendance', { params });
+  return res.data;
 };
 
-// Student attendance
-const getStudentAttendance = async () => {
-  const response = await axios.get(API_URL, {
-    params: {
-      person_type: "Student",
-    },
-  });
-
-  return response.data;
+/**
+ * Save teacher attendance for a date.
+ * @param {string} attendance_date - "YYYY-MM-DD"
+ * @param {Array}  records - [{ person_id, person_name, attendance_status, notes }]
+ */
+const saveTeacherAttendance = async (attendance_date, records) => {
+  const res = await api.post('/attendance/teacher/save', { attendance_date, records });
+  return res.data;
 };
 
-// Teacher attendance
-const getTeacherAttendance = async () => {
-  const response = await axios.get(API_URL, {
-    params: {
-      person_type: "Teacher",
-    },
-  });
-
-  return response.data;
+/**
+ * Get teacher attendance map for a specific date.
+ * Returns { [person_id]: { attendance_status, notes } }
+ */
+const getTeacherAttendanceByDate = async (date) => {
+  const res = await api.get('/attendance/teacher', { params: { date } });
+  return res.data;
 };
 
-// Staff attendance
-const getStaffAttendance = async () => {
-  const response = await axios.get(API_URL, {
-    params: {
-      person_type: "Staff",
-    },
-  });
-
-  return response.data;
+/**
+ * Get teacher attendance records for a date range.
+ */
+const getTeacherAttendanceRange = async (params = {}) => {
+  const res = await api.get('/attendance/teacher/range', { params });
+  return res.data;
 };
+
+// Legacy helpers
+const getStudentAttendance = async () => getAttendance({ person_type: 'Student' });
+const getStaffAttendance = async () => getAttendance({ person_type: 'Staff' });
 
 export default {
   createAttendance,
   getAttendance,
+  saveTeacherAttendance,
+  getTeacherAttendanceByDate,
+  getTeacherAttendanceRange,
   getStudentAttendance,
-  getTeacherAttendance,
   getStaffAttendance,
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   RefreshCcw,
   Printer,
@@ -6,263 +6,178 @@ import {
   Filter,
   ArrowUpDown,
   Download,
+  Save,
+  Loader2,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { getTeachers } from "../../../service/teacherService";
+import attendanceService from "../../../service/attendanceService";
 
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "TCH1001",
-    empId: "EMP501",
-    name: "John Smith",
-    image: "https://i.pravatar.cc/40?img=31",
-    department: "Mathematics",
-    designation: "Senior Teacher",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "TCH1002",
-    empId: "EMP502",
-    name: "Maria Garcia",
-    image: "https://i.pravatar.cc/40?img=32",
-    department: "Physics",
-    designation: "Teacher",
-    attendance: "Late",
-    notes: "",
-  },
-  {
-    id: "TCH1003",
-    empId: "EMP503",
-    name: "Robert Brown",
-    image: "https://i.pravatar.cc/40?img=33",
-    department: "Chemistry",
-    designation: "Assistant Teacher",
-    attendance: "Absent",
-    notes: "",
-  },
-  {
-    id: "TCH1004",
-    empId: "EMP504",
-    name: "Emily Johnson",
-    image: "https://i.pravatar.cc/40?img=34",
-    department: "Biology",
-    designation: "Teacher",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "TCH1005",
-    empId: "EMP505",
-    name: "Daniel Wilson",
-    image: "https://i.pravatar.cc/40?img=35",
-    department: "English",
-    designation: "Senior Teacher",
-    attendance: "Holiday",
-    notes: "",
-  },
-  {
-    id: "TCH1006",
-    empId: "EMP506",
-    name: "Sophia Anderson",
-    image: "https://i.pravatar.cc/40?img=36",
-    department: "History",
-    designation: "Teacher",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "TCH1007",
-    empId: "EMP507",
-    name: "Michael Thomas",
-    image: "https://i.pravatar.cc/40?img=37",
-    department: "Geography",
-    designation: "Assistant Teacher",
-    attendance: "Halfday",
-    notes: "",
-  },
-  {
-    id: "TCH1008",
-    empId: "EMP508",
-    name: "Olivia Martin",
-    image: "https://i.pravatar.cc/40?img=38",
-    department: "Computer Science",
-    designation: "Teacher",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "TCH1009",
-    empId: "EMP509",
-    name: "James Taylor",
-    image: "https://i.pravatar.cc/40?img=39",
-    department: "Economics",
-    designation: "Senior Teacher",
-    attendance: "Absent",
-    notes: "",
-  },
-  {
-    id: "TCH1010",
-    empId: "EMP510",
-    name: "Isabella Moore",
-    image: "https://i.pravatar.cc/40?img=40",
-    department: "Political Science",
-    designation: "Teacher",
-    attendance: "Present",
-    notes: "",
-  },
-];
+type AttendanceStatus = "Present" | "Late" | "Absent" | "Holiday" | "Halfday";
 
-/* ================= PAGE ================= */
-export default function StudentAttendance() {
-   const isLocked = false; // 🔒 enable full blur lock
- //const userRole = "Admin";        //  change dynamically later
-  //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+interface TeacherRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  qualification: string;
+  status: string;
+  attendance: AttendanceStatus;
+  notes: string;
+}
+
+const STATUS_OPTIONS: AttendanceStatus[] = ["Present", "Late", "Absent", "Holiday", "Halfday"];
+
+const today = () => new Date().toISOString().split("T")[0];
+
+export default function TeacherAttendance() {
+  const [teachers, setTeachers] = useState<TeacherRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(today());
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
   const [sortAsc, setSortAsc] = useState(true);
-
   const [openCalendar, setOpenCalendar] = useState(false);
   const [openFilter, setOpenFilter] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [statusFilter, setStatusFilter] =
-    useState<"Present" | "Late" | "Absent" | "Holiday" | "Halfday" | null>(null);
-  
-  /* CLOSE DROPDOWNS */
+  const [statusFilter, setStatusFilter] = useState<AttendanceStatus | null>(null);
+  const rowsPerPage = 10;
+
+  /* ---- close dropdowns on outside click ---- */
   useEffect(() => {
-    const close = () => {
-      setOpenCalendar(false);
-      setOpenFilter(false);
-    };
+    const close = () => { setOpenCalendar(false); setOpenFilter(false); };
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, []);
 
-  /* EXPORT CSV */
+  /* ---- fetch teachers + saved attendance for date ---- */
+  const loadData = useCallback(async (date: string) => {
+    setLoading(true);
+    try {
+      const [teacherRes, attendanceRes] = await Promise.all([
+        getTeachers({ limit: 200 }),
+        attendanceService.getTeacherAttendanceByDate(date),
+      ]);
+
+      const teacherList: any[] = teacherRes?.rows ?? teacherRes?.data ?? [];
+      const savedMap: Record<string, { attendance_status: AttendanceStatus; notes: string }> =
+        attendanceRes?.data ?? {};
+
+      const rows: TeacherRow[] = teacherList.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        email: t.email ?? "",
+        phone: t.phone ?? "",
+        qualification: t.qualification ?? "",
+        status: t.status ?? "Active",
+        attendance: savedMap[t.id]?.attendance_status ?? "Present",
+        notes: savedMap[t.id]?.notes ?? "",
+      }));
+
+      setTeachers(rows);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData(selectedDate);
+  }, [selectedDate, loadData]);
+
+  /* ---- save attendance ---- */
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const records = teachers.map((t) => ({
+        person_id: t.id,
+        person_name: t.name,
+        attendance_status: t.attendance,
+        notes: t.notes,
+      }));
+      await attendanceService.saveTeacherAttendance(selectedDate, records);
+      toast.success("Attendance saved successfully");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to save attendance");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* ---- update a single row ---- */
+  const updateRow = (id: string, field: "attendance" | "notes", value: string) => {
+    setTeachers((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, [field]: value } : t))
+    );
+  };
+
+  /* ---- export CSV ---- */
   const handleExport = () => {
-    const csv =
-      "data:text/csv;charset=utf-8," +
-      ["Teacher ID,Employee ID,Name,Department,Designation,Attendance,Notes"]
-        .concat(
-          data.map(
-            (d) =>
-              `${d.id},${d.empId},${d.name},${d.department},${d.designation},${d.attendance},${d.notes}`
-          )
-        )
-        .join("\n");
-  
+    const header = "Name,Email,Phone,Qualification,Status,Attendance,Notes";
+    const rows = teachers.map(
+      (t) => `${t.name},${t.email},${t.phone},${t.qualification},${t.status},${t.attendance},${t.notes}`
+    );
+    const csv = "data:text/csv;charset=utf-8," + [header, ...rows].join("\n");
     const link = document.createElement("a");
     link.href = encodeURI(csv);
-    link.download = "teacher_attendance.csv";
+    link.download = `teacher_attendance_${selectedDate}.csv`;
     link.click();
   };
-  
+
+  /* ---- sort ---- */
   const handleSort = () => {
-    setData((prev) =>
+    setTeachers((prev) =>
       [...prev].sort((a, b) =>
-        sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+        sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
   };
-  const handleRefresh = () => {
-    setData(INITIAL_DATA);   // reset data
-    setSearch("");           // clear search
-    setCurrentPage(1);       // reset pagination
-    setStatusFilter(null);   // clear filter
-    setStartDate("");        // clear date
-    setEndDate("");          // clear date
-  };
-  
-  /* SEARCH */
-  const filtered = data.filter((d) => {
+
+  /* ---- filter + search ---- */
+  const filtered = teachers.filter((t) => {
     const matchSearch =
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
-  
-    const matchStatus = statusFilter
-      ? d.attendance === statusFilter
-      : true;
-  
+      t.name.toLowerCase().includes(search.toLowerCase()) ||
+      t.email.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter ? t.attendance === statusFilter : true;
     return matchSearch && matchStatus;
   });
-  
 
-  /* PAGINATION */
-  const totalPages = Math.ceil(filtered.length / rowsPerPage);
-  const paginated = filtered.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+  const paginated = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-  /* ATTENDANCE CHANGE */
-  const updateAttendance = (id: string, value: string) => {
-    setData((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, attendance: value } : d
-      )
-    );
+  /* ---- summary counts ---- */
+  const summary = STATUS_OPTIONS.reduce((acc, s) => {
+    acc[s] = teachers.filter((t) => t.attendance === s).length;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const statusColor: Record<string, string> = {
+    Present: "bg-green-100 text-green-700",
+    Late: "bg-yellow-100 text-yellow-700",
+    Absent: "bg-red-100 text-red-700",
+    Holiday: "bg-blue-100 text-blue-700",
+    Halfday: "bg-orange-100 text-orange-700",
   };
 
-  // return (
-  //   <div className="space-y-6">
   return (
-  <div className="relative">
-
-    {/* 🔒 FULL PAGE BLUR LOCK */}
-     {isLocked && (
-  <div
-    className="
-      absolute inset-0 z-50
-      bg-white/20
-      backdrop-blur-sm
-      flex items-center justify-center
-      rounded-xl
-    "
-  >
-        <div className="bg-white px-6 py-4 rounded-xl shadow-lg text-center">
-
-          <p className="text-sm font-semibold text-gray-800">
-            Subscription Upgrade Required — Contact Atelier Creation
-          </p>
-
-          <button
-            onClick={() => window.location.href = "tel:+919999999999"}
-            className="mt-3 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg"
-          >
-            📞 Call Atelier
-          </button>
-
-        </div>
-      </div>
-    )}
-
-    {/* ===== ORIGINAL CONTENT WRAPPER ===== */}
-    <div className={`space-y-6 ${isLocked ? "pointer-events-none select-none" : ""}`}>
-   
-      {/* ================= HEADER ================= */}
+    <div className="space-y-6">
+      {/* HEADER */}
       <div className="bg-white border rounded-2xl px-6 py-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Teacher Attendance</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Dashboard / HRM / Teacher Attendance
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Dashboard / HRM / Teacher Attendance</p>
           </div>
-
           <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
-          <button
-  onClick={handleRefresh}
-  className="p-2.5 border rounded-lg hover:bg-gray-50"
-  title="Refresh"
->
-  <RefreshCcw size={16} />
-</button>
-
+            <button
+              onClick={() => loadData(selectedDate)}
+              className="p-2.5 border rounded-lg hover:bg-gray-50"
+              title="Refresh"
+            >
+              <RefreshCcw size={16} />
+            </button>
             <button className="p-2.5 border rounded-lg" onClick={() => window.print()}>
               <Printer size={16} />
             </button>
@@ -272,295 +187,253 @@ export default function StudentAttendance() {
             >
               <Download size={14} /> Export
             </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm flex items-center gap-1 disabled:opacity-60"
+            >
+              {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              Save
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ================= SUB HEADER ================= */}
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {STATUS_OPTIONS.map((s) => (
+          <div key={s} className={`rounded-xl px-4 py-3 text-center ${statusColor[s]}`}>
+            <p className="text-2xl font-bold">{summary[s] ?? 0}</p>
+            <p className="text-xs mt-1">{s}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* CONTROLS */}
       <div className="bg-white border rounded-xl px-6 py-4 space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h3 className="text-base font-semibold">Teacher Attendance List</h3>
 
           <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
-            {/* DATE RANGE */}
+            {/* DATE PICKER */}
             <div className="relative">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenCalendar(!openCalendar);
-                }}
+                onClick={(e) => { e.stopPropagation(); setOpenCalendar(!openCalendar); }}
                 className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm"
               >
                 <CalendarDays size={14} />
-                {startDate && endDate
-                  ? `${startDate} - ${endDate}`
-                  : "15 May 2020 - 24 May 2024"}
+                {selectedDate}
               </button>
-
               {openCalendar && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute left-0 mt-2 w-80 bg-white border rounded-xl shadow-lg p-5 z-40"
+                  className="absolute left-0 mt-2 w-64 bg-white border rounded-xl shadow-lg p-4 z-40"
                 >
-                  <div className="mb-4">
-                    <label className="text-sm">Start Date</label>
-                    <input
-                      type="date"
-                      className="w-full mt-1 border rounded-lg px-3 py-2 text-sm"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                  </div>
+                  <label className="text-sm text-gray-600">Select Date</label>
+                  <input
+                    type="date"
+                    className="w-full mt-1 border rounded-lg px-3 py-2 text-sm"
+                    value={selectedDate}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                      setCurrentPage(1);
+                      setOpenCalendar(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
 
-                  <div className="mb-4">
-                    <label className="text-sm">End Date</label>
-                    <input
-                      type="date"
-                      className="w-full mt-1 border rounded-lg px-3 py-2 text-sm"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
-                  </div>
-
+            {/* FILTER */}
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenFilter(!openFilter); setOpenCalendar(false); }}
+                className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
+              >
+                <Filter size={14} /> Filter
+              </button>
+              {openFilter && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute left-0 mt-2 w-44 bg-white border rounded-lg shadow-lg z-40"
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => { setStatusFilter(s); setOpenFilter(false); setCurrentPage(1); }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                    >
+                      {s}
+                    </button>
+                  ))}
                   <button
-                    onClick={() => setOpenCalendar(false)}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg"
+                    onClick={() => { setStatusFilter(null); setOpenFilter(false); }}
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
                   >
-                    Apply
+                    Clear
                   </button>
                 </div>
               )}
             </div>
 
-            <div className="relative">
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      setOpenFilter(!openFilter);
-      setOpenCalendar(false);
-    }}
-    className="flex flex-wrap gap-2 px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
-  >
-    <Filter size={14} /> Filter
-  </button>
-
-  {openFilter && (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className="absolute left-0 mt-2 w-44 bg-white border rounded-lg shadow-lg z-40"
-    >
-      {["Present", "Late", "Absent", "Holiday", "Halfday"].map((s) => (
-        <button
-          key={s}
-          onClick={() => {
-            setStatusFilter(s as any);
-            setOpenFilter(false);
-          }}
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
-        >
-          {s}
-        </button>
-      ))}
-
-      <button
-        onClick={() => {
-          setStatusFilter(null);
-          setOpenFilter(false);
-        }}
-        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-      >
-        Clear
-      </button>
-    </div>
-  )}
-</div>
-
-<button
-  onClick={handleSort}
-  className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
->
-  <ArrowUpDown size={14} /> Sort By A-Z
-</button>
-
+            <button
+              onClick={handleSort}
+              className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
+            >
+              <ArrowUpDown size={14} /> Sort A-Z
+            </button>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm">Row Per Page 10 Entries</div>
-
+          <div className="text-sm text-gray-500">{filtered.length} teachers</div>
           <input
-            placeholder="Search"
+            placeholder="Search by name or email"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm w-52"
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            className="border rounded-lg px-3 py-2 text-sm w-60"
           />
         </div>
       </div>
 
-      {/* ================= TABLE ================= */}
-      <div className="hidden lg:block bg-white border rounded-xl overflow-x-auto">
-      <table className="min-w-[1200px] w-full text-sm table-fixed">
-      <thead className="bg-gray-50">
-  <tr>
-    <th className="px-4 py-3 w-[140px] text-left">Teacher ID</th>
-    <th className="px-4 py-3 w-[120px] text-left">Employee ID</th>
-    <th className="px-4 py-3 w-[220px] text-left">Teacher Name</th>
-    <th className="px-4 py-3 w-[160px] text-left">Department</th>
-    <th className="px-4 py-3 w-[180px] text-left">Designation</th>
-    <th className="px-4 py-3 w-[360px] text-left">Attendance</th>
-    <th className="px-4 py-3 w-[180px] text-left">Notes</th>
-  </tr>
-</thead>
-
-
-<tbody>
-  {paginated.map((d) => (
-    <tr key={d.id} className="border-t">
-      <td className="px-4 py-3 text-blue-600">{d.id}</td>
-      <td className="px-4 py-3">{d.empId}</td>
-
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          <img
-            src={d.image}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-            alt={d.name}
-          />
-          <span className="truncate">{d.name}</span>
+      {/* LOADING */}
+      {loading && (
+        <div className="flex justify-center py-12">
+          <Loader2 size={32} className="animate-spin text-blue-600" />
         </div>
-      </td>
+      )}
 
-      <td className="px-4 py-3">{d.department}</td>
-      <td className="px-4 py-3">{d.designation}</td>
+      {/* TABLE — desktop */}
+      {!loading && (
+        <>
+          <div className="hidden lg:block bg-white border rounded-xl overflow-x-auto">
+            <table className="min-w-[900px] w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left w-[200px]">Name</th>
+                  <th className="px-4 py-3 text-left w-[200px]">Email</th>
+                  <th className="px-4 py-3 text-left w-[130px]">Phone</th>
+                  <th className="px-4 py-3 text-left w-[360px]">Attendance</th>
+                  <th className="px-4 py-3 text-left w-[180px]">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-10 text-gray-400">
+                      No teachers found
+                    </td>
+                  </tr>
+                ) : (
+                  paginated.map((t) => (
+                    <tr key={t.id} className="border-t hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium">{t.name}</td>
+                      <td className="px-4 py-3 text-gray-500">{t.email}</td>
+                      <td className="px-4 py-3 text-gray-500">{t.phone || "—"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                          {STATUS_OPTIONS.map((s) => (
+                            <label key={s} className="flex items-center gap-1 whitespace-nowrap cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`att-${t.id}`}
+                                checked={t.attendance === s}
+                                onChange={() => updateRow(t.id, "attendance", s)}
+                              />
+                              {s}
+                            </label>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          className="border rounded-lg px-2 py-1 text-xs w-full"
+                          placeholder="Notes"
+                          value={t.notes}
+                          onChange={(e) => updateRow(t.id, "notes", e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      <td className="px-4 py-3">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
-          {["Present", "Late", "Absent", "Holiday", "Halfday"].map((s) => (
-            <label key={s} className="flex items-center gap-1 whitespace-nowrap">
-              <input
-                type="radio"
-                checked={d.attendance === s}
-                onChange={() => updateAttendance(d.id, s)}
-              />
-              {s}
-            </label>
-          ))}
-        </div>
-      </td>
+          {/* MOBILE CARDS */}
+          <div className="lg:hidden space-y-4">
+            {paginated.map((t) => (
+              <div key={t.id} className="bg-white border rounded-2xl p-4 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-medium">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.email}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs ${statusColor[t.attendance]}`}>
+                    {t.attendance}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-gray-500">Phone</p>
+                    <p className="font-medium">{t.phone || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Qualification</p>
+                    <p className="font-medium">{t.qualification || "—"}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3 text-xs">
+                  {STATUS_OPTIONS.map((s) => (
+                    <label key={s} className="flex items-center gap-1 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`mob-att-${t.id}`}
+                        checked={t.attendance === s}
+                        onChange={() => updateRow(t.id, "attendance", s)}
+                      />
+                      {s}
+                    </label>
+                  ))}
+                </div>
+                <input
+                  placeholder="Notes"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  value={t.notes}
+                  onChange={(e) => updateRow(t.id, "notes", e.target.value)}
+                />
+              </div>
+            ))}
+          </div>
 
-      <td className="px-4 py-3">
-        <input
-          className="border rounded-lg px-2 py-1 text-xs w-full"
-          placeholder="Notes"
-        />
-      </td>
-    </tr>
-  ))}
-</tbody>
-
-        </table>
-        </div>
-{/* ================= MOBILE & TABLET VIEW ================= */}
-<div className="lg:hidden space-y-4">
-  {paginated.map((d) => (
-    <div
-      key={d.id}
-      className="bg-white border rounded-2xl p-4 space-y-4"
-    >
-      {/* TOP ROW */}
-      <div className="flex justify-between items-start">
-  <div className="flex items-center gap-3">
-    {/* PROFILE IMAGE */}
-    <img
-      src={d.image}
-      alt={d.name}
-      className="w-10 h-10 rounded-full object-cover"
-    />
-
-    {/* NAME & ID */}
-    <div>
-      <p className="font-medium leading-tight">{d.name}</p>
-      <p className="text-xs text-blue-600">{d.id}</p>
+          {/* PAGINATION */}
+          <div className="flex justify-end gap-2 px-4 py-3 border-t bg-white rounded-xl text-sm">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-3 py-1 border rounded disabled:opacity-40"
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => setCurrentPage(p)}
+                className={`px-3 py-1 rounded ${p === currentPage ? "bg-blue-600 text-white" : "border"}`}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-3 py-1 border rounded disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
     </div>
-  </div>
-
-  {/* STATUS */}
-  <span
-    className={`px-3 py-1 rounded-full text-xs ${
-      d.attendance === "Present"
-        ? "bg-green-100 text-green-600"
-        : d.attendance === "Absent"
-        ? "bg-red-100 text-red-600"
-        : "bg-yellow-100 text-yellow-600"
-    }`}
-  >
-    {d.attendance}
-  </span>
-</div>
-
-      {/* DETAILS */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-gray-500">Employee ID</p>
-          <p className="font-medium">{d.empId}</p>
-        </div>
-
-        <div>
-          <p className="text-gray-500">Department</p>
-          <p className="font-medium">{d.department}</p>
-        </div>
-
-        <div>
-          <p className="text-gray-500">Designation</p>
-          <p className="font-medium">{d.designation}</p>
-        </div>
-      </div>
-
-      {/* ATTENDANCE */}
-      <div className="flex flex-wrap gap-3 text-xs">
-        {["Present", "Late", "Absent", "Holiday", "Halfday"].map((s) => (
-          <label key={s} className="flex items-center gap-1">
-            <input
-              type="radio"
-              checked={d.attendance === s}
-              onChange={() => updateAttendance(d.id, s)}
-            />
-            {s}
-          </label>
-        ))}
-      </div>
-
-      {/* NOTES */}
-      <input
-        placeholder="Notes"
-        className="w-full border rounded-lg px-3 py-2 text-sm"
-      />
-    </div>
-  ))}
-</div>
-
-        {/* PAGINATION */}
-        <div className="flex justify-end gap-2 px-4 py-3 border-t text-sm">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Prev
-          </button>
-
-          <button className="px-3 py-1 bg-blue-600 text-white rounded">
-            {currentPage}
-          </button>
-
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-     
-  </div>
-    </div> 
-  ); 
+  );
 }
