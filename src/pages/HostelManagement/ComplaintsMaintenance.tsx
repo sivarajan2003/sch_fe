@@ -1,3 +1,4 @@
+//ComplaintsMaintenance.tsx
 import { useState, useEffect } from "react";
 import {
   Wrench,
@@ -158,10 +159,10 @@ const handleSave = async () => {
 
 };
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2 sm:px-4 md:px-6">
 
       {/* ================= HEADER ================= */}
-      <div className="bg-white border rounded-2xl px-6 py-5">
+      <div className="bg-white border rounded-2xl px-4 sm:px-6 py-5">
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -175,7 +176,7 @@ const handleSave = async () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
 
             <button
   onClick={fetchComplaints}
@@ -194,7 +195,7 @@ const handleSave = async () => {
 
 <button
   onClick={() => setShowModal(true)}
-  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm"
+  className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm"
 >
 
               <Plus size={16} />
@@ -206,7 +207,7 @@ const handleSave = async () => {
       </div>
 
       {/* ================= STATS ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
 
         {/* CARD */}
         <div className="bg-white border rounded-2xl p-5">
@@ -311,7 +312,7 @@ const handleSave = async () => {
       </div>
 
       {/* ================= SEARCH ================= */}
-      <div className="bg-white border rounded-xl px-6 py-4 space-y-4">
+      <div className="bg-white border rounded-xl px-4 sm:px-6 py-4 space-y-4">
 
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
@@ -319,14 +320,13 @@ const handleSave = async () => {
             Complaint List
           </h3>
 
-          <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:gap-3">
-
+<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
 <select
   value={filterStatus}
   onChange={(e) =>
     setFilterStatus(e.target.value)
   }
-  className="px-3 py-2 border rounded-lg text-sm"
+  className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm"
 >
   <option value="">All Status</option>
   <option value="Pending">Pending</option>
@@ -339,7 +339,7 @@ const handleSave = async () => {
   onChange={(e) =>
     setSortOrder(e.target.value)
   }
-  className="px-3 py-2 border rounded-lg text-sm"
+  className="w-full sm:w-auto px-3 py-2 border rounded-lg text-sm"
 >
   <option value="asc">A-Z</option>
   <option value="desc">Z-A</option>
@@ -348,7 +348,7 @@ const handleSave = async () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
 
           <div className="text-sm text-gray-500">
             Total Complaints : {filtered.length}
@@ -373,9 +373,9 @@ const handleSave = async () => {
       </div>
 
       {/* ================= TABLE ================= */}
-      <div className="bg-white border rounded-xl overflow-x-auto">
+      <div className="hidden lg:block bg-white border rounded-xl overflow-x-auto w-full">
 
-        <table className="min-w-full text-sm">
+        <table className="min-w-[1000px] w-full text-sm">
 
           <thead className="bg-gray-50">
             <tr>
@@ -503,7 +503,7 @@ filtered.map((d) => (
 
                 <td className="px-4 py-3 text-center">
 
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
 
                     <button
   onClick={() => setViewData(d)}
@@ -538,12 +538,164 @@ filtered.map((d) => (
           </tbody>
         </table>
       </div>
+      {/* ================= MOBILE & TABLET VIEW ================= */}
+<div className="lg:hidden space-y-4">
+
+  {filtered.length === 0 ? (
+
+    <div className="bg-white border rounded-2xl p-6 text-center text-gray-500">
+      No Data Found
+    </div>
+
+  ) : (
+
+    filtered.map((d) => (
+
+      <div
+        key={d.id}
+        className="bg-white border rounded-2xl p-4 space-y-4"
+      >
+
+        {/* TOP */}
+        <div className="flex justify-between items-start gap-3">
+
+          <div>
+
+            <p className="text-blue-600 font-semibold text-sm">
+              {d.complaint_id}
+            </p>
+
+            <p className="font-semibold text-gray-800 mt-1">
+              {d.student}
+            </p>
+
+            <p className="text-xs text-gray-500 mt-1">
+              {d.regNo}
+            </p>
+
+          </div>
+
+          <span
+            className={`px-3 py-1 rounded-full text-xs
+            ${
+              d.status === "Pending"
+                ? "bg-orange-100 text-orange-600"
+                : d.status === "In Progress"
+                ? "bg-blue-100 text-blue-600"
+                : "bg-green-100 text-green-600"
+            }`}
+          >
+            ● {d.status}
+          </span>
+
+        </div>
+
+        {/* DETAILS */}
+        <div className="grid grid-cols-2 gap-4 text-sm">
+
+          <div>
+            <p className="text-gray-500">
+              Hostel
+            </p>
+
+            <p className="font-medium">
+              {d.hostel}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Room
+            </p>
+
+            <p className="font-medium">
+              {d.room}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Issue
+            </p>
+
+            <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-600">
+              {d.issue}
+            </span>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Priority
+            </p>
+
+            <span
+              className={`px-2 py-1 rounded-full text-xs
+              ${
+                d.priority === "High"
+                  ? "bg-red-100 text-red-600"
+                  : d.priority === "Medium"
+                  ? "bg-orange-100 text-orange-600"
+                  : "bg-green-100 text-green-600"
+              }`}
+            >
+              {d.priority}
+            </span>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Date
+            </p>
+
+            <p className="font-medium">
+              {d.date}
+            </p>
+          </div>
+
+        </div>
+
+        {/* ACTIONS */}
+        <div className="grid grid-cols-3 gap-3">
+
+          {/* VIEW */}
+          <button
+            onClick={() => setViewData(d)}
+            className="flex items-center justify-center gap-2 border rounded-xl py-2.5 text-sm hover:bg-blue-50"
+          >
+            <Eye size={15} />
+            View
+          </button>
+
+          {/* EDIT */}
+          <button
+            onClick={() => setEditData(d)}
+            className="flex items-center justify-center gap-2 border rounded-xl py-2.5 text-sm hover:bg-yellow-50"
+          >
+            <Edit size={15} />
+            Edit
+          </button>
+
+          {/* DELETE */}
+          <button
+            onClick={() => setDeleteId(d.id)}
+            className="flex items-center justify-center gap-2 border rounded-xl py-2.5 text-sm text-red-600 hover:bg-red-50"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    ))
+  )}
+</div>
       {/* ADD COMPLAINT MODAL */}
 
 {showModal && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
 
-    <div className="bg-white rounded-2xl w-full max-w-3xl p-6">
+    <div className="bg-white rounded-2xl w-full max-w-3xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
 
       <div className="flex justify-between items-center mb-5">
 
@@ -571,7 +723,7 @@ filtered.map((d) => (
               student: e.target.value,
             })
           }
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 w-full"
         />
 
         <input
@@ -583,7 +735,7 @@ filtered.map((d) => (
               hostel: e.target.value,
             })
           }
-          className="border rounded-lg px-3 py-2"
+         className="border rounded-lg px-3 py-2 w-full"
         />
 
         <input
@@ -595,7 +747,7 @@ filtered.map((d) => (
               room: e.target.value,
             })
           }
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 w-full"
         />
 
         <input
@@ -607,7 +759,7 @@ filtered.map((d) => (
               issue: e.target.value,
             })
           }
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 w-full"
         />
 
         <select
@@ -618,7 +770,7 @@ filtered.map((d) => (
               priority: e.target.value,
             })
           }
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 w-full"
         >
           <option value="">Select Priority</option>
           <option value="High">High</option>
@@ -635,7 +787,7 @@ filtered.map((d) => (
               date: e.target.value,
             })
           }
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 w-full"
         />
 
       </div>
@@ -666,7 +818,7 @@ filtered.map((d) => (
 {viewData && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
 
-    <div className="bg-white rounded-2xl w-full max-w-2xl p-6">
+   <div className="bg-white rounded-2xl w-full max-w-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
 
       <div className="flex justify-between items-center mb-5">
 
@@ -683,7 +835,7 @@ filtered.map((d) => (
 
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
         <div>
           <p className="text-gray-500">Student</p>
@@ -724,7 +876,7 @@ filtered.map((d) => (
 
 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
 
-  <div className="bg-white rounded-2xl w-full max-w-3xl p-6">
+ <div className="bg-white rounded-2xl w-full max-w-3xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
 
     <div className="flex justify-between items-center mb-5">
 
@@ -751,7 +903,7 @@ filtered.map((d) => (
             student: e.target.value,
           })
         }
-        className="border rounded-lg px-3 py-2"
+       className="border rounded-lg px-3 py-2 w-full"
       />
 
       <input
@@ -762,7 +914,7 @@ filtered.map((d) => (
             hostel: e.target.value,
           })
         }
-        className="border rounded-lg px-3 py-2"
+        className="border rounded-lg px-3 py-2 w-full"
       />
 
       <input
@@ -773,7 +925,7 @@ filtered.map((d) => (
             room: e.target.value,
           })
         }
-        className="border rounded-lg px-3 py-2"
+       className="border rounded-lg px-3 py-2 w-full"
       />
 
       <input
@@ -784,7 +936,7 @@ filtered.map((d) => (
             issue: e.target.value,
           })
         }
-        className="border rounded-lg px-3 py-2"
+        className="border rounded-lg px-3 py-2 w-full"
       />
 
     </div>

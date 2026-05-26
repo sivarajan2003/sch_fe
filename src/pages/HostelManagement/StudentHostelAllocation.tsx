@@ -444,165 +444,297 @@ const handleSave = async () => {
         </div>
       </div>
 
-      {/* ================= TABLE ================= */}
-      <div className="bg-white border rounded-xl overflow-x-auto">
+      {/* ================= DESKTOP TABLE ================= */}
 
-        <table className="min-w-full text-sm">
+<div className="hidden lg:block bg-white border rounded-xl overflow-x-auto">
 
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-center">Student</th>
-              <th className="px-4 py-3 text-center">Register No</th>
-              <th className="px-4 py-3 text-center">className</th>
-              <th className="px-4 py-3 text-center">Hostel</th>
-              <th className="px-4 py-3 text-center">Room No</th>
-              <th className="px-4 py-3 text-center">Bed No</th>
-              <th className="px-4 py-3 text-center">Allocation Date</th>
-              <th className="px-4 py-3 text-center">Status</th>
-              <th className="px-4 py-3 text-center">Action</th>
-            </tr>
-          </thead>
+  <table className="min-w-full text-sm">
 
-          <tbody>
+    <thead className="bg-gray-50">
+
+      <tr>
+        <th className="px-4 py-3 text-center">Student</th>
+        <th className="px-4 py-3 text-center">Register No</th>
+        <th className="px-4 py-3 text-center">Class</th>
+        <th className="px-4 py-3 text-center">Hostel</th>
+        <th className="px-4 py-3 text-center">Room No</th>
+        <th className="px-4 py-3 text-center">Bed No</th>
+        <th className="px-4 py-3 text-center">Allocation Date</th>
+        <th className="px-4 py-3 text-center">Status</th>
+        <th className="px-4 py-3 text-center">Action</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      {filtered.length === 0 ? (
+
+        <tr>
+          <td
+            colSpan={9}
+            className="text-center py-10 text-gray-500"
+          >
+            No Data Found
+          </td>
+        </tr>
+
+      ) : (
+
+        filtered.map((d) => (
+
+          <tr
+            key={d.id}
+            className="border-t hover:bg-gray-50"
+          >
+
+            <td className="px-4 py-3">
+
+              <div className="flex items-center gap-3">
+
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm
+                  ${
+                    d.color === "blue"
+                      ? "bg-blue-100 text-blue-700"
+                      : d.color === "pink"
+                      ? "bg-pink-100 text-pink-700"
+                      : "bg-orange-100 text-orange-700"
+                  }`}
+                >
+                  {d.initial}
+                </div>
+
+                <p className="font-medium text-gray-800 text-sm">
+                  {d.student}
+                </p>
+
+              </div>
+
+            </td>
+
+            <td className="px-4 py-3 text-center">
+              {d.regNo}
+            </td>
+
+            <td className="px-4 py-3 text-center">
+              {d.className}
+            </td>
+
+            <td className="px-4 py-3 text-center">
+              {d.hostel}
+            </td>
+
+            <td className="px-4 py-3 text-center">
+              {d.room}
+            </td>
+
+            <td className="px-4 py-3 text-center">
+              {d.bed}
+            </td>
+
+            <td className="px-4 py-3 text-center">
+              {d.date}
+            </td>
+
+            <td className="px-4 py-3 text-center">
+
+              <span
+                className={`px-2 py-1 rounded-full text-xs
+                ${
+                  d.status === "Active"
+                    ? "bg-green-100 text-green-600"
+                    : "bg-yellow-100 text-yellow-600"
+                }`}
+              >
+                ● {d.status}
+              </span>
+
+            </td>
+
+            <td className="px-4 py-3 text-center">
+
+              <div className="flex items-center justify-center gap-3">
+
+                <button
+                  onClick={() => setViewData(d)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <Eye size={18} />
+                </button>
+
+                <button
+                  onClick={() => {
+                    setFormData(d);
+                    setEditId(d.id);
+                    setOpenModal(true);
+                  }}
+                  className="text-yellow-600 hover:text-yellow-800"
+                >
+                  <Edit size={18} />
+                </button>
+
+                <button
+                  onClick={async () => {
+                    await deleteAllocation(d.id);
+                    fetchAllocations();
+                  }}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        ))
+      )}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+{/* ================= MOBILE & TABLET VIEW ================= */}
+
+<div className="lg:hidden space-y-4">
 
   {filtered.length === 0 ? (
 
-    <tr>
-
-      <td
-        colSpan={9}
-        className="text-center py-10 text-gray-500"
-      >
-        No Data Found
-      </td>
-
-    </tr>
+    <div className="bg-white border rounded-2xl p-8 text-center text-gray-500">
+      No Data Found
+    </div>
 
   ) : (
 
     filtered.map((d) => (
-              <tr
-                key={d.id}
-                className="border-t hover:bg-gray-50"
-              >
 
-                <td className="px-4 py-3">
+      <div
+        key={d.id}
+        className="bg-white border rounded-2xl p-4 space-y-4"
+      >
 
-                  <div className="flex items-center gap-3">
+        {/* TOP */}
 
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm
-                      ${
-                        d.color === "blue"
-                          ? "bg-blue-100 text-blue-700"
-                          : d.color === "pink"
-                          ? "bg-pink-100 text-pink-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
-                    >
-                      {d.initial}
-                    </div>
+        <div className="flex justify-between items-start">
 
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm">
-                        {d.student}
-                      </p>
+          <div>
 
-                      {/* <p className="text-xs text-gray-500">
-                        {d.year}
-                      </p> */}
-                    </div>
+            <p className="font-semibold text-gray-800">
+              {d.student}
+            </p>
 
-                  </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {d.regNo}
+            </p>
 
-                </td>
+          </div>
 
-                <td className="px-4 py-3 text-center text-gray-700">
-                  {d.regNo}
-                </td>
+          <span
+            className={`px-3 py-1 rounded-full text-xs
+            ${
+              d.status === "Active"
+                ? "bg-green-100 text-green-600"
+                : "bg-yellow-100 text-yellow-600"
+            }`}
+          >
+            ● {d.status}
+          </span>
 
-                <td className="px-4 py-3 text-center text-gray-700">
-                  {d.className}
-                </td>
+        </div>
 
-                <td className="px-4 py-3 text-center">
-                  {d.hostel}
-                </td>
+        {/* DETAILS */}
 
-                <td className="px-4 py-3 text-center">
-                  {d.room}
-                </td>
+        <div className="grid grid-cols-2 gap-4 text-sm">
 
-                <td className="px-4 py-3 text-center">
-                  {d.bed}
-                </td>
+          <div>
+            <p className="text-gray-500">
+              Class
+            </p>
 
-                <td className="px-4 py-3 text-center">
-                  {d.date}
-                </td>
+            <p className="font-medium">
+              {d.className}
+            </p>
+          </div>
 
-                <td className="px-4 py-3 text-center">
+          <div>
+            <p className="text-gray-500">
+              Hostel
+            </p>
 
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs
-                    ${
-                      d.status === "Active"
-                        ? "bg-green-100 text-green-600"
-                        : "bg-yellow-100 text-yellow-600"
-                    }`}
-                  >
-                    ● {d.status}
-                  </span>
+            <p className="font-medium">
+              {d.hostel}
+            </p>
+          </div>
 
-                </td>
+          <div>
+            <p className="text-gray-500">
+              Room
+            </p>
 
-                <td className="px-4 py-3 text-center">
+            <p className="font-medium">
+              {d.room}
+            </p>
+          </div>
 
-                  <div className="flex items-center justify-center gap-3">
+          <div>
+            <p className="text-gray-500">
+              Bed
+            </p>
 
-<button
-  onClick={() => setViewData(d)}
-  className="text-blue-600 hover:text-blue-800"
->
-  <Eye size={18} />
-</button>
+            <p className="font-medium">
+              {d.bed}
+            </p>
+          </div>
 
-<button
-  onClick={() => {
-    setFormData(d);
-    setEditId(d.id);
-    setOpenModal(true);
-  }}
-  className="text-yellow-600 hover:text-yellow-800"
->
-  <Edit size={18} />
-</button>
-  <button
-    onClick={async () => {
+        </div>
 
-      await deleteAllocation(d.id);
+        {/* ACTIONS */}
 
-      fetchAllocations();
+        <div className="grid grid-cols-3 gap-3">
 
-    }}
-    className="text-red-600 hover:text-red-800"
-  >
-    Delete
-  </button>
+          <button
+            onClick={() => setViewData(d)}
+            className="border rounded-xl py-2 text-sm hover:bg-blue-50"
+          >
+            View
+          </button>
+
+          <button
+            onClick={() => {
+              setFormData(d);
+              setEditId(d.id);
+              setOpenModal(true);
+            }}
+            className="border rounded-xl py-2 text-sm hover:bg-yellow-50"
+          >
+            Edit
+          </button>
+
+          <button
+            onClick={async () => {
+              await deleteAllocation(d.id);
+              fetchAllocations();
+            }}
+            className="border rounded-xl py-2 text-sm text-red-600 hover:bg-red-50"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    ))
+  )}
 
 </div>
 
-                </td>
-
-             </tr>
-))
-
-)}
-
-          </tbody>
-        </table>
-      </div>
-      {/* ================= MODAL ================= */}
+{/* ================= MODAL ================= */}
 
 {openModal && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
