@@ -343,7 +343,7 @@ const handleSave = async () => {
       </div>
 
       {/* ================= TABLE ================= */}
-      <div className="bg-white border rounded-xl overflow-x-auto">
+<div className="hidden lg:block bg-white border rounded-xl overflow-x-auto">
 
         <table className="min-w-full text-sm">
 
@@ -534,7 +534,173 @@ filtered.map((d) => (
           </tbody>
         </table>
       </div>
-      {/* ================= MODAL ================= */}
+
+{/* ================= MOBILE & TABLET VIEW ================= */}
+
+<div className="lg:hidden space-y-4">
+
+  {filtered.length === 0 ? (
+
+    <div className="bg-white border rounded-2xl p-8 text-center text-gray-500">
+      No Data Found
+    </div>
+
+  ) : (
+
+    filtered.map((d) => (
+
+      <div
+        key={d.id}
+        className="bg-white border rounded-2xl p-4 space-y-4"
+      >
+
+        {/* TOP */}
+
+        <div className="flex justify-between items-start">
+
+          <div>
+
+            <p className="font-semibold text-gray-800">
+              {d.student}
+            </p>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {d.regNo}
+            </p>
+
+          </div>
+
+          <span
+            className={`px-3 py-1 rounded-full text-xs
+            ${
+              d.status === "Present"
+                ? "bg-green-100 text-green-600"
+                : d.status === "Outside"
+                ? "bg-orange-100 text-orange-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            ● {d.status}
+          </span>
+
+        </div>
+
+        {/* DETAILS */}
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+
+          <div>
+            <p className="text-gray-500">
+              Hostel
+            </p>
+
+            <p className="font-medium">
+              {d.hostel}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Room
+            </p>
+
+            <p className="font-medium">
+              {d.room}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Check In
+            </p>
+
+            <p className="font-medium text-green-600">
+              {d.checkIn}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Check Out
+            </p>
+
+            <p className="font-medium text-red-600">
+              {d.checkOut}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Entry Type
+            </p>
+
+            <p className="font-medium">
+              {d.entryType}
+            </p>
+          </div>
+
+        </div>
+
+        {/* ACTIONS */}
+
+        <div className="grid grid-cols-3 gap-3">
+
+          <button
+            onClick={() => setViewData(d)}
+            className="border rounded-xl py-2 text-sm hover:bg-blue-50"
+          >
+            View
+          </button>
+
+          <button
+            onClick={() => {
+
+              setFormData({
+                student: d.student,
+                regNo: d.regNo,
+                hostel: d.hostel,
+                room: d.room,
+                checkIn: d.checkIn,
+                checkOut: d.checkOut,
+                status: d.status,
+                entryType: d.entryType,
+              });
+
+              setEditId(d.id);
+
+              setShowModal(true);
+
+            }}
+            className="border rounded-xl py-2 text-sm hover:bg-yellow-50"
+          >
+            Edit
+          </button>
+
+          <button
+            onClick={async () => {
+
+              await deleteAttendanceEntry(
+                d.id
+              );
+
+              fetchAttendance();
+
+            }}
+            className="border rounded-xl py-2 text-sm text-red-600 hover:bg-red-50"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    ))
+  )}
+
+</div>
+
+{/* ================= MODAL ================= */}
 
 {showModal && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">

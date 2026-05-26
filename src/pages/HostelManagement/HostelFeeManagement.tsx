@@ -428,7 +428,7 @@ const handleSave = async () => {
       </div>
 
       {/* ================= TABLE ================= */}
-      <div className="bg-white border rounded-xl overflow-x-auto">
+      <div className="hidden lg:block bg-white border rounded-xl overflow-x-auto">
 
         <table className="min-w-full text-sm">
 
@@ -575,7 +575,152 @@ filtered.map((d) => (
           </tbody>
         </table>
       </div>
-      {/* ADD FEE MODAL */}
+
+{/* ================= MOBILE & TABLET VIEW ================= */}
+
+<div className="lg:hidden space-y-4">
+
+  {filtered.length === 0 ? (
+
+    <div className="bg-white border rounded-2xl p-8 text-center text-gray-500">
+      No Data Found
+    </div>
+
+  ) : (
+
+    filtered.map((d) => (
+
+      <div
+        key={d.id}
+        className="bg-white border rounded-2xl p-4 space-y-4"
+      >
+
+        {/* TOP */}
+
+        <div className="flex justify-between items-start">
+
+          <div>
+
+            <p className="font-semibold text-gray-800">
+              {d.student}
+            </p>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {d.regNo}
+            </p>
+
+          </div>
+
+          <span
+            className={`px-3 py-1 rounded-full text-xs
+            ${
+              d.status === "Paid"
+                ? "bg-green-100 text-green-600"
+                : d.status === "Partial"
+                ? "bg-yellow-100 text-yellow-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            ● {d.status}
+          </span>
+
+        </div>
+
+        {/* DETAILS */}
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+
+          <div>
+            <p className="text-gray-500">
+              Hostel
+            </p>
+
+            <p className="font-medium">
+              {d.hostel}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Room
+            </p>
+
+            <p className="font-medium">
+              {d.room}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Total
+            </p>
+
+            <p className="font-medium">
+              ₹{d.total}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Paid
+            </p>
+
+            <p className="font-medium text-green-600">
+              ₹{d.paid}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Balance
+            </p>
+
+            <p className="font-medium text-red-600">
+              ₹{d.balance}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">
+              Due Date
+            </p>
+
+            <p className="font-medium">
+              {d.dueDate}
+            </p>
+          </div>
+
+        </div>
+
+        {/* ACTIONS */}
+
+        <div className="grid grid-cols-2 gap-3">
+
+          <button
+            onClick={() =>
+              setViewData(d)
+            }
+            className="border rounded-xl py-2 text-sm hover:bg-blue-50"
+          >
+            View
+          </button>
+
+          <button
+            className="border rounded-xl py-2 text-sm hover:bg-yellow-50"
+          >
+            Edit
+          </button>
+
+        </div>
+
+      </div>
+
+    ))
+  )}
+
+</div>
+
+{/* ADD FEE MODAL */}
 
 {showModal && (
 
