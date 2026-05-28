@@ -1,8 +1,7 @@
-//complaintsmaintenanceService.js
 import axios from 'axios';
 
 const API =
-  'http://localhost:5000/api/v1/hostel/complaintsmaintenance';
+  'http://localhost:4000/api/v1/psms/hostel/complaintsmaintenance';
 
 export const getComplaints = () =>
   axios.get(API);

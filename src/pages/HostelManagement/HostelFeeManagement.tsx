@@ -74,7 +74,11 @@ export default function HostelFeeManagement() {
   //   },
   // ];
  
+const [filterStatus, setFilterStatus] =
+  useState("");
 
+const [sortOrder, setSortOrder] =
+  useState("asc");
 
 const filtered = feeData
   .filter(
@@ -105,11 +109,11 @@ const filtered = feeData
   const [showModal, setShowModal] =
   useState(false);
 
-const [filterStatus, setFilterStatus] =
-  useState("");
+// const [filterStatus, setFilterStatus] =
+//   useState("");
 
-const [sortOrder, setSortOrder] =
-  useState("asc");
+// const [sortOrder, setSortOrder] =
+//   useState("asc");
 
 const [viewData, setViewData] =
   useState<any>(null);

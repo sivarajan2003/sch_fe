@@ -1,3 +1,5 @@
+
+//hostelservice.js
 import api from "../api/client";
 
 export const createHostel = (data) =>
