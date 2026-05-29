@@ -29,73 +29,73 @@ api.interceptors.request.use(
 
 /**
  * CREATE INTERVIEW
- * POST /interviews
+ * POST /admission/interviews
  */
 export const createInterview = async (payload) => {
-  const res = await api.post("/interviews", payload);
+  const res = await api.post("/admission/interviews", payload);
   return res.data;
 };
 
 /**
  * GET INTERVIEWS LIST
- * GET /interviews
+ * GET /admission/interviews
  */
 export const getInterviews = async (params = {}) => {
-  const res = await api.get("/interviews", { params });
+  const res = await api.get("/admission/interviews", { params });
   return res.data;
 };
 
 /**
  * GET INTERVIEW BY ID
- * GET /interviews/:id
+ * GET /admission/interviews/:id
  */
 export const getInterviewById = async (id) => {
-  const res = await api.get(`/interviews/${id}`);
+  const res = await api.get(`/admission/interviews/${id}`);
   return res.data;
 };
 
 /**
  * UPDATE INTERVIEW
- * PUT /interviews/:id
+ * PUT /admission/interviews/:id
  */
 export const updateInterview = async (id, data) => {
-  const res = await api.put(`/interviews/${id}`, data);
+  const res = await api.put(`/admission/interviews/${id}`, data);
   return res.data;
 };
 
 /**
  * UPDATE INTERVIEW STATUS
- * PATCH /interviews/:id/status
+ * PATCH /admission/interviews/:id/status
  */
 export const updateInterviewStatus = async (id, payload) => {
-  const res = await api.patch(`/interviews/${id}/status`, payload);
+  const res = await api.patch(`/admission/interviews/${id}/status`, payload);
   return res.data;
 };
 
 /**
  * VERIFY DOCUMENTS
- * PATCH /interviews/:id/documents
+ * PATCH /admission/interviews/:id/documents
  */
 export const verifyInterviewDocuments = async (id, payload) => {
-  const res = await api.patch(`/interviews/${id}/documents`, payload);
+  const res = await api.patch(`/admission/interviews/${id}/documents`, payload);
   return res.data;
 };
 
 /**
  * DELETE INTERVIEW
- * DELETE /interviews/:id
+ * DELETE /admission/interviews/:id
  */
 export const deleteInterview = async (id) => {
-  const res = await api.delete(`/interviews/${id}`);
+  const res = await api.delete(`/admission/interviews/${id}`);
   return res.data;
 };
 
 /**
  * RESTORE INTERVIEW
- * PATCH /interviews/:id/restore
+ * PATCH /admission/interviews/:id/restore
  */
 export const restoreInterview = async (id) => {
-  const res = await api.patch(`/interviews/${id}/restore`);
+  const res = await api.patch(`/admission/interviews/${id}/restore`);
   return res.data;
 };
 

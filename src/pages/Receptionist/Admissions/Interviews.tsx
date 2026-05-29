@@ -1,29 +1,20 @@
-import { Eye, Pencil, Trash2, FileText, ArrowLeft, RefreshCcw, Printer, Plus, CalendarDays, Filter, ArrowUpDown } from "lucide-react";
+import { Eye, ArrowLeft, RefreshCcw, Printer, Plus, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-// @ts-ignore
-import admissionService from "../../../service/admissionService";
+import { useNavigate } from "react-router-dom";
+import interviewService from "../../../service/interviewService";
 import { toast } from "react-toastify";
 import i1 from "../../../assets/gif/i1.gif";
 import i2 from "../../../assets/gif/i2.gif";
 import i3 from "../../../assets/gif/i3.gif";
-import interviewService from "../../../service/interviewService";
 
 const statusStyle = (status: string) => {
   switch (status) {
-    case "Enrolled":
-    case "Approved":
+    case "Completed":
       return "bg-green-100 text-green-700";
-    case "Interview Done":
-    case "Interview Scheduled":
+    case "Scheduled":
       return "bg-blue-100 text-blue-700";
-    case "Applied":
-    case "Pending":
-      return "bg-indigo-100 text-indigo-700";
-    case "Offer Accepted":
-      return "bg-green-100 text-green-700 font-bold";
-    case "Verifying Documents":
-      return "bg-yellow-100 text-yellow-700";
+    case "Cancelled":
+      return "bg-red-100 text-red-700";
     default:
       return "bg-gray-100 text-gray-600";
   }
@@ -35,38 +26,24 @@ export default function Interviews() {
   const [loading, setLoading] = useState(false);
 
   // Filters
-  const [openDate, setOpenDate] = useState(false);
   const [openFilter, setOpenFilter] = useState(false);
-  const [search, setSearch] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const search = "";
+  const startDate = "";
+  const endDate = "";
+  const sortOrder = "asc";
   const [statusFilter, setStatusFilter] = useState<string>("All");
 
   // Pagination
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const rowsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
   // Modals
   const [viewApp, setViewApp] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "documents" | "interview" | "offer">("overview");
-
-  const [editApp, setEditApp] = useState<any>(null);
-  const [deleteApp, setDeleteApp] = useState<any>(null);
 
   const [scheduleApp, setScheduleApp] = useState<any>(null);
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
   const [scheduleLocation, setScheduleLocation] = useState("Admin Office - Room 101");
-
-  const [openNewApp, setOpenNewApp] = useState(false);
-  const [newApp, setNewApp] = useState({
-    name: "",
-    dob: "",
-    phone: "",
-    email: "",
-    class: "Grade 1",
-  });
 
   useEffect(() => {
     fetchInterviews();
@@ -76,87 +53,60 @@ export default function Interviews() {
     setLoading(true);
     try {
       const filters: any = {};
-      // We generally show all, but maybe prioritize interviews?
-      // The original page seemed to show generic "All Applications" but named "Interviews".
-      // It had stats for "Scheduled", "Completed".
-      // I will fetch ALL and filter in UI for stats, but backend filter for list if possible.
-      // If I want to show ONLY interviews, I should defaulting statusFilter.
-      // But the dropdown allows "All", "Applied", etc. So it's really an "All Applications" view but focused on interviews?
-      // I'll stick to fetching everything but logically handling it as the previous code did.
+      if (statusFilter !== "All") filters.status = statusFilter;
 
-      if (statusFilter !== "All") filters.admission_status = statusFilter;
+      const res = await interviewService.getInterviews({
+        page: currentPage,
+        limit: rowsPerPage,
+        search: search || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        order: JSON.stringify([['interview_date', sortOrder.toUpperCase()]]),
+        filters: JSON.stringify(filters),
+      });
 
-     const res = await admissionService.getAdmissions({
-  page: currentPage,
-  limit: rowsPerPage,
-  search,
-  startDate: startDate || undefined,
-  endDate: endDate || undefined,
-  order: JSON.stringify([['createdAt', sortOrder.toUpperCase()]])
-});
-// console.log("🔥 FULL API RESPONSE:", res);
+      const rows = res?.rows ?? res?.data?.rows ?? [];
 
-const rows = res?.rows || res?.data?.rows || [];
-
-// 👉 filter only interview records
-const interviewRows = rows.filter(
-  (r:any) => r.admission_status === "Interview Scheduled" ||
-             r.admission_status === "Interview Done"
-);
-      if (res.success && res.rows) {
-        const mapped = interviewRows.map((item:any) => {
-
-          // Calculate documents count
+      if (res.success) {
+        const mapped = rows.map((item: any) => {
           const docs = [
-            item.birth_certificate,
-            item.tc_certificate,
-            item.passport_size_photo,
-            item.address_proof
+            item.admission?.birth_certificate,
+            item.admission?.tc_certificate,
+            item.admission?.passport_size_photo,
+            item.admission?.address_proof,
           ];
           const uploadedCount = docs.filter(d => d && d !== 'null').length;
-          const totalDocs = 4; // Based on known requirements
-// const [interviews, setInterviews] = useState([]);
-// useEffect(() => {
-//   const loadInterviews = async () => {
-//     try {
-//       const res = await admissionService.getAdmissions();
-
-//       const rows = res?.rows || res?.data?.rows || [];
-
-//       const filtered = rows.filter(
-//         (r) =>
-//           r.admission_status === "Interview Scheduled" ||
-//           r.admission_status === "Interview Done"
-//       );
-
-//       console.log("🔥 Parent interviews:", filtered);
-
-//       setInterviews(filtered);
-//     } catch (e) {
-//       console.log(e);
-//     }
-//   };
-
-//   loadInterviews();
-// }, []);
+          const totalDocs = 4;
 
           return {
-            id: item.addmission_number || item.id,
-            name: item.student_name,
-            dob: item.date_of_birth,
-            phone: item.parent_number,
-            email: item.parent_email,
-            class: item.class_name || item.class_applied_id || "N/A",
-            status: item.admission_status,
+            id: item.id,
+            name: item.admission?.student_name || item.admission_id,
+            dob: item.admission?.date_of_birth || "-",
+            phone: item.admission?.parent_number || "",
+            email: item.admission?.parent_email || "",
+            class: item.admission?.class_name || item.admission?.class_applied_id || "N/A",
+            status: item.status || "Verifying Documents",
             documents: `${uploadedCount}/${totalDocs}`,
-            avatar: item.passport_size_photo ? (item.passport_size_photo.startsWith("http") ? item.passport_size_photo : `http://localhost:4000/${item.passport_size_photo}`) : `https://ui-avatars.com/api/?name=${item.student_name}&background=random`,
+            avatar: item.admission?.passport_size_photo
+              ? (item.admission.passport_size_photo.startsWith("http")
+                ? item.admission.passport_size_photo
+                : `http://localhost:4000/${item.admission.passport_size_photo}`)
+              : `https://ui-avatars.com/api/?name=${item.admission?.student_name || item.admission_id}&background=random`,
             interviewDate: item.interview_date ? new Date(item.interview_date).toLocaleDateString() : "-",
             interviewTime: item.interview_time || "",
-            interviewLocation: item.interview_location || "Admin Office",
-            original: item
+            interviewLocation: item.location || "Admin Office",
+            original: item,
           };
         });
+
         setData(mapped);
+        setStats({
+          scheduled: mapped.filter((m: any) => m.status === 'Scheduled').length,
+          completed: mapped.filter((m: any) => m.status === 'Completed').length,
+        });
+      } else {
+        setData([]);
+        setStats({ scheduled: 0, completed: 0 });
       }
     } catch (error) {
       console.error(error);
@@ -170,17 +120,13 @@ const interviewRows = rows.filter(
     fetchInterviews();
   };
 
-  const handleSort = () => {
-    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
-  };
-
   // ACTIONS
   const markInterviewDone = async (app: any) => {
     try {
-      await admissionService.updateAdmission(app.original.id, {
-        admission_status: "Interview Done"
+      await interviewService.updateInterviewStatus(app.original.id, {
+        status: "Completed"
       });
-      toast.success("Marked as Interview Done");
+      toast.success("Marked as Completed");
       fetchInterviews();
     } catch (error) {
       toast.error("Failed to update status");
@@ -190,14 +136,10 @@ const interviewRows = rows.filter(
   const handleSchedule = async () => {
     if (!scheduleApp) return;
     try {
-      // Since we don't have interview date/time fields in backend yet, we just update status
-      // In a real implementation we would send date/time/location
-      // Update status and schedule details
-      await admissionService.updateAdmission(scheduleApp.original.id, {
-        admission_status: "Interview Scheduled",
+      await interviewService.updateInterview(scheduleApp.original.id, {
         interview_date: scheduleDate,
-        interview_time: scheduleTime,
-        interview_location: scheduleLocation
+        location: scheduleLocation,
+        status: "Scheduled",
       });
       toast.success(`Interview Scheduled for ${scheduleApp.name}`);
       setScheduleApp(null);
@@ -207,54 +149,12 @@ const interviewRows = rows.filter(
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteApp) return;
-    try {
-      await admissionService.deleteAdmission(deleteApp.original.id);
-      toast.success("Application deleted");
-      setDeleteApp(null);
-      fetchInterviews();
-    } catch (error) {
-      toast.error("Failed to delete");
-    }
-  };
-
-  const handleCreate = async () => { // Simple logic, assumes default parent etc or expands
-    // The new application form in this modal is very simple (name, dob, phone, email, class)
-    // The backend requires more fields. This might fail validation if we don't provide all mandatory fields.
-    // Mandatory: gender, address, parent_name, parent_number, parent_email, quota_category...
-    // I will skip Implementing Create here or stub it to redirect to full form?
-    // Redirecting is safer.
-    navigate("/admin/dashboard/receptionist/admissions/application-form");
-  };
-
   // Stats calculation (on current page data? or ideally separate API call?)
   // We'll calculate on current loaded data for simplicity as per previous code, 
   // OR fetch stats separately. The previous code calculated from "data" (all local data).
   // Now "data" is paginated. So stats will be wrong if we only use `data`.
   // We should fetch stats or use the `getAdmissionStats` I added!
   const [stats, setStats] = useState({ scheduled: 0, completed: 0 });
-
- useEffect(() => {
-  const loadStats = async () => {
-    try {
-      const res: any = await admissionService.getAdmissionStats();
-
-      if (res?.success) {
-        const counts = res.data?.counts || {};
-
-        setStats({
-          scheduled: counts["Interview Scheduled"] || 0,
-          completed: counts["Interview Done"] || 0,
-        });
-      }
-    } catch (err) {
-      console.log("Stats API failed — ignoring", err);
-    }
-  };
-
-  loadStats();
-}, []);
 
 useEffect(() => {
   if (viewApp || scheduleApp) {
@@ -272,7 +172,6 @@ useEffect(() => {
 }, [viewApp, scheduleApp]);
 
   const handlePrint = () => window.print();
-  const handleExport = () => { /* Export logic similar to before but using data */ };
 
   return (
     <div className="space-y-6">
@@ -309,7 +208,7 @@ useEffect(() => {
             {/* Filter Dropdown Logic */}
             {openFilter && (
               <div className="absolute right-20 mt-32 w-52 bg-white border rounded-lg shadow z-20">
-                {["All", "Interview Done", "Interview Scheduled", "Applied", "Approved"].map(s => (
+                {["All", "Scheduled", "Completed", "Cancelled"].map(s => (
                   <button key={s} onClick={() => { setStatusFilter(s); setOpenFilter(false); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">{s}</button>
                 ))}
               </div>
@@ -364,13 +263,13 @@ useEffect(() => {
                 <td className="px-6 py-4 text-center">
                   <div className="flex justify-center gap-2">
                     <button onClick={() => setViewApp(app)} className="p-2 border rounded hover:bg-gray-50"><Eye size={16} /></button>
-                    {app.status !== "Interview Done" && (
+                    {app.status !== "Completed" && (
                       <button onClick={() => setScheduleApp(app)} className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs">Schedule</button>
                     )}
-                    {app.status === "Interview Done" ? (
+                    {app.status === "Completed" ? (
                       <span className="text-green-600 text-xs font-bold px-2 py-1">Done</span>
                     ) : (
-                      app.status === "Interview Scheduled" && (
+                      app.status === "Scheduled" && (
                         <button onClick={() => markInterviewDone(app)} className="p-2 bg-green-600 text-white rounded hover:bg-green-700 text-xs">Mark Done</button>
                       )
                     )}
@@ -380,6 +279,31 @@ useEffect(() => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="lg:hidden space-y-4">
+        {loading ? (
+          <div className="bg-white border rounded-xl p-6 text-center text-gray-600">Loading interviews...</div>
+        ) : data.length === 0 ? (
+          <div className="bg-white border rounded-xl p-6 text-center text-gray-600">No interviews found.</div>
+        ) : (
+          data.map((app) => (
+            <div key={app.id} className="bg-white border rounded-xl p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <img src={app.avatar} className="w-12 h-12 rounded-full object-cover" />
+                <div>
+                  <p className="font-medium">{app.name}</p>
+                  <p className="text-xs text-gray-500">{app.class}</p>
+                </div>
+              </div>
+              <div className="mt-3 text-sm text-gray-600 space-y-2">
+                <div><span className="font-medium">Schedule:</span> {app.interviewDate || "Not scheduled"}</div>
+                <div><span className="font-medium">Location:</span> {app.interviewLocation || "Admin Office"}</div>
+                <div><span className="font-medium">Status:</span> <span className={`px-2 py-1 rounded-full text-xs ${statusStyle(app.status)}`}>{app.status}</span></div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* PAGINATION */}

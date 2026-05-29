@@ -60,6 +60,14 @@ export default function Verification() {
             item.passport_size_photo,
           ].filter(Boolean).length;
 
+          const normalizedStatus = (item.admission_status || "").trim();
+          const allDocsVerified = [
+            item.birth_certificate_status,
+            item.tc_certificate_status,
+            item.passport_size_photo_status,
+            item.address_proof_status,
+          ].every((value: string) => value === "Verified");
+
           return {
             id: item.id,
             displayId: item.addmission_number || item.id,
@@ -68,7 +76,7 @@ export default function Verification() {
             phone: item.parent_number,
             email: item.parent_email,
             class: item.class_name || "N/A",
-            status: item.admission_status,
+            status: normalizedStatus || (allDocsVerified ? "Verifying Documents" : "Pending"),
             documents: `${uploadedDocs}/4`,
             avatar: item.passport_size_photo
               ? (item.passport_size_photo.startsWith("http")

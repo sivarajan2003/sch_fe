@@ -15,6 +15,7 @@ import ReceptionistAdmissions from "./pages/Receptionist/Admissions";
 import NewApplication from "./pages/Receptionist/Admissions/NewApplication";
 import DocumentVerification from "./pages/Receptionist/Admissions/DocumentVerification";
 import Interviews from "./pages/Receptionist/Admissions/Interviews";
+import AddInterview from "./pages/Receptionist/Admissions/AddInterview";
 import OfferLetters from "./pages/Receptionist/Admissions/OfferLetters";
 import EnrolledStudents from "./pages/Receptionist/Admissions/EnrolledStudents";
 import AllApplications from "./pages/Receptionist/Admissions/AllApplications";
@@ -173,6 +174,7 @@ export default function App() {
             <Route path="new" element={<NewApplication />} />
             <Route path="documents" element={<DocumentVerification />} />
             <Route path="interviews" element={<Interviews />} />
+            <Route path="interviews/new" element={<AddInterview />} />
             <Route path="offers" element={<OfferLetters />} />
             <Route path="enrolled" element={<EnrolledStudents />} />
             <Route path="seat-allocation" element={<SeatAllocation />} />

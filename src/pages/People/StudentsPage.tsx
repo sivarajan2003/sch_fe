@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutGrid,
   List,
@@ -10,273 +10,124 @@ import {
   Filter,
   CalendarDays,
   ArrowUpDown,
+  Loader2,
 } from "lucide-react";
 import AddFeesModal from "../../components/AddFeesModal";
 import AddStudentModal from "../../components/AddStudentModal";
 import { MoreVertical, Eye, Pencil, Trash2 } from "lucide-react";
-import s1 from "../../assets/stud/s1.png";
-import s2 from "../../assets/stud/s2.png";
-import s3 from "../../assets/stud/s3.png";
-import s4 from "../../assets/stud/s4.png";
-import s5 from "../../assets/stud/s5.png";
-import s6 from "../../assets/stud/s6.png";
-import s7 from "../../assets/stud/s7.png";
-import s8 from "../../assets/stud/s8.png";
-import s9 from "../../assets/stud/s9.png";
-import s10 from "../../assets/stud/s10.png";
+import studentService from "../../service/studentService";
+import toast from "react-hot-toast";
 
-/* ================= STUDENT DATA ================= */
-const students = [
-  {
-    id: "AD9982434",
-    name: "Ananya Sharma",
-    class: "VIII, A",
-    rollNo: "35013",
-    gender: "Female",
-    joined: "10 Jan 2015",
-    status: "Active",
-    image: s1,
-  },
-  {
-    id: "AD9982433",
-    name: "Mohammed Arif",
-    class: "IV, B",
-    rollNo: "35012",
-    gender: "Male",
-    joined: "19 Aug 2014",
-    status: "Active",
-    image: s2,
-  },
-  {
-    id: "AD9982432",
-    name: "Kavya",
-    class: "III, A",
-    rollNo: "35011",
-    gender: "Female",
-    joined: "5 Dec 2017",
-    status: "Active",
-    image: s3,
-  },
-  {
-    id: "AD9982431",
-    name: "Joseph Mathew",
-    class: "I, B",
-    rollNo: "35010",
-    gender: "Male",
-    joined: "22 Mar 2018",
-    status: "Active",
-    image: s4,
-  },
-  {
-    id: "AD9982430",
-    name: "Ayesha Khan",
-    class: "II, B",
-    rollNo: "35009",
-    gender: "Female",
-    joined: "13 May 2017",
-    status: "Inactive",
-    image: s5,
-  },
-  {
-    id: "AD9982429",
-    name: "Rohit Verma",
-    class: "III, B",
-    rollNo: "35008",
-    gender: "Male",
-    joined: "20 Jun 2015",
-    status: "Active",
-    image: s6,
-  },
-  {
-    id: "AD9982428",
-    name: "Maria",
-    class: "V, A",
-    rollNo: "35007",
-    gender: "Female",
-    joined: "18 Jan 2023",
-    status: "Active",
-    image: s7,
-  },
-  {
-    id: "AD9982427",
-    name: "Suresh Kumar",
-    class: "VI, A",
-    rollNo: "35006",
-    gender: "Male",
-    joined: "26 Nov 2012",
-    status: "Active",
-    image: s8,
-  },
-  {
-    id: "AD9982426",
-    name: "Fatima Noor",
-    class: "VIII, B",
-    rollNo: "35005",
-    gender: "Female",
-    joined: "26 May 2020",
-    status: "Inactive",
-    image: s9,
-  },
-  {
-    id: "AD9982425",
-    name: "Arvind Choudhary",
-    class: "VII, B",
-    rollNo: "35004",
-    gender: "Male",
-    joined: "6 Oct 2022",
-    status: "Active",
-    image: s10,
-  },
-  {
-    id: "AD9982434",
-    name: "Ananya Sharma",
-    class: "VIII, A",
-    rollNo: "35013",
-    gender: "Female",
-    joined: "10 Jan 2015",
-    status: "Active",
-    image: s1,
-  },
-  {
-    id: "AD9982428",
-    name: "Maria",
-    class: "V, A",
-    rollNo: "35007",
-    gender: "Female",
-    joined: "18 Jan 2023",
-    status: "Active",
-    image: s7,
-  },
-];
 /* ================= MAIN PAGE ================= */
 
 export default function StudentsPage() {
-   const isLocked = false;// 🔒 enable full blur lock
- //const userRole = "Admin";        //  change dynamically later
-  //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-    const [view, setView] = useState<"grid" | "table">("grid");
-    const [openFees, setOpenFees] = useState(false);
-    const [selectedStudent, setSelectedStudent] = useState("");
-    const [visibleCount, setVisibleCount] = useState(8);
-    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-    const [studentList, setStudentList] = useState(students);
-    const [openAddStudent, setOpenAddStudent] = useState(false);
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-    const [openFilter, setOpenFilter] = useState(false);
-    const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Inactive">("All");
-    const [genderFilter, setGenderFilter] = useState<"All" | "Male" | "Female">("All");
-//   const [startDate, setStartDate] = useState<string>(() =>
-//   new Date().toISOString().split("T")[0]
-// );
-// const [endDate, setEndDate] = useState<string>(() =>
-//   new Date().toISOString().split("T")[0]
-// );
+  const isLocked = false;
+  const [view, setView] = useState<"grid" | "table">("grid");
+  const [openFees, setOpenFees] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [visibleCount, setVisibleCount] = useState(8);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [studentList, setStudentList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [openAddStudent, setOpenAddStudent] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [openFilter, setOpenFilter] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Inactive">("All");
+  const [genderFilter, setGenderFilter] = useState<"All" | "Male" | "Female">("All");
+  const [viewStudent, setViewStudent] = useState<any>(null);
+  const [editStudent, setEditStudent] = useState<any>(null);
+  const [deleteStudent, setDeleteStudent] = useState<any>(null);
+  const [openDate, setOpenDate] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-const [viewStudent, setViewStudent] = useState<any>(null);
-const [editStudent, setEditStudent] = useState<any>(null);
-const [deleteStudent, setDeleteStudent] = useState<any>(null);
+  useEffect(() => { fetchStudents(); }, []);
 
-const [openDate, setOpenDate] = useState(false);
+  const fetchStudents = async () => {
+    setLoading(true);
+    try {
+      const res = await studentService.getStudents({ limit: 200 });
+      const rows = res.rows ?? res.data ?? [];
+      setStudentList(rows.map((r: any) => ({
+        id: r.admission_number || r.id,
+        _id: r.id,
+        name: r.name,
+        class: r.academic_year || "—",
+        rollNo: r.roll_number,
+        gender: r.gender,
+        joined: r.admission_date ? new Date(r.admission_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+        status: r.is_active ? "Active" : "Inactive",
+        image: r.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.name)}&background=random`,
+        email: r.parent_email || "",
+        phone: r.parent_phone || "",
+        _raw: r,
+      })));
+    } catch (err) {
+      toast.error("Failed to load students");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const [startDate, setStartDate] = useState("2020-05-15");
-const [endDate, setEndDate] = useState("2024-05-24");
+  /* EXPORT */
+  const handleExport = () => {
+    const headers = ["ID", "Name", "Class", "Roll No", "Gender", "Joined", "Status"];
+    const rows = studentList.map((s) => [s.id, s.name, s.class, s.rollNo, s.gender, s.joined, s.status]);
+    const csv = "data:text/csv;charset=utf-8," + [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const link = document.createElement("a");
+    link.href = encodeURI(csv);
+    link.download = "students_list.csv";
+    link.click();
+  };
 
-    /* ✅ REAL TIME DATE */
-    const today = new Date().toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  
-    /* EXPORT */
-    const handleExport = () => {
-      const headers = [
-        "ID",
-        "Name",
-        "Class",
-        "Roll No",
-        "Gender",
-        "Joined",
-        "Status",
-      ];
-  
-      const rows = studentList.map((s) => [
-        s.id,
-        s.name,
-        s.class,
-        s.rollNo,
-        s.gender,
-        s.joined,
-        s.status,
-      ]);
-  
-      const csv =
-        "data:text/csv;charset=utf-8," +
-        [headers, ...rows].map((r) => r.join(",")).join("\n");
-  
-      const link = document.createElement("a");
-      link.href = encodeURI(csv);
-      link.download = "students_list.csv";
-      link.click();
-    };
-    const handleSortByName = () => {
-      const sorted = [...studentList].sort((a, b) => {
-        if (sortOrder === "asc") {
-          return a.name.localeCompare(b.name);
-        } else {
-          return b.name.localeCompare(a.name);
-        }
+  const handleSortByName = () => {
+    const sorted = [...studentList].sort((a, b) =>
+      sortOrder === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+    );
+    setStudentList(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  const filteredStudents = studentList.filter((s) => {
+    const statusMatch = statusFilter === "All" || s.status === statusFilter;
+    const genderMatch = genderFilter === "All" || s.gender === genderFilter;
+    return statusMatch && genderMatch;
+  });
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteStudent) return;
+    try {
+      await studentService.deleteStudent(deleteStudent._id);
+      toast.success("Student deleted");
+      setDeleteStudent(null);
+      fetchStudents();
+    } catch {
+      toast.error("Failed to delete student");
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editStudent) return;
+    try {
+      await studentService.updateStudent(editStudent._id, {
+        name: editStudent.name,
+        gender: editStudent.gender,
       });
-    
-      setStudentList(sorted);
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    };
-    const filteredStudents = studentList.filter((s) => {
-      const joinedDate = new Date(s.joined).getTime();
-      const start = new Date(startDate).getTime();
-      const end = new Date(endDate).getTime();
-    
-      const dateMatch = joinedDate >= start && joinedDate <= end;
-    
-      const statusMatch =
-        statusFilter === "All" || s.status === statusFilter;
-    
-      const genderMatch =
-        genderFilter === "All" || s.gender === genderFilter;
-    
-      return dateMatch && statusMatch && genderMatch;
-    });
-    
-    const downloadTeacherCSV = (teacher: any) => {
-  const headers = [
-    "ID",
-    "Name",
-    "Class",
-    "Subject",
-    "Email",
-    "Phone",
-    "Status",
-  ];
+      toast.success("Student updated");
+      setEditStudent(null);
+      fetchStudents();
+    } catch {
+      toast.error("Failed to update student");
+    }
+  };
 
-  const row = [
-    teacher.id,
-    teacher.name,
-    teacher.class,
-    teacher.subject,
-    teacher.email,
-    teacher.phone,
-    teacher.status,
-  ];
-
-  const csvContent =
-    "data:text/csv;charset=utf-8," +
-    [headers.join(","), row.join(",")].join("\n");
-
-  const link = document.createElement("a");
-  link.href = encodeURI(csvContent);
-  link.download = `${teacher.name}.csv`;
-  link.click();
-};
+  const downloadTeacherCSV = (s: any) => {
+    const csv = "data:text/csv;charset=utf-8," + ["ID,Name,Class,Roll,Gender,Joined,Status", `${s.id},${s.name},${s.class},${s.rollNo},${s.gender},${s.joined},${s.status}`].join("\n");
+    const link = document.createElement("a");
+    link.href = encodeURI(csv);
+    link.download = `${s.name}.csv`;
+    link.click();
+  };
 
   return (
   <div className="relative">
@@ -329,7 +180,7 @@ const [endDate, setEndDate] = useState("2024-05-24");
 
     {/* RIGHT */}
     <div className="flex items-center gap-2">
-      <button className="p-2 border rounded-lg hover:bg-gray-50">
+      <button className="p-2 border rounded-lg hover:bg-gray-50" onClick={fetchStudents}>
         <RefreshCcw size={14} />
       </button>
 
@@ -513,7 +364,7 @@ const [endDate, setEndDate] = useState("2024-05-24");
      
 {view === "grid" && (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-{studentList.slice(0, visibleCount).map((s) => (
+{filteredStudents.slice(0, visibleCount).map((s) => (
       <div
         key={s.id}
         className="bg-white border rounded-xl p-4 hover:shadow-md transition"
@@ -681,7 +532,7 @@ const [endDate, setEndDate] = useState("2024-05-24");
               </tr>
             </thead>
             <tbody>
-              {students.map((s) => (
+              {filteredStudents.map((s) => (
                 <tr
                   key={s.id}
                   className="border-t hover:bg-gray-50"
@@ -728,7 +579,7 @@ const [endDate, setEndDate] = useState("2024-05-24");
           </table>
         </div>
       )}
-      {view === "grid" && visibleCount < students.length && (
+      {view === "grid" && visibleCount < filteredStudents.length && (
   <div className="flex justify-center mt-8">
     <button
       onClick={() => setVisibleCount((prev) => prev + 4)}
@@ -754,9 +605,16 @@ const [endDate, setEndDate] = useState("2024-05-24");
 <AddStudentModal
   open={openAddStudent}
   onClose={() => setOpenAddStudent(false)}
-  onAdd={(newStudent) =>
-    setStudentList((prev) => [newStudent, ...prev])
-  }
+  onAdd={async (newStudent: any) => {
+    try {
+      await studentService.createStudent(newStudent);
+      toast.success("Student added");
+      setOpenAddStudent(false);
+      fetchStudents();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to add student");
+    }
+  }}
 />
 {viewStudent && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -882,14 +740,7 @@ const [endDate, setEndDate] = useState("2024-05-24");
         </button>
 
         <button
-          onClick={() => {
-            setStudentList((prev) =>
-              prev.map((s) =>
-                s.id === editStudent.id ? editStudent : s
-              )
-            );
-            setEditStudent(null);
-          }}
+          onClick={handleEditSave}
           className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
         >
           Save
@@ -925,12 +776,7 @@ const [endDate, setEndDate] = useState("2024-05-24");
 
         {/* CONFIRM DELETE */}
         <button
-          onClick={() => {
-            setStudentList((prev) =>
-              prev.filter((st) => st.id !== deleteStudent.id)
-            );
-            setDeleteStudent(null);
-          }}
+          onClick={handleDeleteConfirm}
           className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
         >
           Delete

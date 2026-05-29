@@ -179,21 +179,18 @@ export default function VerificationDetails() {
       const payload: any = {};
 
       documents.forEach((d) => {
-        if (d.url && d.status !== DOC_STATUS.VERIFIED) {
-          payload[d.statusKey] = DOC_STATUS.VERIFIED;
-          payload[d.remarksKey] = d.remarks || null;
-        }
+        payload[d.statusKey] = DOC_STATUS.VERIFIED;
+        payload[d.remarksKey] = d.remarks || null;
       });
-
-      // if payload empty, nothing to do
-      if (Object.keys(payload).length === 0) {
-        toast.info("All documents already verified");
-        return;
-      }
 
       await admissionService.verifyAdmissionDocuments(app.id, payload);
 
-      toast.success("All documents verified");
+      // Also advance the admission status to Approved
+      await admissionService.updateAdmission(app.id, {
+        admission_status: "Approved",
+      });
+
+      toast.success("All documents verified — status set to Approved");
       await fetchApp();
       setTimeout(() => navigate(-1), 1200);
     } catch (err) {
@@ -369,7 +366,7 @@ function DocumentCard({
             </a>
           )}
           <span className={`px-3 py-1 text-xs rounded-full ${badge}`}>
-            {doc.status}
+            {statusLabel}
           </span>
         </div>
       </div>
