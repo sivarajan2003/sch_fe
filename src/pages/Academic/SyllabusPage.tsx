@@ -74,23 +74,21 @@ export default function SyllabusPage() {
   loadSyllabus();
 }, []);
 
-const loadSyllabus =
-  async () => {
-
-    try {
-
-      const res =
-        await syllabusService.getSyllabus();
-
-      setData(
-        res.data || []
-      );
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
+const loadSyllabus = async () => {
+  try {
+    const res = await syllabusService.getSyllabus();
+    const rows = res.data ?? [];
+    setData(rows.map((r: any) => ({
+      id: r.id,
+      class: r.class_name ?? "",
+      section: r.section ?? "",
+      group: r.subject_group ?? "",
+      date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+      status: r.is_active ? "Active" : "Inactive",
+    })));
+  } catch (error) {
+    console.log(error);
+  }
 };
   /* 🔄 REFRESH */
   const handleRefresh = () => {
@@ -564,12 +562,12 @@ onClick={(e) => {
   <AddSubjectGroupModal
     onClose={() => setOpenAdd(false)}
     onAdd={async (group) => {
-
-  await syllabusService
-    .createSyllabus(group);
-
+  await syllabusService.createSyllabus({
+    class_name: group.class ?? group.class_name,
+    section: group.section,
+    subject_group: group.group ?? group.subject_group,
+  });
   loadSyllabus();
-
 }}
   />
 )}

@@ -52,11 +52,15 @@ useEffect(() => {
 
 const fetchSubjects = async () => {
   try {
-    const res =
-      await subjectService.getSubjects();
-
-    setData(res.rows);
-
+    const res = await subjectService.getSubjects();
+    const rows = res.rows ?? res.data ?? [];
+    setData(rows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      code: r.code ?? "—",
+      type: r.type ?? "Theory",
+      status: r.is_active ? "Active" : "Inactive",
+    })));
   } catch (error) {
     console.error(error);
   }

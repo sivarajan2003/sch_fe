@@ -48,43 +48,43 @@ export const getClassById = async (id) => {
 
 /**
  * Update Class (PUT – full update)
- * PUT /class/:id
+ * PUT /school/class/:id
  */
 export const updateClass = async (id, payload) => {
   if (!id) throw new Error("Class ID is required");
-  const res = await api.put(`/class/${id}`, payload);
+  const res = await api.put(`/school/class/${id}`, payload);
   return res.data;
 };
 
 /**
  * Patch Class (PATCH – partial update)
- * PATCH /class/:id
+ * PATCH /school/class/:id
  */
 export const patchClass = async (id, payload) => {
   if (!id) throw new Error("Class ID is required");
-  const res = await api.patch(`/class/${id}`, payload);
+  const res = await api.patch(`/school/class/${id}`, payload);
   return res.data;
 };
 
 /**
  * Soft Delete Class
- * DELETE /class/:id
+ * DELETE /school/class/:id
  * (Super Admin only)
  */
 export const deleteClass = async (id) => {
   if (!id) throw new Error("Class ID is required");
-  const res = await api.delete(`/class/${id}`);
+  const res = await api.delete(`/school/class/${id}`);
   return res.data;
 };
 
 /**
  * Restore Class
- * PATCH /class/:id/restore
+ * PATCH /school/class/:id/restore
  * (Super Admin only)
  */
 export const restoreClass = async (id) => {
   if (!id) throw new Error("Class ID is required");
-  const res = await api.patch(`/class/${id}/restore`);
+  const res = await api.patch(`/school/class/${id}/restore`);
   return res.data;
 };
 

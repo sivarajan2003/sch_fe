@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   RefreshCcw,
   Printer,
@@ -10,9 +10,8 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-
 import AddRoutineModal from "../../components/AddRoutineModal";
-import { useEffect } from "react";
+import classRoutineService from "../../service/classRoutineService";
 /* ================= DATA ================= */
 
 const ROUTINES = [
@@ -148,10 +147,8 @@ export default function ClassRoutinePage() {
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
   const STORAGE_KEY = "academic_class_routines";
 
-  const [data, setData] = useState<any[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : ROUTINES;
-  });
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
     //const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
@@ -179,19 +176,39 @@ useEffect(() => {
   window.addEventListener("click", close);
   return () => window.removeEventListener("click", close);
 }, []);
-useEffect(() => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}, [data]);
+
+useEffect(() => { fetchRoutines(); }, []);
+
+const fetchRoutines = async () => {
+  setLoading(true);
+  try {
+    const res = await classRoutineService.getRoutines({ limit: 200 });
+    const rows = res.rows ?? res.data ?? [];
+    setData(rows.map((r: any) => ({
+      id: r.id,
+      className: r.Class?.name ?? r.class_id ?? "—",
+      section: r.Class?.section ?? "—",
+      teacher: r.teacher_id ?? "—",
+      subject: r.Subject?.name ?? r.subject_id ?? "—",
+      day: r.day_of_week,
+      start: r.start_time,
+      end: r.end_time,
+      room: r.period_number ?? "—",
+      date: r.createdAt ? r.createdAt.split("T")[0] : "",
+    })));
+  } catch (err) {
+    console.error("Failed to fetch routines", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setData(JSON.parse(saved));
-    }
     setSearch("");
     setDayFilter(null);
     setCurrentPage(1);
+    fetchRoutines();
   };
   
 
@@ -684,10 +701,13 @@ const handleDownloadRoutine = (r: any) => {
         </button>
 
         <button
-          onClick={() => {
-            setData((prev) =>
-              prev.filter((item) => item.id !== confirmDeleteId)
-            );
+          onClick={async () => {
+            try {
+              await classRoutineService.deleteRoutine(confirmDeleteId);
+              await fetchRoutines();
+            } catch (err) {
+              console.error(err);
+            }
             setConfirmDeleteId(null);
           }}
           className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"

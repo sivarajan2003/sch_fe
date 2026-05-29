@@ -63,9 +63,16 @@ export default function ApplicationForm() {
 
         // --- DOCUMENT URLS (already uploaded to DO Spaces) ---
         birth_certificate: formData.documents.birth_certificate || null,
+        birth_certificate_status: formData.documents.birth_certificate ? 'Pending' : 'not uploaded',
+
         tc_certificate: formData.documents.tc_certificate || null,
+        tc_certificate_status: formData.documents.tc_certificate ? 'Pending' : 'not uploaded',
+
         passport_size_photo: formData.documents.passport_size_photo || null,
+        passport_size_photo_status: formData.documents.passport_size_photo ? 'Pending' : 'not uploaded',
+
         address_proof: formData.documents.address_proof || null,
+        address_proof_status: formData.documents.address_proof ? 'Pending' : 'not uploaded',
 
         // --- FEES ---
         // --- FEES (BACKEND SAFE) ---
