@@ -533,14 +533,14 @@ onClick={() =>
                   icon={DoorOpen}
                   path={`${basePath}/academic/class-room`}
                 />
-                 {!isAdmissionAdmin && (
+                 {/* {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Class Routine"
                     icon={CalendarDays}
                     path={`${basePath}/academic/class-routine`}
                     locked
                   />
-                )} 
+                )}  */}
                  {!isAdmissionAdmin && (
                   <AcademicItem
                     label="Subject"
