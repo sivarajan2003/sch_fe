@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API =
-'http://localhost:5000/api/v1/hostel/hostelfeemanagement';
+'http://localhost:4000/api/v1/psms/hostel/hostelfeemanagement';
 
 export const getFees = () =>
   axios.get(API);

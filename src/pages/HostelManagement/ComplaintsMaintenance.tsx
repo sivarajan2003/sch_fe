@@ -131,14 +131,13 @@ const handleSave = async () => {
       regNo: "AUTO",
     };
 
-    console.log(payload);
+    console.log("PAYLOAD =>", payload);
 
-    const res =
-      await createComplaint(payload);
+    const res = await createComplaint(payload);
 
-    console.log(res.data);
+    console.log("SAVE RESPONSE =>", res.data);
 
-    fetchComplaints();
+    await fetchComplaints();
 
     setFormData({
       student: "",
@@ -151,12 +150,22 @@ const handleSave = async () => {
 
     setShowModal(false);
 
-  } catch (error) {
+    alert("Complaint Added Successfully");
 
-    console.log(error);
+  } catch (error: any) {
 
+    console.log("SAVE ERROR =>", error);
+
+    console.log(
+      "BACKEND ERROR =>",
+      error?.response?.data
+    );
+
+    alert(
+      error?.response?.data?.message ||
+      "Save Failed"
+    );
   }
-
 };
   return (
     <div className="space-y-6 px-2 sm:px-4 md:px-6">

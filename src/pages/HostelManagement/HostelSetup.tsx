@@ -93,7 +93,7 @@ const [newHostel, setNewHostel] = useState({
         .concat(
           data.map(
             (d) =>
-              `${d.id},${d.name},${d.type},${d.rooms},${d.capacity},${d.warden},${d.status}`
+              `${d.hostel_id}d.name},${d.type},${d.rooms},${d.capacity},${d.warden},${d.status}`
           )
         )
         .join("\n");
@@ -129,9 +129,10 @@ useEffect(() => {
 
 const fetchHostels = async () => {
   try {
-    const res = await getHostels();
-    setData(res.rows || []);
-setAllData(res.rows || []);
+   const res = await getHostels();
+
+setData(res.data.rows || []);
+setAllData(res.data.rows || []);
   } catch (err) {
     console.log(err);
   }
@@ -203,7 +204,8 @@ setAllData(res.rows || []);
               </p>
 
               <h3 className="text-2xl font-semibold mt-2">
-                12
+                 {data.length || 0}
+
               </h3>
             </div>
 
@@ -225,7 +227,7 @@ setAllData(res.rows || []);
               </p>
 
               <h3 className="text-2xl font-semibold mt-2">
-                120
+               {data.reduce((sum, item) => sum + Number(item.rooms || 0), 0)}
               </h3>
             </div>
 
@@ -247,7 +249,7 @@ setAllData(res.rows || []);
               </p>
 
               <h3 className="text-2xl font-semibold mt-2">
-                540
+               {data.reduce((sum, item) => sum + Number(item.capacity || 0), 0)}
               </h3>
             </div>
 
@@ -406,14 +408,25 @@ setAllData(res.rows || []);
 
           <tbody>
 
-            {filtered.map((d) => (
+  {filtered.length === 0 && (
+    <tr>
+      <td
+        colSpan={8}
+        className="text-center py-8 text-gray-400"
+      >
+        No Hostel Data Found
+      </td>
+    </tr>
+  )}
+
+  {filtered.map((d) => (
               <tr
                 key={d.id}
                 className="border-t hover:bg-gray-50"
               >
 
                 <td className="px-4 py-3 text-center text-blue-600">
-                  {d.id}
+                  {d.hostel_id}
                 </td>
 
                 <td className="px-4 py-3 text-center font-medium">
@@ -492,6 +505,12 @@ setAllData(res.rows || []);
       {/* ================= MOBILE & TABLET VIEW ================= */}
 <div className="lg:hidden space-y-4">
 
+  {filtered.length === 0 && (
+    <div className="bg-white border rounded-xl p-6 text-center text-gray-400">
+      No Hostel Data Found
+    </div>
+  )}
+
   {filtered.map((d) => (
 
     <div
@@ -505,7 +524,7 @@ setAllData(res.rows || []);
         <div>
 
           <p className="text-blue-600 font-semibold text-sm">
-            {d.id}
+            {d.hostel_id}
           </p>
 
           <p className="font-semibold text-gray-800 mt-1">
@@ -661,7 +680,7 @@ setAllData(res.rows || []);
     onChange={(e) =>
       setSelectedHostel({
         ...selectedHostel,
-        rooms: e.target.value,
+        rooms: Number(e.target.value),
       })
     }
     placeholder="Rooms"
@@ -675,7 +694,7 @@ setAllData(res.rows || []);
     onChange={(e) =>
       setSelectedHostel({
         ...selectedHostel,
-        capacity: e.target.value,
+       capacity: Number(e.target.value),
       })
     }
     placeholder="Capacity"

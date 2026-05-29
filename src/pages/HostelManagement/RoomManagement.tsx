@@ -95,7 +95,7 @@ const [sortAsc, setSortAsc] =
   const filtered = data.filter(
     (d) =>
       d.roomNo.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+     d.room_id?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -403,7 +403,7 @@ filtered.map((d: any) => (
                 className="border-t hover:bg-gray-50"
               >
                 <td className="px-4 py-3 text-center text-blue-600">
-                  {d.id}
+                {d.room_id}
                 </td>
 
                 <td className="px-4 py-3 text-center font-medium">
@@ -512,7 +512,7 @@ filtered.map((d: any) =>(
         <div>
 
           <p className="text-blue-600 font-semibold text-sm">
-            {d.id}
+           {d.room_id}
           </p>
 
           <h3 className="font-semibold text-gray-800 mt-1">
