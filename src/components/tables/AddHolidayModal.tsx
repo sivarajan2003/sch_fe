@@ -12,19 +12,19 @@ export default function AddHolidayModal({ onClose, onAdd }: Props) {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
 
-  const handleSave = () => {
-    if (!title || !date) return;
+ const handleSave = () => {
+  if (!title || !date) {
+    alert("Please fill all required fields");
+    return;
+  }
 
-    onAdd({
-      id: `H${Math.floor(100000 + Math.random() * 900000)}`,
-      title,
-      date,
-      description,
-      status,
-    });
-
-    onClose();
-  };
+  onAdd({
+    title,
+    from_date: date,
+    to_date: date,
+    description,
+  });
+};
 
  return createPortal(
   <div

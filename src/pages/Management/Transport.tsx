@@ -1,3 +1,4 @@
+//transport.tsx
 import { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -11,28 +12,38 @@ import {
   Trash2,
 } from "lucide-react";
 import transportService from "../../service/transportService";
+
 import AddRouteModal from "../../components/tables/AddRouteModal";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  { id: "R124556", route: "Seattle", status: "Active", date: "15 May 2024" },
-  { id: "R124555", route: "Brooklyn Central", status: "Active", date: "14 May 2024" },
-  { id: "R124554", route: "Rochester", status: "Active", date: "13 May 2024" },
-  { id: "R124553", route: "Kansas City", status: "Active", date: "12 May 2024" },
-  { id: "R124552", route: "Brooklyn North", status: "Active", date: "11 May 2024" },
-  { id: "R124551", route: "Port Graham", status: "Active", date: "10 May 2024" },
-  { id: "R124550", route: "Nashville", status: "Active", date: "09 May 2024" },
-  { id: "R124549", route: "Detroit", status: "Inactive", date: "08 May 2024" },
-  { id: "R124548", route: "Camden", status: "Active", date: "07 May 2024" },
-  { id: "R124547", route: "Terra Bella", status: "Active", date: "04 May 2024" },
-];
+// const INITIAL_DATA = [
+//   { id: "R124556", route: "Seattle", status: "Active", date: "15 May 2024" },
+//   { id: "R124555", route: "Brooklyn Central", status: "Active", date: "14 May 2024" },
+//   { id: "R124554", route: "Rochester", status: "Active", date: "13 May 2024" },
+//   { id: "R124553", route: "Kansas City", status: "Active", date: "12 May 2024" },
+//   { id: "R124552", route: "Brooklyn North", status: "Active", date: "11 May 2024" },
+//   { id: "R124551", route: "Port Graham", status: "Active", date: "10 May 2024" },
+//   { id: "R124550", route: "Nashville", status: "Active", date: "09 May 2024" },
+//   { id: "R124549", route: "Detroit", status: "Inactive", date: "08 May 2024" },
+//   { id: "R124548", route: "Camden", status: "Active", date: "07 May 2024" },
+//   { id: "R124547", route: "Terra Bella", status: "Active", date: "04 May 2024" },
+// ];
 
 /* ================= PAGE ================= */
 export default function Transport() {
   const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+ type TransportType = {
+  id: string;
+  transport_id: string;
+  route: string;
+  status: string;
+  date: string;
+};
+
+const [data, setData] = useState<TransportType[]>([]);
+const [allData, setAllData] = useState<TransportType[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,30 +59,34 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
   const [endDate, setEndDate] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [openAdd, setOpenAdd] = useState(false);
+const fetchTransport = async () => {
+  try {
+    const res = await transportService.getTransport();
 
+setData(res.data);
+setAllData(res.data);
+  } catch (err) {
+    console.error(err);
+  }
+};
   useEffect(() => {
-    const close = () => {
-      setOpenCalendar(false);
-      setOpenFilter(false);
-    };
-    window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, []);
+  fetchTransport();
+}, []);
   
 
   /* 🔄 REFRESH */
-  const handleRefresh = () => {
-    setData(INITIAL_DATA);
-    setSearch("");
-    setCurrentPage(1);
-  };
+const handleRefresh = () => {
+  fetchTransport();
+  setSearch("");
+  setCurrentPage(1);
+};
 
   /* 📤 EXPORT CSV */
   const handleExport = () => {
     const csv =
       "data:text/csv;charset=utf-8," +
       ["ID,Route,Status,Added On"]
-        .concat(data.map(d => `${d.id},${d.route},${d.status},${d.date}`))
+        .concat(data.map(d => `${d.transport_id},${d.route},${d.status},${d.date}`))
         .join("\n");
 
     const link = document.createElement("a");
@@ -94,9 +109,9 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
 
   /* 🔍 SEARCH */
   const filtered = data.filter(
-    d =>
+  (d: TransportType) =>
       d.route.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+     d.transport_id.toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -228,7 +243,7 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
         onClick={() => {
           if (!startDate || !endDate) return;
 
-          const filteredByDate = INITIAL_DATA.filter((d) => {
+          const filteredByDate = allData.filter((d) => {
             const rowDate = new Date(d.date);
             return (
               rowDate >= new Date(startDate) &&
@@ -266,7 +281,7 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
                 >
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Active"));
+                      setData(allData.filter(d => d.status === "Active"));
                       setOpenFilter(false);
                     }}
                     className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
@@ -276,7 +291,7 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
 
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Inactive"));
+                      setData(allData.filter(d => d.status === "Inactive"));
                       setOpenFilter(false);
                     }}
                     className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
@@ -286,7 +301,7 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
 
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA);
+                    setData(allData);
                       setOpenFilter(false);
                     }}
                     className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
@@ -341,9 +356,11 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
           </thead>
 
           <tbody>
-            {paginated.map(d => (
+            {paginated.map((d: TransportType) => (
               <tr key={d.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-3 text-center text-blue-600">{d.id}</td>
+                <td className="px-4 py-3 text-center text-blue-600">
+  {d.transport_id}
+</td>
                 <td className="px-4 py-3 text-center">{d.route}</td>
                 <td className="px-4 py-3 text-center">
                   <span className={`px-2 py-1 rounded-full text-xs ${
@@ -402,7 +419,7 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
         </div></div>
         {/* ================= MOBILE & TABLET VIEW ================= */}
 <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-  {paginated.map((d) => (
+  {paginated.map((d: TransportType) => (
     <div
       key={d.id}
       className="bg-white border rounded-2xl p-4 space-y-4"
@@ -412,7 +429,9 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
       <div className="flex justify-between items-start">
         <div>
           <p className="font-semibold">{d.route}</p>
-          <p className="text-xs text-gray-500">{d.id}</p>
+         <p className="text-xs text-gray-500">
+  {d.transport_id}
+</p>
         </div>
 
         <span
@@ -529,12 +548,13 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
         </button>
 
         <button
-          onClick={() => {
-            setData(prev =>
-              prev.filter(item => item.id !== confirmDeleteId)
-            );
-            setConfirmDeleteId(null);
-          }}
+         onClick={async () => {
+  await transportService.deleteTransport(confirmDeleteId);
+
+  fetchTransport();
+
+  setConfirmDeleteId(null);
+}}
           className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
         >
           Delete
@@ -544,12 +564,20 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
   </div>
 )}
 {openAdd && (
-  <AddRouteModal
-    onClose={() => setOpenAdd(false)}
-    onSave={(newRoute) =>
-      setData((prev) => [newRoute, ...prev])
+ <AddRouteModal
+  onClose={() => setOpenAdd(false)}
+  onSave={async (newRoute) => {
+    try {
+      await transportService.createTransport(newRoute);
+
+      fetchTransport();
+
+      setOpenAdd(false);
+    } catch (err) {
+      console.error(err);
     }
-  />
+  }}
+/>
 )}
 {openView && selectedRoute && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -564,7 +592,7 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
       {/* DETAILS */}
       <div className="space-y-3 text-sm">
         {[
-          ["Route ID", selectedRoute.id],
+         ["Route ID", selectedRoute.transport_id],
           ["Route Name", selectedRoute.route],
           ["Status", selectedRoute.status],
           ["Added On", selectedRoute.date],
@@ -593,11 +621,12 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
             const csv =
               "data:text/csv;charset=utf-8," +
               "ID,Route,Status,Added On\n" +
-              `${selectedRoute.id},${selectedRoute.route},${selectedRoute.status},${selectedRoute.date}`;
+              `${selectedRoute.transport_id},${selectedRoute.route},${selectedRoute.status},${selectedRoute.date}`;
 
             const link = document.createElement("a");
             link.href = encodeURI(csv);
-            link.download = `route_${selectedRoute.id}.csv`;
+           link.download =
+  `route_${selectedRoute.transport_id}.csv`;
             link.click();
           }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
@@ -657,14 +686,16 @@ const [selectedRoute, setSelectedRoute] = useState<any>(null);
         </button>
 
         <button
-          onClick={() => {
-            setData(prev =>
-              prev.map(item =>
-                item.id === selectedRoute.id ? selectedRoute : item
-              )
-            );
-            setOpenEdit(false);
-          }}
+          onClick={async () => {
+  await transportService.updateTransport(
+  selectedRoute.id,
+  selectedRoute
+);
+
+  fetchTransport();
+
+  setOpenEdit(false);
+}}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
         >
           Update

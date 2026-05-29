@@ -1,32 +1,25 @@
+//transportservice.js
 import axios from "axios";
 
 const API =
-  "http://localhost:5000/management/transport";
+  "http://localhost:4000/api/v1/psms/transport";
 
 const getTransport = () => {
   return axios.get(API);
 };
 
 const createTransport = (data) => {
-  return axios.post(
-    API,
-    data
-  );
+  return axios.post(API, data);
 };
 
-const updateTransport = (
-  id,
-  data
-) => {
+const updateTransport = (id, data) => {
   return axios.put(
     `${API}/${id}`,
     data
   );
 };
 
-const deleteTransport = (
-  id
-) => {
+const deleteTransport = (id) => {
   return axios.delete(
     `${API}/${id}`
   );
