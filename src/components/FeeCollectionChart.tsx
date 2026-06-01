@@ -1,28 +1,53 @@
+//feecollectionchart.tsx
 import { Calendar } from "lucide-react";
-import { useState } from "react";
 
-const data = [
-  { label: "Q1: 2022", total: 48, collected: 38 },
-  { label: "Q2: 2022", total: 52, collected: 41 },
-  { label: "Q3: 2022", total: 50, collected: 39 },
-  { label: "Q4: 2022", total: 54, collected: 42 },
+import { getFeeCollection } from "../service/feecollectionService";
+import { useState, useEffect } from "react";
+// const data = [
+//   { label: "Q1: 2022", total: 48, collected: 38 },
+//   { label: "Q2: 2022", total: 52, collected: 41 },
+//   { label: "Q3: 2022", total: 50, collected: 39 },
+//   { label: "Q4: 2022", total: 54, collected: 42 },
 
-  { label: "Q1: 2023", total: 55, collected: 43 },
-  { label: "Q2: 2023", total: 62, collected: 49 },
-  { label: "Q3: 2023", total: 60, collected: 47 },
-  { label: "Q4: 2023", total: 63, collected: 50 },
+//   { label: "Q1: 2023", total: 55, collected: 43 },
+//   { label: "Q2: 2023", total: 62, collected: 49 },
+//   { label: "Q3: 2023", total: 60, collected: 47 },
+//   { label: "Q4: 2023", total: 63, collected: 50 },
 
-  { label: "Q1: 2024", total: 58, collected: 46 },
-  { label: "Q2: 2024", total: 50, collected: 41 },
-];
+//   { label: "Q1: 2024", total: 58, collected: 46 },
+//   { label: "Q2: 2024", total: 50, collected: 41 },
+// ];
+
 
 const MAX_VALUE = 70;
 const CHART_HEIGHT = 220;
 
 export default function FeeCollectionChart() {
-  const [showLast8, setShowLast8] = useState(false);
+   const [showLast8, setShowLast8] = useState(false);
+  const [data, setData] = useState<any[]>([]);
 
+  useEffect(() => {
+    loadFeeCollection();
+  }, []);
+
+  const loadFeeCollection = async () => {
+  try {
+    const res = await getFeeCollection();
+
+    console.log("Full Response:", res);
+    console.log("Data:", res.data);
+
+    if (!res.data || res.data.length === 0) {
+      setData([]);
+    } else {
+      setData(res.data?.data || []);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
   const visibleData = showLast8 ? data.slice(-8) : data;
+  console.log("Visible Data:", visibleData);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 transition hover:shadow-md">
@@ -80,11 +105,16 @@ export default function FeeCollectionChart() {
   className="flex min-w-max items-end gap-4 sm:gap-6"
   style={{ height: CHART_HEIGHT }}
 >
-          {visibleData.map((item, index) => {
+          {visibleData.length === 0 ? (
+  <div className="w-full text-right py-10 text-gray-500">
+    No Data Found
+  </div>
+) : (
+  visibleData.map((item, index) => {
             const totalHeight =
-              (item.total / MAX_VALUE) * CHART_HEIGHT;
+  (item.total / MAX_VALUE) * CHART_HEIGHT;
             const collectedHeight =
-              (item.collected / MAX_VALUE) * CHART_HEIGHT;
+  (item.collected / MAX_VALUE) * CHART_HEIGHT;
 
             return (
               <div
@@ -122,7 +152,9 @@ export default function FeeCollectionChart() {
                 </span>
               </div>
             );
-          })}
+          })
+)
+}
         </div>
       </div>
     </div>

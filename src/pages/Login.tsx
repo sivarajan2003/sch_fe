@@ -105,7 +105,7 @@ export default function Login() {
       const isAdmin = roleLower === "super admin" || roleLower === "admin";
 
       if (isAdmin) {
-        navigate("/admin/dashboard/receptionist");
+         navigate("/admin/dashboard");
       } else if (roleLower === "student") {
         navigate("/student/dashboard");
       } else if (roleLower === "teacher") {

@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 interface StatCardProps {
   icon: string;
   title: string;
-  value: string;
+  value: string | number;
   percent: string;
   percentBg: string;
   percentText: string;
-  active: string;
-  inactive: string;
+  active: string | number;
+  inactive: string | number;
   iconBg: string;
-  delay?: number; // 👈 add delay
+  delay?: number;
 }
 
 export default function StatCard({
