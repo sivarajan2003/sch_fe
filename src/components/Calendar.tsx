@@ -57,7 +57,7 @@ const loadEvents = async () => {
 
     console.log("Calendar API Response:", res);
 
-    setEvents(res.data || []);
+    setEvents(res.data.data || []);
   } catch (err) {
     console.error(err);
   }

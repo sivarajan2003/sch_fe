@@ -1,4 +1,10 @@
-import { useState } from "react";
+//lastdashboardwidgets.tsx
+import { useState, useEffect } from "react";
+import {
+  getTopSubjects,
+  getStudentActivities,
+  getTodos,
+} from "../service/dashboardWidgetService";
 import { Info, ChevronDown } from "lucide-react";
 
 import student1 from "../assets/student1.png";
@@ -9,70 +15,94 @@ import student4 from "../assets/student4.png";
 export default function LastDashboardWidgets() {
   /* ================= TOP SUBJECT STATE ================= */
   const [selectedClass, setSelectedClass] = useState("Class II");
+  const [subjects, setSubjects] = useState<any[]>([]);
+const [activities, setActivities] = useState<any[]>([]);
+const [todos, setTodos] = useState<any[]>([]);
   const [showClassList, setShowClassList] = useState(false);
 
-  const subjectsByClass: Record<string, any[]> = {
-    "Class I": [
-      { name: "Maths", value: "bg-blue-500 w-[30%]" },
-      { name: "English", value: "bg-yellow-500 w-[40%]" },
-    ],
-    "Class II": [
-      { name: "Maths", value: "bg-blue-500 w-[35%]" },
-      { name: "Physics", value: "bg-cyan-500 w-[45%]" },
-      { name: "Chemistry", value: "bg-blue-700 w-[65%]" },
-      { name: "Botany", value: "bg-green-500 w-[55%]" },
-      { name: "English", value: "bg-yellow-500 w-[75%]" },
-      { name: "Spanish", value: "bg-red-500 w-[85%]" },
-    ],
-    "Class III": [
-      { name: "Maths", value: "bg-blue-600 w-[60%]" },
-      { name: "Science", value: "bg-green-500 w-[70%]" },
-      { name: "English", value: "bg-yellow-500 w-[80%]" },
-    ],
-  };
+  // const subjectsByClass: Record<string, any[]> = {
+  //   "Class I": [
+  //     { name: "Maths", value: "bg-blue-500 w-[30%]" },
+  //     { name: "English", value: "bg-yellow-500 w-[40%]" },
+  //   ],
+  //   "Class II": [
+  //     { name: "Maths", value: "bg-blue-500 w-[35%]" },
+  //     { name: "Physics", value: "bg-cyan-500 w-[45%]" },
+  //     { name: "Chemistry", value: "bg-blue-700 w-[65%]" },
+  //     { name: "Botany", value: "bg-green-500 w-[55%]" },
+  //     { name: "English", value: "bg-yellow-500 w-[75%]" },
+  //     { name: "Spanish", value: "bg-red-500 w-[85%]" },
+  //   ],
+  //   "Class III": [
+  //     { name: "Maths", value: "bg-blue-600 w-[60%]" },
+  //     { name: "Science", value: "bg-green-500 w-[70%]" },
+  //     { name: "English", value: "bg-yellow-500 w-[80%]" },
+  //   ],
+  // };
 
   /* ================= STUDENT ACTIVITY ================= */
   const [showAllActivity, setShowAllActivity] = useState(false);
 
-  const activities = [
-    {
-      title: '1st place in "Chess"',
-      desc: "This event took place in Our School",
-      img: student1,
-    },
-    {
-      title: 'Participated in "Carrom"',
-      desc: 'Justin Lee participated in "Carrom"',
-      img: student2,
-    },
-    {
-      title: '1st place in "100M"',
-      desc: "This event took place in Our School on sports day",
-      img: student3,
-    },
-    {
-      title: "International conference",
-      desc: 'Conference held in "Germany"',
-      img: student4,
-    },
-    {
-      title: "Science Exhibition",
-      desc: "Won 2nd prize in Science Expo",
-      img: student1,
-    },
-  ];
+  // const activities = [
+  //   {
+  //     title: '1st place in "Chess"',
+  //     desc: "This event took place in Our School",
+  //     img: student1,
+  //   },
+  //   {
+  //     title: 'Participated in "Carrom"',
+  //     desc: 'Justin Lee participated in "Carrom"',
+  //     img: student2,
+  //   },
+  //   {
+  //     title: '1st place in "100M"',
+  //     desc: "This event took place in Our School on sports day",
+  //     img: student3,
+  //   },
+  //   {
+  //     title: "International conference",
+  //     desc: 'Conference held in "Germany"',
+  //     img: student4,
+  //   },
+  //   {
+  //     title: "Science Exhibition",
+  //     desc: "Won 2nd prize in Science Expo",
+  //     img: student1,
+  //   },
+  // ];
 
   /* ================= TODO ================= */
   const [showAllTodo, setShowAllTodo] = useState(false);
 
-  const todos = [
-    { title: "Send Reminder to Students", time: "01:00 PM", status: "Completed" },
-    { title: "Create Routine to new staff", time: "04:50 PM", status: "Inprogress" },
-    { title: "Extra Class Info to Students", time: "04:55 PM", status: "Yet to Start" },
-    { title: "Fees for Upcoming Academics", time: "04:55 PM", status: "Yet to Start" },
-    { title: "English - Essay on Visit", time: "05:55 PM", status: "Yet to Start" },
-  ];
+  // const todos = [
+  //   { title: "Send Reminder to Students", time: "01:00 PM", status: "Completed" },
+  //   { title: "Create Routine to new staff", time: "04:50 PM", status: "Inprogress" },
+  //   { title: "Extra Class Info to Students", time: "04:55 PM", status: "Yet to Start" },
+  //   { title: "Fees for Upcoming Academics", time: "04:55 PM", status: "Yet to Start" },
+  //   { title: "English - Essay on Visit", time: "05:55 PM", status: "Yet to Start" },
+  // ];
+useEffect(() => {
+  loadDashboardData();
+}, [selectedClass]);
 
+const loadDashboardData = async () => {
+  try {
+    const subRes = await getTopSubjects(selectedClass);
+    setSubjects(subRes.data.data || []);
+
+    const actRes = await getStudentActivities();
+    setActivities(actRes.data.data || []);
+
+    const todoRes = await getTodos();
+    setTodos(todoRes.data.data || []);
+  } catch (error) {
+    console.log(error);
+
+    setSubjects([]);
+    setActivities([]);
+    setTodos([]);
+  }
+};
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -115,15 +145,29 @@ export default function LastDashboardWidgets() {
         </div>
 
         <div className="space-y-4">
-          {(subjectsByClass[selectedClass] || []).map((item, i) => (
-            <div key={i}>
-              <p className="text-sm text-gray-600 mb-1">{item.name}</p>
-              <div className="w-full h-2 bg-gray-100 rounded-full">
-                <div className={`h-2 rounded-full ${item.value}`} />
-              </div>
-            </div>
-          ))}
+  {subjects.length === 0 ? (
+    <p className="text-center text-gray-500">
+      No Subjects Found
+    </p>
+  ) : (
+    subjects.map((item, i) => (
+      <div key={i}>
+        <p className="text-sm text-gray-600 mb-1">
+          {item.name}
+        </p>
+
+        <div className="w-full h-2 bg-gray-100 rounded-full">
+          <div
+            className="h-2 bg-blue-500 rounded-full"
+            style={{
+              width: `${item.percentage || 0}%`,
+            }}
+          />
         </div>
+      </div>
+    ))
+  )}
+</div>
       </div>
 
       {/* ================= STUDENT ACTIVITY ================= */}
@@ -139,16 +183,37 @@ export default function LastDashboardWidgets() {
         </div>
 
         <div className="space-y-4">
-          {(showAllActivity ? activities : activities.slice(0, 4)).map((a, i) => (
-            <div key={i} className="flex gap-4 p-4 border rounded-xl">
-              <img src={a.img} className="w-12 h-12 rounded-lg object-cover" />
-              <div>
-                <p className="text-sm font-semibold">{a.title}</p>
-                <p className="text-sm text-gray-500">{a.desc}</p>
-              </div>
-            </div>
-          ))}
+  {activities.length === 0 ? (
+    <p className="text-center text-gray-500">
+      No Activities Found
+    </p>
+  ) : (
+    (showAllActivity
+      ? activities
+      : activities.slice(0, 4)
+    ).map((a, i) => (
+      <div
+        key={i}
+        className="flex gap-4 p-4 border rounded-xl"
+      >
+        <img
+          src={a.image}
+          className="w-12 h-12 rounded-lg object-cover"
+        />
+
+        <div>
+          <p className="text-sm font-semibold">
+            {a.title}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            {a.description}
+          </p>
         </div>
+      </div>
+    ))
+  )}
+</div>
       </div>
 
       {/* ================= TODO ================= */}
@@ -164,25 +229,46 @@ export default function LastDashboardWidgets() {
         </div>
 
         <div className="space-y-4">
-          {(showAllTodo ? todos : todos.slice(0, 3)).map((t, i) => (
-            <div key={i} className="flex justify-between p-4 border rounded-xl">
-              <div>
-                <p className="text-sm font-medium">{t.title}</p>
-                <p className="text-sm text-gray-400">{t.time}</p>
-              </div>
+  {todos.length === 0 ? (
+    <p className="text-center text-gray-500">
+      No Todo Found
+    </p>
+  ) : (
+    (showAllTodo
+      ? todos
+      : todos.slice(0, 3)
+    ).map((t, i) => (
+      <div
+        key={i}
+        className="flex justify-between p-4 border rounded-xl"
+      >
+        <div>
+          <p className="text-sm font-medium">
+            {t.title}
+          </p>
 
-              <span
-                className={`text-xs px-3 py-1 rounded-md
-                  ${t.status === "Completed" && "bg-green-100 text-green-700"}
-                  ${t.status === "Inprogress" && "bg-blue-100 text-blue-700"}
-                  ${t.status === "Yet to Start" && "bg-yellow-100 text-yellow-700"}
-                `}
-              >
-                {t.status}
-              </span>
-            </div>
-          ))}
+          <p className="text-sm text-gray-400">
+            {t.time}
+          </p>
         </div>
+
+        <span
+          className={`text-xs px-3 py-1 rounded-md
+            ${
+              t.status === "Completed"
+                ? "bg-green-100 text-green-700"
+                : t.status === "Inprogress"
+                ? "bg-blue-100 text-blue-700"
+                : "bg-yellow-100 text-yellow-700"
+            }
+          `}
+        >
+          {t.status}
+        </span>
+      </div>
+    ))
+  )}
+</div>
       </div>
 
     </div>

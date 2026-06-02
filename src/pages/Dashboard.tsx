@@ -53,6 +53,11 @@ const [stats, setStats] = useState({
 
   activeSubjects: 0,
   inactiveSubjects: 0,
+
+  studentPercent: 0,
+  teacherPercent: 0,
+  staffPercent: 0,
+  subjectPercent: 0,
 });
 useEffect(() => {
   const timer = setInterval(() => {
@@ -185,7 +190,7 @@ useEffect(() => {
           icon={StudGif}
           title="Total Students"
           value={stats.totalStudents || 0}
-          percent="+10%"
+         percent={`${stats.studentPercent || 0}`}
           percentBg="bg-red-100"
           percentText="text-red-600"
 active={stats.activeStudents || 0}
@@ -198,7 +203,7 @@ inactive={stats.inactiveStudents || 0}
           icon={TeacherGif}
           title="Total Teachers"
           value={stats.totalTeachers || 0}
-          percent="+5%"
+          percent={`${stats.teacherPercent || 0}`}
           percentBg="bg-blue-100"
           percentText="text-blue-600"
          active={stats.activeTeachers || 0}
@@ -211,7 +216,7 @@ inactive={stats.inactiveTeachers || 0}
           icon={StaffGif}
           title="Total Staff"
           value={stats.totalStaff || 0}
-          percent="+2%"
+          percent={`${stats.staffPercent || 0}`}
           percentBg="bg-yellow-100"
           percentText="text-yellow-600"
          active={stats.activeStaff || 0}
@@ -224,7 +229,7 @@ inactive={stats.inactiveStaff || 0}
           icon={SubjectGif}
           title="Total Subjects"
           value={stats.totalSubjects || 0}
-          percent="+15%"
+         percent={`${stats.subjectPercent || 0}`}
           percentBg="bg-green-100"
           percentText="text-green-600"
          active={stats.activeSubjects || 0}
