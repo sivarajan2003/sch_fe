@@ -90,10 +90,10 @@ export default function TeachersPage() {
       setLoading(true);
       const params: any = {
         page: opts.page ?? 1,
-        limit: opts.limit ?? 100, // fetch plenty — you can add pagination later
+        limit: opts.limit ?? 100,
       };
 
-      // date filters
+      // only send date filters if user explicitly set them
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
@@ -159,19 +159,9 @@ export default function TeachersPage() {
   };
 
   useEffect(() => {
-    // set default date range: past 30 days
-    const today = new Date();
-    const past = new Date();
-    past.setDate(today.getDate() - 30);
-    setStartDate(past.toISOString().split("T")[0]);
-    setEndDate(today.toISOString().split("T")[0]);
-  }, []);
-
-  // refetch when filters change
-  useEffect(() => {
     fetchTeachers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, startDate, endDate]);
+  }, [statusFilter]);
 
   /* SORT */
   const handleSort = () => {

@@ -1,6 +1,6 @@
 import api from "../api/client";
 
-// === BUS FLLET LOGISTICS ===
+// === BUS FLEET LOGISTICS ===
 export const getBuses = async () => {
   const res = await api.get("/management/transport/buses");
   return res.data;
@@ -58,6 +58,17 @@ export const deleteAssignment = async (id) => {
   return res.data;
 };
 
+// === PICKUP EVENTS ===
+export const createPickupEvent = async (routeId, data) => {
+  const res = await api.post(`/management/transport/routes/${routeId}/pickup`, data);
+  return res.data;
+};
+
+export const getPickupEvents = async (routeId) => {
+  const res = await api.get(`/management/transport/routes/${routeId}/pickups`);
+  return res.data;
+};
+
 export default {
   getBuses,
   createBus,
@@ -69,5 +80,7 @@ export default {
   deleteTransport,
   getAssignments,
   createAssignment,
-  deleteAssignment
+  deleteAssignment,
+  createPickupEvent,
+  getPickupEvents
 };
