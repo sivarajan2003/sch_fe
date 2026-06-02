@@ -1,32 +1,37 @@
-import { useState } from "react";
 import { Check, X, Calendar } from "lucide-react";
 import A6 from "../assets/a6.png";
 import A7 from "../assets/a7.png";
+import {
+  getLeaves,
+  approveLeave,
+  rejectLeave,
+} from "../service/leaverequestService";
 
-const leaveData = [
-  {
-    id: 1,
-    name: "James",
-    role: "Physics Teacher",
-    type: "Emergency",
-    typeColor: "red",
-    leaveFrom: "2024-05-12",
-    leaveTo: "2024-05-13",
-    appliedOn: "2024-05-12",
-    img: A6,
-  },
-  {
-    id: 2,
-    name: "Hendrita",
-    role: "Maths Teacher",
-    type: "Medical",
-    typeColor: "green",
-    leaveFrom: "2024-05-17",
-    leaveTo: "2024-05-18",
-    appliedOn: "2024-05-12",
-    img: A7,
-  },
-];
+import { useEffect, useState } from "react";
+// const leaveData = [
+//   {
+//     id: 1,
+//     name: "James",
+//     role: "Physics Teacher",
+//     type: "Emergency",
+//     typeColor: "red",
+//     leaveFrom: "2024-05-12",
+//     leaveTo: "2024-05-13",
+//     appliedOn: "2024-05-12",
+//     img: A6,
+//   },
+//   {
+//     id: 2,
+//     name: "Hendrita",
+//     role: "Maths Teacher",
+//     type: "Medical",
+//     typeColor: "green",
+//     leaveFrom: "2024-05-17",
+//     leaveTo: "2024-05-18",
+//     appliedOn: "2024-05-12",
+//     img: A7,
+//   },
+// ];
 
 export default function LeaveRequests() {
   const [thisWeekOnly, setThisWeekOnly] = useState(false);
@@ -38,18 +43,36 @@ export default function LeaveRequests() {
 
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 6);
-  const [leaves, setLeaves] = useState(leaveData);
+  const [leaves, setLeaves] = useState<any[]>([]);
   const [confirmReject, setConfirmReject] = useState<number | null>(null);
   const [successMsg, setSuccessMsg] = useState("");
   
   const filteredLeaves = thisWeekOnly
   ? leaves.filter((item) => {
-      const leaveDate = new Date(item.leaveFrom);
+      const leaveDate = new Date(item.leave_from);
       return leaveDate >= startOfWeek && leaveDate <= endOfWeek;
     })
   : leaves;
+const [errorMsg, setErrorMsg] = useState("");
+useEffect(() => {
+  loadLeaves();
+}, []);
 
+const loadLeaves = async () => {
+  try {
+    setErrorMsg("");
 
+    const res = await getLeaves();
+
+    setLeaves(res.data || []);
+  } catch (err) {
+    console.error(err);
+
+    setErrorMsg(
+      "Failed to load leave requests"
+    );
+  }
+};
   return (
 <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 h-full transition hover:shadow-md">
       {successMsg && (
@@ -81,7 +104,13 @@ export default function LeaveRequests() {
 
       {/* REQUEST LIST */}
       <div className="space-y-4">
-        {filteredLeaves.map((item) => (
+      
+  {filteredLeaves.length === 0 ? (
+    <div className="text-center py-8 text-gray-500">
+      No Leave Requests Found
+    </div>
+  ) : (
+    filteredLeaves.map((item) => (
           <div
             key={item.id}
             className="
@@ -94,18 +123,18 @@ export default function LeaveRequests() {
           >
 <div className="flex items-start gap-3 w-full">
               <img
-                src={item.img}
+                src={A6}
                 className="
                   w-10 h-10 rounded-lg object-cover
                   transition-transform duration-300
                   group-hover:scale-105
                 "
-                alt={item.name}
+                alt={item.employee_name}
               />
 
               <div>
               <p className="font-medium text-gray-900 flex flex-wrap items-center gap-2">
-                  {item.name}
+                 {item.employee_name}
                   <span
                     className={`
                       ml-2 text-xs px-2 py-0.5 rounded
@@ -117,17 +146,17 @@ export default function LeaveRequests() {
                       }
                     `}
                   >
-                    {item.type}
+                    {item.leave_type}
                   </span>
                 </p>
 
-                <p className="text-sm text-gray-500">{item.role}</p>
+                <p className="text-sm text-gray-500">{item.employee_role}</p>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 mt-1 text-xs text-gray-400">
                   <span>
-                    Leave : {item.leaveFrom} - {item.leaveTo}
+                    Leave : {item.leave_from} - {item.leave_to}
                   </span>
-                  <span>Apply on : {item.appliedOn}</span>
+                  <span>Apply on : {item.applied_on}</span>
                 </div>
               </div>
             </div>
@@ -135,11 +164,23 @@ export default function LeaveRequests() {
             {/* ACTIONS */}
             <div className="flex gap-2 justify-end sm:justify-start">
             <button
-  onClick={() => {
-    setLeaves((prev) => prev.filter((l) => l.id !== item.id));
-    setSuccessMsg(`Leave approved for ${item.name}`);
-    setTimeout(() => setSuccessMsg(""), 3000);
-  }}
+ onClick={async () => {
+  try {
+    await approveLeave(item.id);
+
+    setSuccessMsg(
+      `Leave approved for ${item.employee_name}`
+    );
+
+    loadLeaves();
+
+    setTimeout(() => {
+      setSuccessMsg("");
+    }, 3000);
+  } catch (err) {
+    console.error(err);
+  }
+}}
   className="
     w-8 h-8 flex items-center justify-center rounded
     bg-green-500 text-white
@@ -164,7 +205,8 @@ export default function LeaveRequests() {
 </button>
             </div>
           </div>
-        ))}
+       ))
+)}
       </div>
       {confirmReject !== null && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -186,14 +228,23 @@ export default function LeaveRequests() {
         </button>
 
         <button
-          onClick={() => {
-            setLeaves((prev) =>
-              prev.filter((l) => l.id !== confirmReject)
-            );
-            setConfirmReject(null);
-            setSuccessMsg("Leave request rejected");
-            setTimeout(() => setSuccessMsg(""), 3000);
-          }}
+          onClick={async () => {
+  try {
+    await rejectLeave(confirmReject);
+
+    setConfirmReject(null);
+
+    setSuccessMsg("Leave request rejected");
+
+    loadLeaves();
+
+    setTimeout(() => {
+      setSuccessMsg("");
+    }, 3000);
+  } catch (err) {
+    console.error(err);
+  }
+}}
           className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg"
         >
           Remove

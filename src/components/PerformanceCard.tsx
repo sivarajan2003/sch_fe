@@ -1,41 +1,92 @@
-import { useState } from "react";
+
 import {
   ChevronUp,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
+import {
+  getPerformance,
+} from "../service/performanceService";
 /* ================= PERFORMANCE DATA ================= */
 
-const performanceData: Record<
-  string,
-  {
-    top: number;
-    average: number;
-    below: number;
-    percent: number;
-  }
-> = {
-  "Class I": { top: 40, average: 15, below: 5, percent: 88 },
-  "Class II": { top: 45, average: 11, below: 2, percent: 95 },
-  "Class III": { top: 38, average: 18, below: 6, percent: 84 },
-  "Class IV": { top: 42, average: 14, below: 4, percent: 90 },
-  "Class V": { top: 47, average: 10, below: 3, percent: 96 },
-  "Class VI": { top: 35, average: 20, below: 7, percent: 80 },
-  "Class VII": { top: 44, average: 12, below: 4, percent: 92 },
-  "Class VIII": { top: 39, average: 17, below: 6, percent: 86 },
-  "Class IX": { top: 41, average: 15, below: 5, percent: 89 },
-  "Class X": { top: 46, average: 9, below: 3, percent: 97 },
-};
-
+// const performanceData: Record<
+//   string,
+//   {
+//     top: number;
+//     average: number;
+//     below: number;
+//     percent: number;
+//   }
+// > = {
+//   "Class I": { top: 40, average: 15, below: 5, percent: 88 },
+//   "Class II": { top: 45, average: 11, below: 2, percent: 95 },
+//   "Class III": { top: 38, average: 18, below: 6, percent: 84 },
+//   "Class IV": { top: 42, average: 14, below: 4, percent: 90 },
+//   "Class V": { top: 47, average: 10, below: 3, percent: 96 },
+//   "Class VI": { top: 35, average: 20, below: 7, percent: 80 },
+//   "Class VII": { top: 44, average: 12, below: 4, percent: 92 },
+//   "Class VIII": { top: 39, average: 17, below: 6, percent: 86 },
+//   "Class IX": { top: 41, average: 15, below: 5, percent: 89 },
+//   "Class X": { top: 46, average: 9, below: 3, percent: 97 },
+// };
+interface PerformanceData {
+  id: string;
+  class_name: string;
+  top_students: number;
+  average_students: number;
+  below_average_students: number;
+  performance_percentage: number;
+}
 export default function PerformanceCard() {
-  const [selectedClass, setSelectedClass] = useState("Class II");
+  
+  // const [selectedClass, setSelectedClass] = useState("Class II");
 
-  const data = performanceData[selectedClass];
+  // const data = performanceData[selectedClass];
 
-  const blue = data.percent;
-  const yellow = Math.max(100 - blue - 5, 0);
-  const red = 5;
+
+ const [allClasses, setAllClasses] =
+  useState<PerformanceData[]>([]);
+
+const [data, setData] =
+  useState<PerformanceData | null>(null);
+const [selectedClass,
+setSelectedClass] =
+  useState<string>("");
+
+const blue =
+  data?.performance_percentage || 0;
+
+const yellow =
+  Math.max(100 - blue - 5, 0);
+
+const red = 5;
+useEffect(() => {
+  loadPerformance();
+}, []);
+
+const loadPerformance = async (): Promise<void> => {
+  try {
+    const res =
+      await getPerformance();
+
+    setAllClasses(res.data.data);
+
+    if (res.data.data.length > 0) {
+      setSelectedClass(
+        res.data[0].class_name
+      );
+
+      setData(res.data[0]);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="bg-white rounded-xl border p-5 transition hover:shadow-md">
@@ -46,17 +97,30 @@ export default function PerformanceCard() {
         </h3>
 
 
-        <select
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 cursor-pointer"
-        >
-          {Object.keys(performanceData).map((cls) => (
-            <option key={cls} value={cls}>
-              {cls}
-            </option>
-          ))}
-        </select>
+       <select
+  value={selectedClass}
+  onChange={(e) => {
+    const cls = allClasses.find(
+  (x: PerformanceData) =>
+    x.class_name === e.target.value
+);
+
+    setSelectedClass(
+      e.target.value
+    );
+
+    setData(cls || null);
+  }}
+>
+  {allClasses.map((cls: PerformanceData) => (
+    <option
+      key={cls.id}
+      value={cls.class_name}
+    >
+      {cls.class_name}
+    </option>
+  ))}
+</select>
       </div>
 
       <div className="flex items-center justify-between gap-5">
@@ -75,7 +139,7 @@ export default function PerformanceCard() {
               Top
             </span>
             <span className="text-sm font-semibold">
-              {data.top}
+              {data?.top_students || 0}
             </span>
           </div>
 
@@ -92,7 +156,7 @@ export default function PerformanceCard() {
               Average
             </span>
             <span className="text-sm font-semibold">
-              {data.average}
+              {data?.average_students || 0}
             </span>
           </div>
 
@@ -109,7 +173,7 @@ export default function PerformanceCard() {
               Below Avg
             </span>
             <span className="text-sm font-semibold">
-              {String(data.below).padStart(2, "0")}
+              {String(data?.below_average_students || 0).padStart(2, "0")}
             </span>
           </div>
         </div>
@@ -166,7 +230,7 @@ export default function PerformanceCard() {
           {/* CENTER TEXT */}
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-lg font-semibold group-hover:scale-110 transition">
-              {data.percent}%
+              {data?.performance_percentage || 0}%
             </span>
           </div>
         </div>

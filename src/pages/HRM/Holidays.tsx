@@ -1,3 +1,4 @@
+//holidays.tsx
 import { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -14,80 +15,80 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import AddHolidayModal from "../../components/tables/AddHolidayModal";
-
+import holidayService from "../../service/holidayservice";
 /* ================= HOLIDAY DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "H752762",
-    title: "New Year",
-    date: "01 Jan 2024",
-    description: "First day of the new year",
-    status: "Active",
-  },
-  {
-    id: "H752761",
-    title: "Martin Luther King Jr. Day",
-    date: "15 Jan 2024",
-    description: "Celebrating the civil rights leader",
-    status: "Active",
-  },
-  {
-    id: "H752760",
-    title: "Presidents' Day",
-    date: "19 Feb 2024",
-    description: "Honoring past US Presidents",
-    status: "Active",
-  },
-  {
-    id: "H752759",
-    title: "Good Friday",
-    date: "29 Mar 2024",
-    description: "Holiday before Easter",
-    status: "Active",
-  },
-  {
-    id: "H752758",
-    title: "Easter Monday",
-    date: "01 Apr 2024",
-    description: "Holiday after Easter",
-    status: "Active",
-  },
-  {
-    id: "H752757",
-    title: "Memorial Day",
-    date: "27 May 2024",
-    description: "Honors military personnel",
-    status: "Active",
-  },
-  {
-    id: "H752756",
-    title: "Independence Day",
-    date: "04 Jul 2024",
-    description: "Celebrates Independence",
-    status: "Active",
-  },
-  {
-    id: "H752755",
-    title: "Labor Day",
-    date: "02 Sep 2024",
-    description: "Honors working people",
-    status: "Active",
-  },
-  {
-    id: "H752754",
-    title: "Veterans Day",
-    date: "11 Nov 2024",
-    description: "Honors military veterans",
-    status: "Active",
-  },
-  {
-    id: "H752753",
-    title: "Christmas Day",
-    date: "25 Dec 2024",
-    description: "Celebration of Christmas",
-    status: "Active",
-  },
-];
+// const INITIAL_DATA = [
+//   {
+//     id: "H752762",
+//     title: "New Year",
+//     date: "01 Jan 2024",
+//     description: "First day of the new year",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752761",
+//     title: "Martin Luther King Jr. Day",
+//     date: "15 Jan 2024",
+//     description: "Celebrating the civil rights leader",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752760",
+//     title: "Presidents' Day",
+//     date: "19 Feb 2024",
+//     description: "Honoring past US Presidents",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752759",
+//     title: "Good Friday",
+//     date: "29 Mar 2024",
+//     description: "Holiday before Easter",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752758",
+//     title: "Easter Monday",
+//     date: "01 Apr 2024",
+//     description: "Holiday after Easter",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752757",
+//     title: "Memorial Day",
+//     date: "27 May 2024",
+//     description: "Honors military personnel",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752756",
+//     title: "Independence Day",
+//     date: "04 Jul 2024",
+//     description: "Celebrates Independence",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752755",
+//     title: "Labor Day",
+//     date: "02 Sep 2024",
+//     description: "Honors working people",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752754",
+//     title: "Veterans Day",
+//     date: "11 Nov 2024",
+//     description: "Honors military veterans",
+//     status: "Active",
+//   },
+//   {
+//     id: "H752753",
+//     title: "Christmas Day",
+//     date: "25 Dec 2024",
+//     description: "Celebration of Christmas",
+//     status: "Active",
+//   },
+// ];
 
 /* ================= PAGE ================= */
 export default function Holidays() {
@@ -95,8 +96,14 @@ export default function Holidays() {
  const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-
-  const [data, setData] = useState(INITIAL_DATA);
+interface Holiday {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  status: string;
+}
+ const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,25 +117,39 @@ export default function Holidays() {
   const [endDate, setEndDate] = useState("");
   
   const [statusFilter, setStatusFilter] = useState<"Active" | "Inactive" | null>(null);
-  useEffect(() => {
-    const close = () => {
-      setOpenCalendar(false);
-      setOpenFilter(false);
-    };
-    window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, []);
+  const fetchHolidays = async () => {
+  try {
+    const res = await holidayService.getHoliday();
+
+    const rows = res.data.data || [];
+
+    setData(
+      rows.map((h: any) => ({
+        id: h.id,
+        title: h.title,
+        date: h.from_date,
+        description: h.description,
+        status: "Active",
+      }))
+    );
+  } catch (err) {
+    console.error("Holiday fetch failed", err);
+  }
+};
+ useEffect(() => {
+  fetchHolidays();
+}, []);
     
   /* 🔄 REFRESH */
-  const handleRefresh = () => {
-    setData(INITIAL_DATA);
-    setSearch("");
-    setCurrentPage(1);
-  };
+  const handleRefresh = async () => {
+  setSearch("");
+  setCurrentPage(1);
+  await fetchHolidays();
+};
 
   /* 🔃 SORT */
   const handleSort = () => {
-    setData(prev =>
+   setData((prev: any[]) =>
       [...prev].sort((a, b) =>
         sortAsc
           ? a.title.localeCompare(b.title)
@@ -162,7 +183,7 @@ export default function Holidays() {
   
   /* 🔍 SEARCH */
   const filtered = data.filter(
-    d =>
+  (d: any) =>
       d.title.toLowerCase().includes(search.toLowerCase()) ||
       d.id.toLowerCase().includes(search.toLowerCase())
   );
@@ -315,7 +336,7 @@ onClick={() => window.history.back()}
         onClick={() => {
           if (!startDate || !endDate) return;
 
-          const filteredByDate = INITIAL_DATA.filter((d) => {
+          const filteredByDate = data.filter((d: any) => {
             const rowDate = new Date(d.date);
             return (
               rowDate >= new Date(startDate) &&
@@ -376,11 +397,11 @@ onClick={() => window.history.back()}
       </button>
 
       <button
-        onClick={() => {
-          setStatusFilter(null);
-          setData(INITIAL_DATA);
-          setOpenFilter(false);
-        }}
+         onClick={async () => {
+    setStatusFilter(null);
+    await fetchHolidays();
+    setOpenFilter(false);
+  }}
         className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
       >
         Clear
@@ -439,7 +460,7 @@ onClick={() => window.history.back()}
           </thead>
 
           <tbody>
-            {paginated.map(d => (
+          {paginated.map((d: any) => (
               <tr key={d.id} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-3 text-center text-blue-600">{d.id}</td>
                 <td className="px-4 py-3">{d.title}</td>
@@ -491,7 +512,7 @@ onClick={() => window.history.back()}
         </div></div>
 {/* ================= MOBILE & TABLET VIEW ================= */}
 <div className="lg:hidden space-y-4">
-  {paginated.map((h) => (
+ {paginated.map((h: any) => (
     <div
       key={h.id}
       className="bg-white border rounded-2xl p-4 space-y-4"
@@ -612,12 +633,15 @@ onClick={() => window.history.back()}
               </button>
 
               <button
-                onClick={() => {
-                  setData(prev =>
-                    prev.filter(x => x.id !== confirmDeleteId)
-                  );
-                  setConfirmDeleteId(null);
-                }}
+                onClick={async () => {
+  try {
+    await holidayService.deleteHoliday(confirmDeleteId);
+    await fetchHolidays();
+    setConfirmDeleteId(null);
+  } catch (err) {
+    console.error(err);
+  }
+}}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
               >
                 Delete
@@ -627,12 +651,20 @@ onClick={() => window.history.back()}
         </div>
       )}
       {openAddHoliday && (
-  <AddHolidayModal
-    onClose={() => setOpenAddHoliday(false)}
-    onAdd={(newHoliday) =>
-      setData((prev) => [newHoliday, ...prev])
+ <AddHolidayModal
+  onClose={() => setOpenAddHoliday(false)}
+  onAdd={async (newHoliday) => {
+    try {
+      await holidayService.createHoliday(newHoliday);
+
+      await fetchHolidays();
+
+      setOpenAddHoliday(false);
+    } catch (err) {
+      console.error("Create Holiday Failed", err);
     }
-  />
+  }}
+/>
 )}
 {openView && selectedHoliday && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -774,16 +806,24 @@ onClick={() => window.history.back()}
         </button>
 
         <button
-          onClick={() => {
-            setData(prev =>
-              prev.map(item =>
-                item.id === selectedHoliday.id
-                  ? selectedHoliday
-                  : item
-              )
-            );
-            setOpenEdit(false);
-          }}
+         onClick={async () => {
+  try {
+    await holidayService.updateHoliday(
+      selectedHoliday.id,
+      {
+        title: selectedHoliday.title,
+        from_date: selectedHoliday.date,
+        to_date: selectedHoliday.date,
+        description: selectedHoliday.description,
+      }
+    );
+
+    await fetchHolidays();
+    setOpenEdit(false);
+  } catch (err) {
+    console.error(err);
+  }
+}}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
         >
           Update

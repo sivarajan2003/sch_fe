@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
+import { useEffect } from "react";
+import { getCalendarEvents } from "../service/calenderService";
 export default function Calendar() {
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const [events, setEvents] = useState<any[]>([]);
+  const today = new Date();
 
-  const [currentMonth, setCurrentMonth] = useState(0);
-  const [currentYear, setCurrentYear] = useState(2025);
-  const [selectedDate, setSelectedDate] = useState<number | null>(20);
+const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+const [currentYear, setCurrentYear] = useState(today.getFullYear());
+const [selectedDate, setSelectedDate] = useState(today.getDate());
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -44,7 +47,21 @@ export default function Calendar() {
       setCurrentMonth((m) => m + 1);
     }
   };
+useEffect(() => {
+  loadEvents();
+}, []);
 
+const loadEvents = async () => {
+  try {
+    const res = await getCalendarEvents();
+
+    console.log("Calendar API Response:", res);
+
+    setEvents(res.data.data || []);
+  } catch (err) {
+    console.error(err);
+  }
+};
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 transition hover:shadow-md">
       {/* HEADER */}
@@ -113,7 +130,37 @@ export default function Calendar() {
           </div>
         ))}
       </div>
+{/* EVENTS LIST */}
+<div className="mt-6">
+  <h4 className="text-md font-semibold mb-3">
+    Events & Holidays
+  </h4>
 
+  {events.length === 0 ? (
+    <p className="text-gray-500 text-sm">
+      No Events Found
+    </p>
+  ) : (
+    events.map((event) => (
+      <div
+        key={event.id}
+        className="border rounded-lg p-3 mb-2"
+      >
+        <p className="font-medium">
+          {event.title}
+        </p>
+
+        <p className="text-xs text-gray-500">
+          {event.event_type}
+        </p>
+
+        <p className="text-xs text-blue-600">
+          {event.event_date}
+        </p>
+      </div>
+    ))
+  )}
+</div>
       {/* ANIMATIONS */}
       <style>{`
         @keyframes pulseOnce {

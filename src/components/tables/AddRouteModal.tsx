@@ -5,11 +5,10 @@ import { createPortal } from "react-dom";
 type Props = {
   onClose: () => void;
   onSave: (route: {
-    id: string;
-    route: string;
-    status: "Active" | "Inactive";
-    date: string;
-  }) => void;
+  route: string;
+  status: "Active" | "Inactive";
+  date: string;
+}) => void;
 };
 
 export default function AddRouteModal({ onClose, onSave }: Props) {
@@ -19,16 +18,11 @@ export default function AddRouteModal({ onClose, onSave }: Props) {
   const handleSave = () => {
     if (!route.trim()) return;
 
-    onSave({
-      id: "RT" + Math.floor(100000 + Math.random() * 900000),
-      route,
-      status,
-      date: new Date().toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    });
+onSave({
+  route,
+  status,
+  date: new Date().toISOString().split("T")[0],
+});
 
     onClose();
   };

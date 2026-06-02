@@ -1,73 +1,61 @@
+//upcomingevents.tsx
 import { Calendar, Clock, Users } from "lucide-react";
-import { useState } from "react";
+import { getUpcomingEvents } from "../service/upcomingEventService";
 
-interface Event {
-  title: string;
-  date: string;
-  time: string;
-  color: string;
-}
-const formatMonthlyDate = (day: number) => {
-  const now = new Date();
+import {
+  useEffect,
+  useState
+} from "react";
+// interface Event {
+//   title: string;
+//   date: string;
+//   time: string;
+//   color: string;
+// }
+// const formatMonthlyDate = (day: number) => {
+//   const now = new Date();
 
-  const date = new Date(
-    now.getFullYear(),     // current year
-    now.getMonth(),        // current month
-    day                   // fixed day
-  );
+//   const date = new Date(
+//     now.getFullYear(),     // current year
+//     now.getMonth(),        // current month
+//     day                   // fixed day
+//   );
 
-  return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-};
+//   return date.toLocaleDateString("en-GB", {
+//     day: "2-digit",
+//     month: "long",
+//     year: "numeric",
+//   });
+// };
 
 export default function UpcomingEvents() {
   const [showAll, setShowAll] = useState(false);
 
 
-  const allEvents: Event[] = [
-    
-    {
-      title: "Parents, Teacher Meet",
-      date: formatMonthlyDate(15),
-      time: "09:10 AM - 10:50 AM",
-      color: "blue",
-    },
-    {
-      title: "Staff Meeting",
-      date: formatMonthlyDate(10),
-      time: "09:10 AM - 10:50 AM",
-      color: "indigo",
-    },
-    {
-      title: "Vacation Meeting",
-      date: formatMonthlyDate(7),
-      time: "09:10 AM - 10:50 AM",
-      color: "red",
-    },
-    {
-      title: "Annual Sports Day",
-      date: formatMonthlyDate(20),
-      time: "08:30 AM - 01:00 PM",
-      color: "blue",
-    },
-    {
-      title: "PTA Discussion",
-      date: formatMonthlyDate(22),
-      time: "10:00 AM - 12:00 PM",
-      color: "indigo",
-    },
-    {
-      title: "Cultural Fest",
-      date: formatMonthlyDate(25),
-      time: "09:00 AM - 04:00 PM",
-      color: "red",
-    },
-  ];
+  const [allEvents, setAllEvents] =
+  useState<any[]>([]);
+
+const [loading, setLoading] =
+  useState(true);
   
-  const events = allEvents.slice(0, 3);
+  const events =
+  allEvents.slice(0, 3);
+  useEffect(() => {
+  loadEvents();
+}, []);
+
+const loadEvents = async () => {
+  try {
+    const res =
+      await getUpcomingEvents();
+
+    setAllEvents(res.data || []);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 transition hover:shadow-md">
       {/* HEADER */}
@@ -87,8 +75,17 @@ export default function UpcomingEvents() {
 
       </div>
 {/* EVENTS */}
-<div className="space-y-4">
-  {events.map((event, index) => (
+{loading ? (
+  <div className="text-center py-4">
+    Loading...
+  </div>
+) : events.length === 0 ? (
+  <div className="text-center py-4 text-gray-500">
+    No Events Found
+  </div>
+) : (
+  <div className="space-y-4">
+    {events.map((event, index) => (
     <div
       key={index}
       className="
@@ -141,7 +138,7 @@ export default function UpcomingEvents() {
       <div className="flex items-center justify-between pt-2 border-t">
         <div className="flex items-center gap-1 text-xs text-gray-500">
           <Clock className="w-3.5 h-3.5" />
-          {event.time}
+         {event.start_time} - {event.end_time}
         </div>
 
         <div className="flex -space-x-2">
@@ -151,8 +148,9 @@ export default function UpcomingEvents() {
         </div>
       </div>
     </div>
-  ))}
-</div>
+    ))}
+  </div>
+)}
 
       {/* ================= SEE ALL MODAL ================= */}
 {showAll && (
@@ -193,9 +191,11 @@ export default function UpcomingEvents() {
       {/* CONTENT */}
       <div className="flex-1">
         <p className="font-medium text-sm">{event.title}</p>
-        <p className="text-xs text-gray-500">
-          {event.date} • {event.time}
-        </p>
+<p className="text-xs text-gray-500">
+  {new Date(event.event_date).toLocaleDateString("en-GB")}
+  {" • "}
+  {event.start_time} - {event.end_time}
+</p>
       </div>
     </div>
   ))}

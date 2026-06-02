@@ -156,14 +156,14 @@ const [activeSection, setActiveSection] = useState<string | null>(null);
             {/* ADMIN – SEE ALL DASHBOARDS */}
             {role === "admin" && (
               <>
-                <MenuItem
-                  icon={LayoutDashboard}
-                  label="Admin Dashboard"
-                  onClick={() => navigate("/admin/dashboard/receptionist")}
-                  active={location.pathname === "/admin/dashboard/receptionist"}
-                  collapsed={collapsed}
-                />
-
+               
+ <MenuItem
+  icon={LayoutDashboard}
+  label="Admin Dashboard"
+  onClick={() => navigate("/admin/dashboard")}
+  active={location.pathname === "/admin/dashboard"}
+  collapsed={collapsed}
+/>
                 {/* <MenuItem
                   icon={UserCheck}
                   label="Receptionist Dashboard"
@@ -243,7 +243,18 @@ onClick={() =>
             />
             {!collapsed && activeSection === "admission" && (
               <div className="ml-6 mt-2 space-y-1">
-
+ {/* <MenuItem
+                  icon={LayoutDashboard}
+                  label="AdmissionDashboard"
+                  onClick={() => navigate("/admin/dashboard/receptionist")}
+                  active={location.pathname === "/admin/dashboard/receptionist"}
+                  collapsed={collapsed}
+                /> */}
+                <ApplicationItem
+  label="AdmissionDashboard"
+  icon={LayoutDashboard}
+  path="/admin/dashboard/receptionist"
+/>
                   <ApplicationItem
                     label="All Applications"
                     icon={FileText}
@@ -1488,8 +1499,10 @@ function ReportItem({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const active = location.pathname.startsWith(path);
-
+ const active =
+  path === "/admin/dashboard/receptionist"
+    ? location.pathname === path
+    : location.pathname.startsWith(path);
   return (
     <button
       onClick={() => navigate(path)}

@@ -28,23 +28,60 @@ import SubjectGif from "../assets/gif/sub.gif";
 import StudentTable from "../components/tables/StudentTable";
 import FeesTable from "../components/tables/FeesTable";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-
+//import { useState, useEffect } from "react";
+import dashboardService from "../service/dashboardService";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const [showAlert, setShowAlert] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+const [stats, setStats] = useState({
+  totalStudents: 0,
+  totalTeachers: 0,
+  totalStaff: 0,
+  totalSubjects: 0,
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+  activeStudents: 0,
+  inactiveStudents: 0,
 
-    return () => clearInterval(timer);
-  }, []);
+  activeTeachers: 0,
+  inactiveTeachers: 0,
 
+  activeStaff: 0,
+  inactiveStaff: 0,
+
+  activeSubjects: 0,
+  inactiveSubjects: 0,
+
+  studentPercent: 0,
+  teacherPercent: 0,
+  staffPercent: 0,
+  subjectPercent: 0,
+});
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCurrentTime(new Date());
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+useEffect(() => {
+  loadDashboard();
+}, []);
   const navigate = useNavigate();
+  const loadDashboard = async () => {
+  try {
+    const res = await dashboardService.getDashboardStats();
+
+    console.log("Dashboard API:", res);
+
+    setStats(res.data || {});
+  } catch (err) {
+    console.error(err);
+  }
+};
   return (
     <>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
@@ -152,12 +189,12 @@ export default function Dashboard() {
         <StatCard
           icon={StudGif}
           title="Total Students"
-          value="3654"
-          percent="+10%"
+          value={stats.totalStudents || 0}
+         percent={`${stats.studentPercent || 0}`}
           percentBg="bg-red-100"
           percentText="text-red-600"
-          active="3643"
-          inactive="11"
+active={stats.activeStudents || 0}
+inactive={stats.inactiveStudents || 0}
           iconBg="bg-pink-50"
           delay={0.1}
         />
@@ -165,12 +202,12 @@ export default function Dashboard() {
         <StatCard
           icon={TeacherGif}
           title="Total Teachers"
-          value="284"
-          percent="+5%"
+          value={stats.totalTeachers || 0}
+          percent={`${stats.teacherPercent || 0}`}
           percentBg="bg-blue-100"
           percentText="text-blue-600"
-          active="254"
-          inactive="30"
+         active={stats.activeTeachers || 0}
+inactive={stats.inactiveTeachers || 0}
           iconBg="bg-cyan-50"
           delay={0.2}
         />
@@ -178,12 +215,12 @@ export default function Dashboard() {
         <StatCard
           icon={StaffGif}
           title="Total Staff"
-          value="162"
-          percent="+2%"
+          value={stats.totalStaff || 0}
+          percent={`${stats.staffPercent || 0}`}
           percentBg="bg-yellow-100"
           percentText="text-yellow-600"
-          active="161"
-          inactive="02"
+         active={stats.activeStaff || 0}
+inactive={stats.inactiveStaff || 0}
           iconBg="bg-yellow-50"
           delay={0.3}
         />
@@ -191,12 +228,12 @@ export default function Dashboard() {
         <StatCard
           icon={SubjectGif}
           title="Total Subjects"
-          value="82"
-          percent="+15%"
+          value={stats.totalSubjects || 0}
+         percent={`${stats.subjectPercent || 0}`}
           percentBg="bg-green-100"
           percentText="text-green-600"
-          active="81"
-          inactive="01"
+         active={stats.activeSubjects || 0}
+inactive={stats.inactiveSubjects || 0}
           iconBg="bg-green-50"
           delay={0.4}
         />

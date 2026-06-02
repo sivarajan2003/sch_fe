@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import {
   BookOpen,
   Leaf,
@@ -8,60 +8,97 @@ import {
   Clock,
   X,
 } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import {getNotices,
+} from "../service/noticeBoardService";
 /* ================= NOTICE DATA (2025) ================= */
 
-const notices = [
-  {
-    title: "New Syllabus Instructions",
-    date: "11 Jan 2025",
-    days: "20 Days",
-    desc: "Updated syllabus structure has been released for the academic year 2025.",
-    icon: BookOpen,
-    bg: "bg-blue-50",
-    color: "text-gray-600",
-  },
-  {
-    title: "World Environment Day Program",
-    date: "05 Jun 2025",
-    days: "15 Days",
-    desc: "School-wide programs, competitions and tree plantation activities are planned.",
-    icon: Leaf,
-    bg: "bg-green-50",
-    color: "text-green-600",
-  },
-  {
-    title: "Exam Preparation Notification",
-    date: "18 Feb 2025",
-    days: "12 Days",
-    desc: "Students are advised to follow the preparation schedule and attend revision classes.",
-    icon: Bell,
-    bg: "bg-red-50",
-    color: "text-red-500",
-  },
-  {
-    title: "Online Classes Preparation",
-    date: "10 Jul 2025",
-    days: "02 Days",
-    desc: "Online class timetable and platform access details will be shared soon.",
-    icon: FileText,
-    bg: "bg-cyan-50",
-    color: "text-cyan-600",
-  },
-  {
-    title: "Exam Time Table Release",
-    date: "22 Aug 2025",
-    days: "06 Days",
-    desc: "Final examination timetable for Term II has been officially released.",
-    icon: CalendarDays,
-    bg: "bg-yellow-50",
-    color: "text-yellow-600",
-  },
-];
+// const notices = [
+//   {
+//     title: "New Syllabus Instructions",
+//     date: "11 Jan 2025",
+//     days: "20 Days",
+//     desc: "Updated syllabus structure has been released for the academic year 2025.",
+//     icon: BookOpen,
+//     bg: "bg-blue-50",
+//     color: "text-gray-600",
+//   },
+//   {
+//     title: "World Environment Day Program",
+//     date: "05 Jun 2025",
+//     days: "15 Days",
+//     desc: "School-wide programs, competitions and tree plantation activities are planned.",
+//     icon: Leaf,
+//     bg: "bg-green-50",
+//     color: "text-green-600",
+//   },
+//   {
+//     title: "Exam Preparation Notification",
+//     date: "18 Feb 2025",
+//     days: "12 Days",
+//     desc: "Students are advised to follow the preparation schedule and attend revision classes.",
+//     icon: Bell,
+//     bg: "bg-red-50",
+//     color: "text-red-500",
+//   },
+//   {
+//     title: "Online Classes Preparation",
+//     date: "10 Jul 2025",
+//     days: "02 Days",
+//     desc: "Online class timetable and platform access details will be shared soon.",
+//     icon: FileText,
+//     bg: "bg-cyan-50",
+//     color: "text-cyan-600",
+//   },
+//   {
+//     title: "Exam Time Table Release",
+//     date: "22 Aug 2025",
+//     days: "06 Days",
+//     desc: "Final examination timetable for Term II has been officially released.",
+//     icon: CalendarDays,
+//     bg: "bg-yellow-50",
+//     color: "text-yellow-600",
+//   },
+// ];
 
 export default function NoticeBoard() {
   const [openModal, setOpenModal] = useState(false);
+const [notices, setNotices] =
+useState<any[]>([]);
+useEffect(() => {
+  loadNotices();
+}, []);
 
+const loadNotices = async () => {
+  try {
+    const res = await getNotices();
+
+    setNotices(res.data.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
+if (notices.length === 0) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5 h-full">
+<div className="flex items-center justify-between mb-5">
+  <h3 className="text-base font-semibold text-gray-900">
+    Notice Board
+  </h3>
+
+  <span
+    className="text-sm text-blue-600 cursor-pointer font-medium"
+  >
+    View All
+  </span>
+</div>
+
+      <div className="flex justify-center items-center h-48 text-gray-500">
+        No Notices Found
+      </div>
+    </div>
+  );
+}
   return (
     <>
       {/* ================= NOTICE BOARD ================= */}
@@ -88,7 +125,7 @@ export default function NoticeBoard() {
           <div className="absolute left-[14px] top-6 bottom-6 border-l-2 border-dotted border-gray-200" />
 
           {notices.slice(0, 3).map((item, index) => {
-            const Icon = item.icon;
+            //const Icon = item.icon;
             return (
               <div
                 key={index}
@@ -102,15 +139,13 @@ export default function NoticeBoard() {
                 {/* ICON */}
                 <div className="relative z-10">
                   <div
-                    className={`
-                      w-9 h-9 rounded-full flex items-center justify-center
-                      ${item.bg}
-                      transition-transform duration-300
-                      group-hover:scale-110 group-hover:rotate-3
-                    `}
-                  >
-                    <Icon className={`w-4 h-4 ${item.color}`} />
-                  </div>
+  className="
+    w-9 h-9 rounded-full flex items-center justify-center
+    bg-blue-50
+  "
+>
+  <BookOpen className="w-4 h-4 text-blue-600" />
+</div>
                 </div>
 
                 {/* TEXT */}
@@ -121,14 +156,16 @@ export default function NoticeBoard() {
 
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
                     <CalendarDays className="w-3.5 h-3.5" />
-                    <span>Added on : {item.date}</span>
+                    <span>
+  Added on : {item.notice_date}
+</span>
                   </div>
                 </div>
 
                 {/* DAYS */}
                 <div className="flex items-center gap-1 text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded-md whitespace-nowrap group-hover:bg-gray-200 transition">
                   <Clock className="w-3.5 h-3.5" />
-                  {item.days}
+                 {item.expiry_days} Days
                 </div>
               </div>
             );
@@ -157,7 +194,7 @@ export default function NoticeBoard() {
             {/* FULL NOTICE CONTENT */}
             <div className="space-y-6">
               {notices.map((item, index) => {
-                const Icon = item.icon;
+                //const Icon = item.icon;
                 return (
                   <div
                     key={index}
@@ -169,29 +206,27 @@ export default function NoticeBoard() {
                     "
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <div
-                        className={`
-                          w-9 h-9 rounded-full flex items-center justify-center
-                          ${item.bg}
-                          transition-transform duration-300
-                          hover:scale-110
-                        `}
-                      >
-                        <Icon className={`${item.color} w-4 h-4`} />
-                      </div>
+<div
+  className="
+    w-9 h-9 rounded-full flex items-center justify-center
+    bg-blue-50
+  "
+>
+  <BookOpen className="text-blue-600 w-4 h-4" />
+</div>
 
                       <div>
                         <p className="font-medium text-gray-900">
                           {item.title}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Added on {item.date}
+                          Added on {item.notice_date}
                         </p>
                       </div>
                     </div>
 
                     <p className="text-sm text-gray-600">
-                      {item.desc}
+                      {item.description}
                     </p>
                   </div>
                 );
