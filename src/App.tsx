@@ -193,10 +193,24 @@ export default function App() {
 
           {/* PEOPLE */}
           <Route path="people/students/add" element={<AddStudentPage />} />
+          <Route
+  path="people/student-dashboard"
+  element={<StudentDashboard />}
+/>
+<Route
+  path="people/teacher-dashboard"
+  element={<TeacherDashboard />}
+/>
           <Route path="people/students" element={<StudentsPage />} />
+          <Route
+  path="people/parent-dashboard"
+  element={<ParentDashboard />}
+/>
           <Route path="people/parents" element={<ParentsPage />} />
           <Route path="people/guardians" element={<GuardiansPage />} />
+          
           <Route path="people/teachers" element={<TeachersPage />} />
+
           <Route
             path="/admin/dashboard/academic/classes/add"
             element={<AddClass />}

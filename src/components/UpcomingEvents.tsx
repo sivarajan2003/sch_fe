@@ -46,10 +46,11 @@ const [loading, setLoading] =
 
 const loadEvents = async () => {
   try {
-    const res =
-      await getUpcomingEvents();
+    const res = await getUpcomingEvents();
 
-    setAllEvents(res.data || []);
+console.log("Upcoming Events Response =", res);
+
+setAllEvents(res.data || []);
   } catch (err) {
     console.error(err);
   } finally {

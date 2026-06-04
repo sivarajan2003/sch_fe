@@ -71,9 +71,12 @@ useEffect(() => {
 
 const loadNotices = async () => {
   try {
-    const res = await getNotices();
+   const res = await getNotices();
 
-    setNotices(res.data.data);
+console.log("Notice API Response:", res.data);
+
+setNotices(res.data.data);
+    
   } catch (err) {
     console.log(err);
   }

@@ -351,9 +351,44 @@ onClick={() =>
   setActiveSection(activeSection === "people" ? null : "people")
 }
             />
+            
             {!collapsed && activeSection === "people" && (
+              
               <div className="ml-6 mt-2 space-y-1">
                 {/* ================= STUDENTS ================= */}
+                
+                <button
+  onClick={() =>
+    navigate(`${basePath}/people/student-dashboard`)
+  }
+  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+  ${
+    isActive(`${basePath}/people/student-dashboard`)
+      ? "bg-blue-600 text-white"
+      : "hover:bg-gray-50 text-gray-700"
+  }`}
+>
+<span
+  className={`w-8 h-8 rounded-lg flex items-center justify-center
+  ${
+    isActive(`${basePath}/people/student-dashboard`)
+      ? "bg-white/20"
+      : "bg-gray-100"
+  }`}
+>
+ <LayoutDashboard
+    className={`w-4 h-4 ${
+      isActive(`${basePath}/people/student-dashboard`)
+        ? "text-white"
+        : "text-gray-700"
+    }`}
+  />
+</span>
+
+  <span className="text-sm font-medium">
+    Student Dashboard
+  </span>
+</button>
                 {!isParent && (
                   <>
                      <button
@@ -398,6 +433,38 @@ onClick={() =>
     )}
 
                     {/* ================= PARENTS ================= */}
+                    <button
+  onClick={() =>
+    navigate(`${basePath}/people/parent-dashboard`)
+  }
+  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+  ${
+    isActive(`${basePath}/people/parent-dashboard`)
+      ? "bg-blue-600 text-white"
+      : "hover:bg-gray-50 text-gray-700"
+  }`}
+>
+  <span
+    className={`w-8 h-8 rounded-lg flex items-center justify-center
+    ${
+      isActive(`${basePath}/people/parent-dashboard`)
+        ? "bg-white/20"
+        : "bg-gray-100"
+    }`}
+  >
+    <LayoutDashboard
+      className={`w-4 h-4 ${
+        isActive(`${basePath}/people/parent-dashboard`)
+          ? "text-white"
+          : "text-gray-700"
+      }`}
+    />
+  </span>
+
+  <span className="text-sm font-medium">
+    Parent Dashboard
+  </span>
+</button>
                      <button
                       onClick={() => {
                         navigate(`${basePath}/people/parents`);
@@ -442,8 +509,40 @@ onClick={() =>
                     {/* 🔒 LOCK ICON */}
   {/* <Lock className="w-4 h-4 text-gray-400" /> */}
                 </button> 
+<button
+  onClick={() =>
+    navigate(`${basePath}/people/teacher-dashboard`)
+  }
+  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg
+  ${
+    isActive(`${basePath}/people/teacher-dashboard`)
+      ? "bg-blue-600 text-white"
+      : "hover:bg-gray-50 text-gray-700"
+  }`}
+>
+  <span
+    className={`w-8 h-8 rounded-lg flex items-center justify-center
+    ${
+      isActive(`${basePath}/people/teacher-dashboard`)
+        ? "bg-white/20"
+        : "bg-gray-100"
+    }`}
+  >
+    <LayoutDashboard
+      className={`w-4 h-4 ${
+        isActive(`${basePath}/people/teacher-dashboard`)
+          ? "text-white"
+          : "text-gray-700"
+      }`}
+    />
+  </span>
 
+  <span className="text-sm font-medium">
+    Teacher Dashboard
+  </span>
+</button>
                 {/* ================= TEACHERS ================= */}
+                
                 <button
                   onClick={() => {
                     navigate(`${basePath}/people/teachers`);

@@ -24,9 +24,9 @@ const loadAttendance = async (type: string) => {
 
     setData(res.data?.data || null);
   } catch (error) {
-    console.error(error);
-    setData(null);
-  }
+  console.error("Attendance Error =", error);
+  setData(null);
+}
 };
 
 const total =

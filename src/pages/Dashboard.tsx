@@ -60,6 +60,9 @@ const [stats, setStats] = useState({
   subjectPercent: 0,
 });
 useEffect(() => {
+  console.log("STATS =", stats);
+}, [stats]);
+useEffect(() => {
   const timer = setInterval(() => {
     setCurrentTime(new Date());
   }, 1000);
@@ -69,17 +72,18 @@ useEffect(() => {
 
 useEffect(() => {
   loadDashboard();
+  
 }, []);
   const navigate = useNavigate();
   const loadDashboard = async () => {
   try {
     const res = await dashboardService.getDashboardStats();
 
-    console.log("Dashboard API:", res);
+    console.log("RESPONSE =", res);
 
-    setStats(res.data || {});
+    setStats(res.data);
   } catch (err) {
-    console.error(err);
+    console.error("Dashboard Error:", err);
   }
 };
   return (
@@ -93,7 +97,7 @@ useEffect(() => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <button
+          {/* <button
             onClick={() => navigate("/admin/dashboard/academic/classes/add")}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm w-full sm:w-auto"
           >
@@ -104,7 +108,7 @@ useEffect(() => {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm w-full sm:w-auto"
           >
             Add New Student
-          </button>
+          </button> */}
           <button
             onClick={() => navigate("/admin/dashboard/fees")}
             className="px-4 py-2 bg-gray-100 rounded-lg text-sm"

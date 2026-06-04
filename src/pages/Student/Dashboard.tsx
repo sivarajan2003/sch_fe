@@ -1,3 +1,4 @@
+//student/dashboard.tsx
 //import DashboardLayout from "../../components/DashboardLayout";
 import DashboardLayout from "../../components/DashboardLayout";
 
@@ -436,6 +437,8 @@ const performanceLabels = perfConfig[perfView].xLabels;
   return (
     //<DashboardLayout>
     <>
+    <div className="w-full max-w-full overflow-x-hidden">
+    <div className="w-full overflow-x-hidden">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-semibold">Student Dashboard</h2>
@@ -463,7 +466,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
       </div>
 
       {/* ================= MAIN GRID ================= */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 xl:auto-rows-min gap-6">
+     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[33%_33%_30%] gap-4 w-full">
 
         {/* ================= LEFT COLUMN ================= */}
         <div className="space-y-6">
@@ -519,8 +522,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
 
           {/* TODAY'S CLASS */}
-          <div className="bg-white border rounded-xl p-6 sm:p-9
-                animate-card card-hover">
+          <div className="bg-white border rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
   <div>
     <h4 className="text-18px font-medium">
@@ -612,7 +614,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
   {/* ===== FULL CIRCLE DONUT ===== */}
   <div className="flex justify-center mb-5">
-    <div className="relative w-44 h-44">
+    <div className="relative w-32 h-32 mx-auto">
 
       <svg viewBox="0 0 200 200" className="w-full h-full">
         {/* Background ring */}
@@ -724,9 +726,8 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
 
  {/* ================= SCHEDULE CARD ================= */}
- <div className="bg-white border rounded-xl p-4 xl:row-span-2 animate-card card-hover">
-
-{/* Header */}
+<div className="bg-white border rounded-xl p-4 xl:row-span-2 animate-card card-hover overflow-hidden">
+    {/* Header */}
 <div className="flex items-center justify-between mb-4">
   <h4 className="text-18px font-medium">Schedules</h4>
   <span
@@ -764,9 +765,9 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
 {/* Weekdays */}
 <div className="grid grid-cols-7 text-xs text-center text-gray-400 mb-2">
-  {["S", "M", "T", "W", "T", "F", "S"].map(d => (
-    <span key={d}>{d}</span>
-  ))}
+ {["S","M","T","W","T","F","S"].map((d,i) => (
+  <span key={i}>{d}</span>
+))}
 </div>
 
 {/* Calendar */}
@@ -836,8 +837,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
 
         {/* ================= QUICK ACTIONS (HALF WIDTH) ================= */}
-        <div className="xl:col-span-2 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-
+<div className="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
 {[
     { title: "Pay Receipts", gif: s1, color: "blue" },
     { title: "Exam Result", gif: s2, color: "green" },
@@ -902,10 +902,12 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
       </div>
 {/* ================= PERFORMANCE + HOME WORK ================= */}
-<div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
-{/* ================= PERFORMANCE (LEFT) ================= */}
-<div className="xl:col-span-2 bg-white rounded-xl border p-3">
 
+{/* <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[26%_30%_40%] gap-4 w-full"> */}
+<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[70%_30%] gap-4 w-full">
+{/* ================= PERFORMANCE (LEFT) ================= */}
+{/* <div className="xl:col-span-2 bg-white rounded-xl border p-3"> */}
+<div className="bg-white rounded-xl border p-3">
   {/* Header */}
   <div className="flex items-center justify-between mb-2">
     <h4 className="text-18px font-medium">Performance</h4>
@@ -940,18 +942,18 @@ const performanceLabels = perfConfig[perfView].xLabels;
   </div>
 
   {/* GRAPH CONTAINER */}
-  <div className="relative bg-[#F8FAFF] rounded-lg p-4 sm:p-12">
-
+<div className="relative bg-[#F8FAFF] rounded-lg p-4">
     {/* Y Axis */}
     <div className="absolute left-2 top-3 bottom-8 flex flex-col justify-between text-xs text-gray-400">
       {[100, 75, 50, 25, 0].map(v => (
         <span key={v}>{v}</span>
       ))}
     </div>
-    <div className="overflow-x-auto">
+   <div className="overflow-hidden w-full">
     <svg
   viewBox="0 0 500 220"
-  className="ml-6 w-full h-40 sm:h-49"
+    className="w-full h-40"
+
   onMouseMove={handlePerfMove}
   onMouseLeave={handlePerfLeave}
 >
@@ -1190,7 +1192,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 </div>
   </div>
 {/* ================= LEAVE + EXAM + FEES ================= */}
-<div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
 
 {/* ================= LEAVE STATUS ================= */}
 
@@ -1465,11 +1467,11 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
   </div>
   {/* Faculty Cards */}
-  <div
+<div
   ref={facultyRef}
   className="
     flex gap-4 overflow-x-auto scroll-smooth
-    scrollbar-hide
+    scrollbar-hide max-w-full
   "
 >
     {[
@@ -1520,7 +1522,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 .map((f, i) => (
   <div
   key={i}
-  className="min-w-[240px] border rounded-lg p-4 flex-shrink-0"
+  className="min-w-[180px] border rounded-lg p-4 flex-shrink-0"
 >
           {/* Avatar + Info */}
         <div className="flex items-center gap-3 mb-3">
@@ -1569,7 +1571,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
   </div>
 </div>
 {/* ================= NOTICE + SYLLABUS + TODO ================= */}
-<div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
   {/* ================= NOTICE BOARD ================= */}
   <div className="bg-white rounded-xl border p-4 sm:p-5
                 animate-card card-hover">
@@ -2193,7 +2195,8 @@ const performanceLabels = perfConfig[perfView].xLabels;
     </div>
   </div>
 )}
-
+</div>
+</div>
   </> 
  // </DashboardLayout>
   );

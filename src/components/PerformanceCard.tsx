@@ -71,18 +71,19 @@ useEffect(() => {
 
 const loadPerformance = async (): Promise<void> => {
   try {
-    const res =
-      await getPerformance();
+    const res = await getPerformance();
 
-    setAllClasses(res.data.data);
+console.log("Performance API =", res);
 
-    if (res.data.data.length > 0) {
-      setSelectedClass(
-        res.data[0].class_name
-      );
+    setAllClasses(res.data);
 
-      setData(res.data[0]);
-    }
+if (res.data.length > 0) {
+  setSelectedClass(
+    res.data[0].class_name
+  );
+
+  setData(res.data[0]);
+}
   } catch (err) {
     console.error(err);
   }

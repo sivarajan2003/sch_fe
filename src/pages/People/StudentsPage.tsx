@@ -5,7 +5,7 @@ import {
   Heart, Info, FileText, Printer, RotateCw, X, Filter, 
   Users, CheckCircle, Copy, Check, Hash, Activity, GraduationCap
 } from "lucide-react";
-
+import studentService from "../../service/studentService";
 const cardFlipStyles = `
   .id-card-perspective {
     perspective: 1200px;
@@ -66,8 +66,12 @@ export default function StudentsPage() {
 
   const fetchStudents = async () => {
     try {
-      const svc = (await import("../../service/studentService")).default;
-      const res = await svc.getStudents({ limit: 200, includeAcademicConfig: true });
+      // const svc = (await import("../../service/studentServicejs")).default;
+      // const res = await svc.getStudents({ limit: 200, includeAcademicConfig: true });
+      const res = await studentService.getStudents({
+  limit: 200,
+  includeAcademicConfig: true,
+});
       const rows = res.rows ?? res.data ?? [];
       const mapped = rows.map((r: any) => {
         const configClass = r.AcademicConfig?.class;

@@ -2,9 +2,11 @@
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getFeeSummary } from "../service/feesummaryService";
+
+
 export default function FeeSummaryCards() {
   const [summary, setSummary] = useState<any>(null);
-
+console.log("SUMMARY STATE =", summary);
 useEffect(() => {
   loadSummary();
 }, []);
@@ -12,11 +14,17 @@ useEffect(() => {
 const loadSummary = async () => {
   try {
     const res = await getFeeSummary();
-    setSummary(res.data);
+
+console.log("FULL RESPONSE =", res);
+console.log("DATA =", res.data);
+console.log("DATA.DATA =", res.data?.data);
+
+setSummary(res.data);
   } catch (err) {
     console.log(err);
   }
 };
+console.log("SUMMARY =", summary);
   const cards = [
   {
     title: "Total Fees Collected",

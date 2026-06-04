@@ -25,7 +25,7 @@ import {
   ArrowRight,
   ChevronRight
 } from "lucide-react";
-import studentService from "../../service/studentService";
+import studentService from "../../service/studentService.js";
 import toast from "react-hot-toast";
 
 // Misspelled filename is transprotService.js

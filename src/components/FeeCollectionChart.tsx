@@ -34,16 +34,12 @@ export default function FeeCollectionChart() {
   try {
     const res = await getFeeCollection();
 
-    console.log("Full Response:", res);
-    console.log("Data:", res.data);
+    console.log("Fee Collection Response:", res);
 
-    if (!res.data || res.data.length === 0) {
-      setData([]);
-    } else {
-      setData(res.data?.data || []);
-    }
+    setData(res.data || []);
   } catch (err) {
     console.error(err);
+    setData([]);
   }
 };
   const visibleData = showLast8 ? data.slice(-8) : data;
