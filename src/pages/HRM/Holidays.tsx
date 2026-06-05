@@ -15,7 +15,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import AddHolidayModal from "../../components/tables/AddHolidayModal";
-import holidayService from "../../service/holidayservice";
+import holidayService from "../../service/holidayService";
 /* ================= HOLIDAY DATA ================= */
 // const INITIAL_DATA = [
 //   {
