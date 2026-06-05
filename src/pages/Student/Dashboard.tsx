@@ -1,7 +1,22 @@
 //student/dashboard.tsx
 //import DashboardLayout from "../../components/DashboardLayout";
 import DashboardLayout from "../../components/DashboardLayout";
+import { useEffect, useState } from "react";
 
+import {
+  getStudentDashboard
+} from "../../service/studentDashboardService";
+import {
+ getStudentExams
+} from "../../service/studentExamService";
+import { getStudentHomework } from "../../service/studentHomeworkService";
+import { getStudentPerformance } from "../../service/studentPerformanceService";
+import {
+ getStudentExamResult
+} from "../../service/studentExamResultService";
+import { getStudentFees }from "../../service/studentFeesService";
+import { getStudentFaculties } from "../../service/studentFacultyService";
+import { getStudentNotices } from "../../service/studentNoticeService";
 import StudentAvatar from "../../assets/s1.png";
 import Tc1 from "../../assets/tc1.png";
 import Tc2 from "../../assets/tc2.png";
@@ -18,13 +33,19 @@ import { X, Asterisk } from "lucide-react";
 import { useRef } from "react";
 import { CalendarDays } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import s1 from "../../assets/gif/s1.gif";
 import s2 from "../../assets/gif/s2.gif";
 import s3 from "../../assets/gif/s3.gif";
 import s4 from "../../assets/gif/s4.gif";
 
-
+interface DashboardData {
+  totalWorkingDays: number;
+  present: number;
+  absent: number;
+  halfday: number;
+  late: number;
+  attendancePercent: number;
+}
 export default function StudentDashboard() {
   const [showEditProfile, setShowEditProfile] = useState(false);
 
@@ -50,40 +71,172 @@ const [showViewExams, setShowViewExams] = useState(false);
 const [rollNo, setRollNo] = useState("");
 const [studentName, setStudentName] = useState("");
 const [showResult, setShowResult] = useState(false);
-const [activeQuarter, setActiveQuarter] = useState<keyof typeof examResults>("1st Quarter");
+const [activeQuarter, setActiveQuarter] =
+  useState("1st Quarter");
 const [showQuarterMenu, setShowQuarterMenu] = useState(false);
+const [dashboardData, setDashboardData] = useState<any>(null);
+  useEffect(() => {
 
+  const studentId =
+    localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentDashboard(studentId)
+  .then((res: any) => {
+    setDashboardData(res.data.data);
+  })
+  .catch((err: any) => {
+    console.error(err);
+  });
+
+}, []);
 /* ================== EXAMS STATE ================== */
-const [exams, setExams] = useState([
-  {
-    title: "1st Quarterly",
-    subject: "Mathematics",
-    date: new Date(2025, 6, 6),
-    time: "01:30 - 02:15 PM",
-    room: "105",
-  },
-  {
-    title: "2nd Quarterly",
-    subject: "English",
-    date: new Date(2025, 6, 12),
-    time: "01:30 - 02:15 PM",
-    room: "106",
-  },
-  {
-    title: "2nd Quarterly",
-    subject: "Physics",
-    date: new Date(2025, 6, 12),
-    time: "01:30 - 02:15 PM",
-    room: "107",
-  },
-  {
-    title: "2nd Quarterly",
-    subject: "Chemistry",
-    date: new Date(2025, 7, 12),
-    time: "01:30 - 02:15 PM",
-    room: "108",
-  },
-]);
+// const [exams, setExams] = useState([
+//   {
+//     title: "1st Quarterly",
+//     subject: "Mathematics",
+//     date: new Date(2025, 6, 6),
+//     time: "01:30 - 02:15 PM",
+//     room: "105",
+//   },
+//   {
+//     title: "2nd Quarterly",
+//     subject: "English",
+//     date: new Date(2025, 6, 12),
+//     time: "01:30 - 02:15 PM",
+//     room: "106",
+//   },
+//   {
+//     title: "2nd Quarterly",
+//     subject: "Physics",
+//     date: new Date(2025, 6, 12),
+//     time: "01:30 - 02:15 PM",
+//     room: "107",
+//   },
+//   {
+//     title: "2nd Quarterly",
+//     subject: "Chemistry",
+//     date: new Date(2025, 7, 12),
+//     time: "01:30 - 02:15 PM",
+//     room: "108",
+//   },
+// ]);
+const [performanceData, setPerformanceData] = useState<any[]>([]);
+const [exams, setExams] = useState<any[]>([]);
+const [homeworks, setHomeworks] = useState<any[]>([]);
+const [examResults, setExamResults] =
+  useState<any[]>([]);
+  const [notices, setNotices] = useState<any[]>([]);
+
+const [fees, setFees] =
+  useState<any[]>([]);
+  const [faculties, setFaculties] =
+useState([]);
+const quarterResults = examResults.filter(
+  (item: any) => item.quarter === activeQuarter
+);
+useEffect(() => {
+
+ const studentId =
+  localStorage.getItem("studentId");
+
+ if (!studentId) return;
+
+ getStudentExams(studentId)
+  .then((res) => {
+    setExams(res.data);
+  })
+  .catch(console.error);
+
+}, []);
+useEffect(() => {
+  const studentId = localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentPerformance(studentId)
+    .then((res: any) => {
+  setPerformanceData(res.data.data || []);
+})
+.catch((err: any) => {
+  console.error(err);
+  setPerformanceData([]);
+});
+}, []);
+useEffect(() => {
+  const studentId =
+    localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentHomework(studentId)
+    then((res: any) => {
+      setHomeworks(res.data.data);
+    })
+    .catch(() => {
+      setHomeworks([]);
+    });
+}, []);
+useEffect(() => {
+  const studentId =
+    localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentExamResult(studentId)
+    .then((res: any) => {
+  setExamResults(res.data || []);
+})
+    .catch(() => {
+      setExamResults([]);
+    });
+}, []);
+useEffect(() => {
+  const studentId =
+    localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentFees(studentId)
+    .then((res: any) => {
+  setFees(res.data.data || []);
+})
+    .catch(() => {
+      setFees([]);
+    });
+}, []);
+useEffect(() => {
+
+ const studentId =
+ localStorage.getItem("studentId");
+
+ if (!studentId) return;
+
+ getStudentFaculties(studentId)
+  .then((res: any) => {
+    setFaculties(res.data.data || []);
+  })
+  .catch((err: any) => {
+    console.error(err);
+    setFaculties([]);
+  });
+}, []);
+useEffect(() => {
+  const studentId =
+    localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentNotices(studentId)
+    .then((res: any) => {
+      setNotices(res.data.data || []);
+    })
+    .catch((err: any) => {
+      console.error(err);
+      setNotices([]);
+    });
+}, []);
 /* ================= ATTENDANCE DATA ================= */
 
 const attendanceData = [
@@ -128,22 +281,17 @@ const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 const firstDay = new Date(currentYear, currentMonth, 1).getDay();
 
 const examDays = exams
-  .filter(
-    e =>
-      e.date.getMonth() === currentMonth &&
-      e.date.getFullYear() === currentYear
+  .filter((e: any) =>
+    new Date(e.exam_date).getMonth() === currentMonth
   )
-  .map(e => e.date.getDate());
-  const uniqueExams = exams.filter(
-    (exam, index, self) =>
-      index ===
-      self.findIndex(
-        e =>
-          e.subject === exam.subject &&
-          e.date.getTime() === exam.date.getTime()
-      )
+  .map((e: any) =>
+    new Date(e.exam_date).getDate()
   );
-  
+  const currentMonthExams = exams.filter(
+  (e: any) =>
+    new Date(e.exam_date).getMonth() === currentMonth &&
+    new Date(e.exam_date).getFullYear() === currentYear
+);
 /* ================== MONTH NAVIGATION ================== */
 const changeMonth = (dir: "prev" | "next") => {
   if (dir === "prev") {
@@ -237,106 +385,7 @@ const nextClasses = [
     c: "blue",
   },
 ];
-const notices = [
-  {
-    title: "New Syllabus Instructions",
-    date: "11 Mar 2025",
-    icon: "📘",
-    color: "text-blue-600",
-  },
-  {
-    title: "World Environment Day",
-    date: "21 Apr 2025",
-    icon: "🌱",
-    color: "text-green-600",
-  },
-  {
-    title: "Exam Preparation Notification!",
-    date: "13 Mar 2025",
-    icon: "🔔",
-    color: "text-red-600",
-  },
-  {
-    title: "Online Classes Preparation",
-    date: "24 May 2025",
-    icon: "💻",
-    color: "text-cyan-600",
-  },
-  {
-    title: "Exam Time Table Release",
-    date: "24 May 2025",
-    icon: "📅",
-    color: "text-yellow-600",
-  },
-  {
-    title: "PTA Meeting Announcement",
-    date: "02 Jun 2025",
-    icon: "👨‍👩‍👧",
-    color: "text-purple-600",
-  },
-  {
-    title: "Holiday Declaration",
-    date: "10 Jun 2025",
-    icon: "🏖️",
-    color: "text-orange-600",
-  },
-];
-const allHomeWorks = [
-  {
-    sub: "Physics",
-    color: "blue",
-    title: "Write about Theory of Pendulum",
-    teacher: "Aaron",
-    due: "16 Jun 2025",
-    percent: 90,
-    img: H1,
-  },
-  {
-    sub: "Chemistry",
-    color: "green",
-    title: "Chemistry - Change of Elements",
-    teacher: "Hellana",
-    due: "18 Jun 2025",
-    percent: 65,
-    img: H2,
-  },
-  {
-    sub: "Maths",
-    color: "yellow",
-    title: "Maths - Problems to Solve Page 21",
-    teacher: "Morgan",
-    due: "21 Jun 2025",
-    percent: 30,
-    img: H3,
-  },
-  {
-    sub: "English",
-    color: "red",
-    title: "English - Vocabulary Introduction",
-    teacher: "Daniel Josua",
-    due: "21 Jun 2025",
-    percent: 10,
-    img: H4,
-  },
-  {
-    sub: "Biology",
-    color: "green",
-    title: "Biology – Cell Structure Notes",
-    teacher: "Sophia",
-    due: "23 Jun 2025",
-    percent: 50,
-    img: H2,
-  },
-  {
-    sub: "History",
-    color: "blue",
-    title: "History – World War II Essay",
-    teacher: "Robert",
-    due: "25 Jun 2025",
-    percent: 20,
-    img: H1,
-  },
-];
+
 const [showLeaveYearDetails, setShowLeaveYearDetails] = useState(false);
 const leaveData = [
   {
@@ -375,29 +424,29 @@ const approvedLeaves = yearLeaves.filter(l => l.status === "Approved").length;
 const pendingLeaves = yearLeaves.filter(l => l.status === "Pending").length;
 const declinedLeaves = yearLeaves.filter(l => l.status === "Declined").length;
 
-const examResults = {
-  "1st Quarter": [
-    { label: "Mat", value: 100 },
-    { label: "Phy", value: 92 },
-    { label: "Che", value: 90 },
-    { label: "Eng", value: 80 },
-    { label: "Sci", value: 70 },
-  ],
-  "2nd Quarter": [
-    { label: "Mat", value: 85 },
-    { label: "Phy", value: 88 },
-    { label: "Che", value: 78 },
-    { label: "Eng", value: 82 },
-    { label: "Sci", value: 75 },
-  ],
-  "Final Exam": [
-    { label: "Mat", value: 90 },
-    { label: "Phy", value: 94 },
-    { label: "Che", value: 89 },
-    { label: "Eng", value: 85 },
-    { label: "Sci", value: 88 },
-  ],
-};
+// const examResults = {
+//   "1st Quarter": [
+//     { label: "Mat", value: 100 },
+//     { label: "Phy", value: 92 },
+//     { label: "Che", value: 90 },
+//     { label: "Eng", value: 80 },
+//     { label: "Sci", value: 70 },
+//   ],
+//   "2nd Quarter": [
+//     { label: "Mat", value: 85 },
+//     { label: "Phy", value: 88 },
+//     { label: "Che", value: 78 },
+//     { label: "Eng", value: 82 },
+//     { label: "Sci", value: 75 },
+//   ],
+//   "Final Exam": [
+//     { label: "Mat", value: 90 },
+//     { label: "Phy", value: 94 },
+//     { label: "Che", value: 89 },
+//     { label: "Eng", value: 85 },
+//     { label: "Sci", value: 88 },
+//   ],
+// };
 const perfConfig: Record<
   PerfView,
   {
@@ -420,7 +469,7 @@ const perfConfig: Record<
     attendance: [92, 94, 95, 96],
   },
   year: {
-    label: "2024 - 2025",
+  label: dashboardData?.academicYear || "Academic Year",
     xLabels: ["Q1", "Q2", "Half", "Model", "Final"],
     exam: [78, 74, 60, 68, 75],
     attendance: [72, 68, 55, 62, 70],
@@ -589,27 +638,32 @@ const performanceLabels = perfConfig[perfView].xLabels;
   {/* Working Days */}
 <p className="text-xs text-gray-500 mb-4 flex items-center gap-1">
   📘 No of total working days
-  <b className="text-gray-700 ml-1">{totalWorkingDays} Days</b>
+  <b className="text-gray-700 ml-1">{dashboardData?.totalWorkingDays || 0} Days</b>
 </p>
 
 {/* Stats */}
 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs mb-6">
   <div className="border rounded-lg py-3">
-    <p className="font-semibold text-sm">{presentDays}</p>
+    <p className="font-semibold text-sm">{dashboardData?.present || 0}</p>
     <p className="text-gray-500">Present</p>
   </div>
   <div className="border rounded-lg py-3">
-    <p className="font-semibold text-sm">{absentDays}</p>
+    <p className="font-semibold text-sm">{dashboardData?.absent || 0}</p>
     <p className="text-gray-500">Absent</p>
   </div>
   <div className="border rounded-lg py-3">
-    <p className="font-semibold text-sm">{halfDays}</p>
-    <p className="text-gray-500">Halfday</p>
-  </div>
-  <div className="border rounded-lg py-3">
-    <p className="font-semibold text-sm">{lateDays}</p>
-    <p className="text-gray-500">Late</p>
-  </div>
+  <p className="font-semibold text-sm">
+    {dashboardData?.halfday || 0}
+  </p>
+  <p className="text-gray-500">Halfday</p>
+</div>
+
+<div className="border rounded-lg py-3">
+  <p className="font-semibold text-sm">
+    {dashboardData?.late || 0}
+  </p>
+  <p className="text-gray-500">Late</p>
+</div>
 </div>
 
   {/* ===== FULL CIRCLE DONUT ===== */}
@@ -675,7 +729,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
       {/* Center Text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <p className="text-xs text-gray-500">Attendance</p>
-<p className="text-2xl font-bold">{attendancePercent}%</p>
+<p className="text-2xl font-bold">{dashboardData?.attendancePercent || 0}%</p>
       </div>
     </div>
   </div>
@@ -704,21 +758,23 @@ const performanceLabels = perfConfig[perfView].xLabels;
     </div>
 
     <div className="flex gap-2">
-      {["M","T","W","T","F","S","S"].map((d, i) => (
-        <span
-          key={i}
-          className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-semibold
-            ${
-              i === 4
-                ? "bg-red-500 text-white"
-                : i > 4
-                ? "bg-gray-100 text-gray-400"
-                : "bg-green-500 text-white"
-            }`}
-        >
-          {d}
-        </span>
-      ))}
+      {dashboardData?.last7Days?.map((d:any, i:number) => (
+  <span
+    key={i}
+    className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-semibold
+      ${
+        d.status === "Present"
+          ? "bg-green-500 text-white"
+          : d.status === "Absent"
+          ? "bg-red-500 text-white"
+          : d.status === "Late"
+          ? "bg-blue-500 text-white"
+          : "bg-gray-400 text-white"
+      }`}
+  >
+    {d.day}
+  </span>
+))}
     </div>
   </div>
   
@@ -801,37 +857,43 @@ const performanceLabels = perfConfig[perfView].xLabels;
 <h5 className="text-18px font-medium">Exams</h5>
 
 <div className="space-y-3">
-  {exams
-    .filter(
-      e =>
-        e.date.getMonth() === currentMonth &&
-        e.date.getFullYear() === currentYear
-    )
-    .map((e, i) => {
+  {currentMonthExams.length === 0 ? (
+    <div className="border rounded-lg p-4 text-center text-gray-500">
+      No Exams Found
+    </div>
+  ) : (
+    currentMonthExams.map((e: any, i: number) => {
       const daysLeft = Math.ceil(
-        (e.date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        (
+          new Date(e.exam_date).getTime() -
+          Date.now()
+        ) /
+        (1000 * 60 * 60 * 24)
       );
 
       return (
         <div key={i} className="border rounded-lg p-3">
-  <div className="flex items-center justify-between mb-1">
-    <p className="text-sm font-semibold">{e.subject}</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-sm font-semibold">
+              {e.subject}
+            </p>
 
-    <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-      {daysLeft} Days More
-    </span>
-  </div>
+            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+              {daysLeft} Days More
+            </span>
+          </div>
 
-  <p className="text-xs text-gray-500">
-    🕒 {e.time}
-  </p>
+          <p className="text-xs text-gray-500">
+            🕒 {e.start_time} - {e.end_time}
+          </p>
 
-  <p className="text-xs text-blue-600">
-    📍 Room No : {e.room}
-  </p>
-</div>
+          <p className="text-xs text-blue-600">
+            📍 Room No : {e.room_no}
+          </p>
+        </div>
       );
-    })}
+    })
+  )}
 </div>
 </div>
 
@@ -940,7 +1002,12 @@ const performanceLabels = perfConfig[perfView].xLabels;
 </div>
 
   </div>
-
+{performanceData.length === 0 ? (
+  <div className="h-64 flex items-center justify-center text-gray-500">
+    No Performance Data Found
+  </div>
+) : (
+  <>
   {/* GRAPH CONTAINER */}
 <div className="relative bg-[#F8FAFF] rounded-lg p-4">
     {/* Y Axis */}
@@ -1057,6 +1124,8 @@ const performanceLabels = perfConfig[perfView].xLabels;
       Avg Attendance : 95%
     </span>
   </div>
+    </>
+)}
 </div>
 {/* ================= HOME WORK (RIGHT) ================= */}
 <div className="bg-white rounded-xl border p-4 sm:p-5
@@ -1073,7 +1142,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 </span>
 </div>
 
-{[
+{/* {[
   {
     sub: "Physics",
     color: "blue",
@@ -1115,14 +1184,14 @@ const performanceLabels = perfConfig[perfView].xLabels;
     key={i}
     className="flex items-center gap-3 p-3 rounded-lg border mb-3"
   >
-    {/* ✅ Local Image */}
+   
     <img
       src={h.img}
       alt={h.sub}
       className="w-12 h-12 rounded-lg object-cover"
     />
 
-    {/* Info */}
+   
     <div className="flex-1">
       <p
         className={`text-xs font-medium ${
@@ -1147,10 +1216,10 @@ const performanceLabels = perfConfig[perfView].xLabels;
       </p>
     </div>
 
-    {/* Circular Progress */}
+ 
     <div className="relative w-9 h-9">
   <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-    {/* Background circle */}
+    
     <circle
       cx="18"
       cy="18"
@@ -1160,7 +1229,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
       strokeWidth="2.5"
     />
 
-    {/* Progress circle */}
+    
     <circle
       cx="18"
       cy="18"
@@ -1181,13 +1250,46 @@ const performanceLabels = perfConfig[perfView].xLabels;
     />
   </svg>
 
-  {/* Percentage text */}
   <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold">
     {h.percent}%
   </span>
 </div>
 </div>
-))}
+))} */}
+{homeworks.length === 0 ? (
+  <div className="text-center py-10 text-gray-500">
+    No Homework Found
+  </div>
+) : (
+  homeworks.map((h: any) => (
+    <div
+      key={h.id}
+      className="flex items-center gap-3 p-3 rounded-lg border mb-3"
+    >
+      <div className="flex-1">
+        <p className="text-xs text-blue-600">
+          {h.subject}
+        </p>
+
+        <p className="text-sm font-medium">
+          {h.title}
+        </p>
+
+        <p className="text-xs text-gray-500">
+          {h.teacher_name}
+        </p>
+
+        <p className="text-xs text-gray-500">
+          Due : {h.due_date}
+        </p>
+      </div>
+
+      <span className="text-xs font-semibold">
+        {h.progress}%
+      </span>
+    </div>
+  ))
+)}
 
 </div>
   </div>
@@ -1267,11 +1369,17 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
   {showQuarterMenu && (
     <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow text-xs z-20">
-      {Object.keys(examResults).map(q => (
+      {[
+  ...new Set(
+    examResults.map(
+      (item:any) => item.quarter
+    )
+  )
+].map((q:any) => (
         <div
           key={q}
           onClick={() => {
-            setActiveQuarter(q as keyof typeof examResults);
+            setActiveQuarter(q);
             setShowQuarterMenu(false);
           }}
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1288,20 +1396,26 @@ const performanceLabels = perfConfig[perfView].xLabels;
   <div className="px-5 py-4">
 
     {/* Subject Pills */}
-    <div className="flex gap-2 mb-4 flex-wrap">
-  {examResults[activeQuarter].map(s => (
-    <span
-      key={s.label}
-      className="text-xs px-3 py-1 rounded bg-blue-100 text-blue-600"
-    >
-      {s.label} : {s.value}
-    </span>
-  ))}
-</div>
-
+    {quarterResults.length === 0 ? (
+  <div className="text-center py-5 text-gray-500">
+    No Exam Result Found
+  </div>
+) : (
+  <div className="flex gap-2 mb-4 flex-wrap">
+    {quarterResults.map((s:any) => (
+      <span
+        key={s.id}
+        className="text-xs px-3 py-1 rounded bg-blue-100 text-blue-600"
+      >
+        {s.subject} : {s.mark}
+      </span>
+    ))}
+  </div>
+)}
 
     {/* Chart */}
-    <div className="flex items-end justify-between h-52 px-4">
+   {quarterResults.length > 0 && (
+  <div className="flex items-end justify-between h-52 px-4">
 
       {/* Y Axis */}
       <div className="flex flex-col justify-between h-full text-xs text-gray-400 mr-3">
@@ -1314,30 +1428,30 @@ const performanceLabels = perfConfig[perfView].xLabels;
       </div>
 
       {/* Bars */}
-      <div className="flex flex-1 items-end justify-between">
+      {/* <div className="flex flex-1 items-end justify-between"> */}
 
       <div className="flex flex-1 items-end justify-between">
-  {examResults[activeQuarter].map((b, i) => (
+ {quarterResults.map((b:any, i:number) => (
     <div key={i} className="flex flex-col items-center gap-2">
 
       <div
-        className={`w-10 rounded-lg ${
-          b.value === Math.max(...examResults[activeQuarter].map(x => x.value))
-            ? "bg-blue-600"
-            : "bg-gray-200"
-        }`}
-        style={{ height: `${b.value * 1.5}px` }}
+className={`w-10 rounded-lg ${
+  b.mark === Math.max(...quarterResults.map((x:any) => x.mark))
+    ? "bg-blue-600"
+    : "bg-gray-200"
+}`}
+        style={{ height: `${b.mark * 1.5}px` }}
       />
 
-      <span className="text-xs text-gray-500">{b.label}</span>
+      <span className="text-xs text-gray-500">{b.subject}</span>
     </div>
   ))}
 </div>
 
 
-      </div>
+    
     </div>
-
+   )}
   </div>
 </div>
 {/* ================= FEES REMINDER ================= */}
@@ -1349,92 +1463,54 @@ const performanceLabels = perfConfig[perfView].xLabels;
     <h4 className="text-18px font-medium">Fees Reminder</h4>
     <span className="text-xs text-gray-500 flex items-center gap-1">
   <CalendarDays className="w-4 h-4 text-gray-400" />
-  2024-2025
+  {dashboardData?.academicYear || "Academic Year"}
 </span>
   </div>
 
   <div className="px-5 py-4 space-y-4">
 
-    {[
-      {
-        title: "Transport Fees",
-        amount: "$2500",
-        date: "25 May 2025",
-        icon: "🚌",
-        iconBg: " text-blue-600",
-      },
-      {
-        title: "Book Fees",
-        amount: "$2500",
-        date: "25 May 2025",
-        icon: "📘",
-        iconBg: "text-green-600",
-      },
-      {
-        title: "Exam Fees",
-        amount: "$2500",
-        date: "25 May 2025",
-        icon: "📝",
-        iconBg: "text-purple-600",
-      },
-      {
-        title: "Mess Fees",
-        amount: "$2500 + $150",
-        due: true,
-        icon: "🍽️",
-        iconBg: "text-red-600",
-      },
-      {
-        title: "Hostel",
-        amount: "$2500",
-        date: "25 May 2025",
-        icon: "🏨",
-        iconBg: "text-yellow-600",
-      },
-    ].map((f, i) => (
-      <div
-        key={i}
-        className="flex items-center justify-between border rounded-lg px-4 py-3"
-      >
-        {/* LEFT ICON + INFO */}
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${f.iconBg}`}
-          >
-            {f.icon}
-          </div>
+    {fees.length === 0 ? (
+  <div className="text-center py-5 text-gray-500">
+    No Fees Found
+  </div>
+) : (
+  fees.map((f: any) => (
+    <div
+      key={f.id}
+      className="flex items-center justify-between border rounded-lg px-4 py-3"
+    >
+      <div>
+        <p className="text-sm font-medium">
+          {f.fee_type}
+        </p>
 
-          <div>
-            <p className="text-sm font-medium">{f.title}</p>
-            <p
-              className={`text-xs ${
-                f.due ? "text-red-500" : "text-gray-500"
-              }`}
-            >
-              {f.amount}
-              {f.due && (
-                <span className="ml-2 text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded">
-                  Due
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
+        <p className="text-xs text-gray-500">
+          ₹{f.amount}
+        </p>
 
-        {/* RIGHT SIDE */}
-        {f.due ? (
-          <button className="bg-blue-600 text-white text-xs px-4 py-1.5 rounded">
-            Pay now
-          </button>
-        ) : (
-          <div className="text-xs text-gray-500 text-right">
-            <p>Last Date</p>
-            <p>{f.date}</p>
-          </div>
-        )}
+        <p className="text-xs text-gray-400">
+          Due Date : {f.due_date}
+        </p>
       </div>
-    ))}
 
+      {f.status === "Pending" ? (
+        <div className="flex items-center gap-2">
+          <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-xs">
+            Due
+          </span>
+
+          <button className="bg-blue-600 text-white px-3 py-1 rounded text-xs">
+            Pay Now
+          </button>
+        </div>
+      ) : (
+        <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs">
+          Paid
+        </span>
+      )}
+    </div>
+  ))
+)}
   </div>
 </div>
 </div>
@@ -1474,57 +1550,61 @@ const performanceLabels = perfConfig[perfView].xLabels;
     scrollbar-hide max-w-full
   "
 >
-    {[
-  {
-    name: "Aaron",
-    subject: "Chemistry",
-    img: C1,
-    email: "aaron@gmail.com",
-    phone: "919876543210", // with country code
-  },
-  {
-    name: "Hellana",
-    subject: "English",
-    img: C2,
-    email: "hellana@gmail.com",
-    phone: "919812345678",
-  },
-  
-  {
-    name: "Morgan",
-    subject: "Physics",
-    img: C3,
-    email: "morgan@gmail.com",
-    phone: "919834567890",
-  },
-  {
-    name: "Daniel Josua",
-    subject: "Spanish",
-    img: C4,
-    email: "daniel@gmail.com",
-    phone: "919845612378",
-  },
-  {
-    name: "Ram",
-    subject: "Maths",
-    img: C4,
-    email: "ram123@gmail.com",
-    phone: "919845612378",
-  },
-  {
-    name: "Kumar",
-    subject: "Social",
-    img: C1,
-    email: "kkummar@gmail.com",
-    phone: "919845612378",
-  },
-]
-.map((f, i) => (
-  <div
+    {faculties.length === 0 ? (
+  <div className="w-full text-center py-8 text-gray-500">
+    No Faculty Found
+  </div>
+) : (
+  faculties.map((f: any) => (
+    <div
+      key={f.id}
+      className="min-w-[180px] border rounded-lg p-4 flex-shrink-0"
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <img
+          src={f.image || C1}
+          alt={f.teacher_name}
+          className="w-10 h-10 rounded-lg object-cover"
+        />
+
+        <div>
+          <p className="text-sm font-semibold">
+            {f.teacher_name}
+          </p>
+
+          <p className="text-xs text-gray-500">
+            {f.subject}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <a
+          href={`mailto:${f.email}`}
+          className="flex-1 flex items-center justify-center gap-1
+          text-xs border rounded-md py-1.5"
+        >
+          ✉️ Email
+        </a>
+
+        <a
+          href={`https://wa.me/${f.phone}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 flex items-center justify-center gap-1
+          text-xs border rounded-md py-1.5"
+        >
+          💬 Chat
+        </a>
+      </div>
+    </div>
+  ))
+)}
+  {/* <div
   key={i}
   className="min-w-[180px] border rounded-lg p-4 flex-shrink-0"
 >
-          {/* Avatar + Info */}
+       
         <div className="flex items-center gap-3 mb-3">
           <img
             src={f.img}
@@ -1542,7 +1622,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
           </div>
         </div>
 
-        {/* Actions */}
+      
         <div className="flex gap-2">
   <a
     href={`mailto:${f.email}`}
@@ -1566,7 +1646,7 @@ const performanceLabels = perfConfig[perfView].xLabels;
 </div>
 
       </div>
-    ))}
+    ))} */}
 
   </div>
 </div>
@@ -1586,28 +1666,39 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
   </div>
 
-  {notices.slice(0, 5).map((n, i) => (
-  <div
-    key={i}
-    className="flex items-start gap-3 py-3 border-b last:border-none"
-  >
-    <div
-      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${n.color}`}
-    >
-      {n.icon}
-    </div>
-
-    <div className="flex-1">
-      <p className="text-sm font-medium">{n.title}</p>
-      <p className="text-xs text-gray-500">
-        Added on : {n.date}
-      </p>
-    </div>
-
-    <span className="text-gray-400">›</span>
+ {notices.length === 0 ? (
+  <div className="text-center py-8 text-gray-500">
+    No Notice Found
   </div>
-))}
+) : (
+  notices.slice(0, 5).map((n: any) => (
+    <div
+      key={n.id}
+      className="flex items-start gap-3 py-3 border-b last:border-none"
+    >
+      <div className="w-8 h-8 rounded-full flex items-center justify-center">
+        📢
+      </div>
 
+      <div className="flex-1">
+        <p className="text-sm font-medium">
+          {n.title}
+        </p>
+
+        <p className="text-xs text-gray-500">
+          Added on :
+          {new Date(
+            n.createdAt
+          ).toLocaleDateString()}
+        </p>
+
+        <p className="text-xs text-blue-600">
+          By : {n.created_by_role}
+        </p>
+      </div>
+    </div>
+  ))
+)}
 </div>
 
 {/* ================= SYLLABUS ================= */}
@@ -1859,30 +1950,40 @@ const performanceLabels = perfConfig[perfView].xLabels;
 
       {/* List */}
       <div className="p-4 space-y-3 overflow-y-auto max-h-[450px]">
-        {allHomeWorks.map((h, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50"
-          >
-            <img
-              src={h.img}
-              alt={h.sub}
-              className="w-12 h-12 rounded-lg object-cover"
-            />
+        {homeworks.length === 0 ? (
+  <div className="text-center py-10 text-gray-500">
+    No Homework Found
+  </div>
+) : (
+  homeworks.map((h) => (
+    <div
+      key={h.id}
+      className="flex items-center gap-3 p-3 border rounded-lg mb-3"
+    >
+      <div className="flex-1">
+        <p className="text-xs text-blue-600">
+          {h.subject}
+        </p>
 
-            <div className="flex-1">
-              <p className="text-xs font-medium text-blue-600">{h.sub}</p>
-              <p className="text-sm font-medium">{h.title}</p>
-              <p className="text-xs text-gray-500">
-                👤 {h.teacher} • Due : {h.due}
-              </p>
-            </div>
+        <p className="text-sm font-medium">
+          {h.title}
+        </p>
 
-            <span className="text-xs font-semibold">
-              {h.percent}%
-            </span>
-          </div>
-        ))}
+        <p className="text-xs text-gray-500">
+          {h.teacher_name}
+        </p>
+
+        <p className="text-xs text-gray-500">
+          Due : {h.due_date}
+        </p>
+      </div>
+
+      <span className="text-xs font-semibold">
+        {h.progress}%
+      </span>
+    </div>
+  ))
+)}
       </div>
     </div>
   </div>
