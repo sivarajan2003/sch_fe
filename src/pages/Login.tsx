@@ -95,6 +95,15 @@ export default function Login() {
       localStorage.setItem("portal", String(isPortal));
 
       localStorage.setItem("user", JSON.stringify(user ?? {}));
+      localStorage.setItem(
+  "userName",
+  user?.name || ""
+);
+
+localStorage.setItem(
+  "teacherName",
+  user?.name || ""
+);
       localStorage.setItem("isAuth", "true");
 
       toast.success("Login successful ✅");

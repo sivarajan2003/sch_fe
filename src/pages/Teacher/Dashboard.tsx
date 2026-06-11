@@ -1,3 +1,4 @@
+//teacher/dashboard.tsx 
 import DashboardLayout from "../../components/DashboardLayout";
 import T1Img from "../../assets/t1.png";
 import T2 from "../../assets/t2.png";
@@ -10,22 +11,64 @@ import JA from "../../assets/ja.png";
 import JO from "../../assets/jo.png";
 import GoodRightImg from "../../assets/good1.png";
 import GoodImg from "../../assets/good.png";
-import { useState } from "react";
 
+import { useState, useEffect } from "react";
 import { CalendarDays, FolderOpen, ChevronDown } from "lucide-react";
-
-
-
+import {
+  getTodayClasses,
+  getUpcomingEvents,
+  getTeacherAttendance,
+  getBestPerformers,
+  getStudentProgress,
+  getTeacherSyllabus, getStudentMarks,
+ getLeaveStatus,getDashboardCards
+} from "../../service/teacherDashboardService";
+type TodayClass = {
+  start_time: string;
+  end_time: string;
+  class_name: string;
+  section: string;
+  subject: string;
+};
+type EventType = {
+  title: string;
+  date: string;
+  time: string;
+  bar: string;
+  iconBg: string;
+  teachers: number[];
+};
 export default function TeacherDashboard() {
   const [showEditProfile, setShowEditProfile] = useState(false);
-
+const teacherName =
+localStorage.getItem("teacherName") ||
+localStorage.getItem("userName") ||
+"Teacher";
 const [teacherProfile, setTeacherProfile] = useState({
   id: "#T594651",
-  name: "Henriques Morgan",
+  name: teacherName,
   subject: "Physics",
   classes: "IV-A, V-B",
   avatar: T1Img,
 });
+const [todayClasses, setTodayClasses] =
+  useState<TodayClass[]>([]);
+   const [currentDate, setCurrentDate] = useState(new Date());
+
+useEffect(() => {
+  const teacherId =
+    localStorage.getItem("teacherId");
+
+  if (!teacherId) return;
+
+  getTodayClasses(teacherId)
+    .then((res: any) => {
+  setTodayClasses(res.data || []);
+})
+    .catch(() => {
+      setTodayClasses([]);
+    });
+}, []);
 
   const [openSection, setOpenSection] = useState(false);
 const [selectedClass, setSelectedClass] = useState("All");
@@ -56,40 +99,11 @@ const leaveData = [
   const cardAnim = (i = 0) =>
   `animate-card card-hover [animation-delay:${i * 80}ms]`;
 
-  const [events, setEvents] = useState([
-    {
-      title: "Vacation Meeting",
-      date: "01 Dec 2025",
-      time: "09:10 AM - 10:50 PM",
-      bar: "bg-red-500",
-      iconBg: "bg-red-100",
-      teachers: [1, 2, 3],
-    },
-    {
-      title: "Staff Meet",
-      date: "15 Dec 2025",
-      time: "09:10 AM - 10:50 PM",
-      bar: "bg-cyan-500",
-      iconBg: "bg-cyan-100",
-      teachers: [14, 25],
-    },
-    {
-      title: "Principal Meet",
-      date: "12 Dec 2025",
-      time: "09:10 AM - 10:50 PM",
-      bar: "bg-cyan-500",
-      iconBg: "bg-cyan-100",
-      teachers: [10,12],
-    },
-    {
-      title: "Parents, Teacher Meet",
-      date: "15 Dec 2025",
-      time: "09:10 AM - 10:50 PM",
-      bar: "bg-cyan-500",
-      iconBg: "bg-cyan-100",
-      teachers: [4, 5],
-    },
-  ]);
+const [events, setEvents] =
+  useState<EventType[]>([]);   
+ const [attendanceData,
+setAttendanceData] =
+useState<any>(null);
   const [openAddEvent, setOpenAddEvent] = useState(false);
 
   const [newEvent, setNewEvent] = useState({
@@ -98,7 +112,7 @@ const leaveData = [
     time: "",
   });
     
-  const [currentDate, setCurrentDate] = useState(new Date());
+ 
 
 const year = currentDate.getFullYear();
 const month = currentDate.getMonth();
@@ -107,7 +121,37 @@ const monthNames = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December"
 ];
+useEffect(() => {
 
+  getUpcomingEvents()
+    .then((res: any) => {
+      setEvents(res.data || []);
+    })
+    .catch(() => {
+      setEvents([]);
+    });
+
+}, []);
+useEffect(() => {
+
+ const teacherId =
+  localStorage.getItem("teacherId");
+
+ if (!teacherId) return;
+
+ getTeacherAttendance(teacherId)
+  .then((res: any) => {
+
+   setAttendanceData(res.data);
+
+  })
+  .catch(() => {
+
+   setAttendanceData(null);
+
+  });
+
+}, []);
 // first day of month (Mon based)
 const firstDay = new Date(year, month, 1).getDay();
 const startOffset = firstDay === 0 ? 6 : firstDay - 1;
@@ -130,17 +174,18 @@ const days = [
 ];
 const [showMonthAttendance, setShowMonthAttendance] = useState(false);
 
-const monthAttendance = [
-  { date: "01 May 2024", status: "Present" },
-  { date: "02 May 2024", status: "Present" },
-  { date: "03 May 2024", status: "Absent" },
-  { date: "04 May 2024", status: "Present" },
-  { date: "05 May 2024", status: "Absent" },
-];
+const monthAttendance =
+attendanceData?.monthlyAttendance || [];
 
-const presentList = monthAttendance.filter(d => d.status === "Present");
-const absentList = monthAttendance.filter(d => d.status === "Absent");
+const presentList =
+attendanceData?.monthlyAttendance?.filter(
+  (d: any) => d.status === "Present"
+) || [];
 
+const absentList =
+attendanceData?.monthlyAttendance?.filter(
+  (d: any) => d.status === "Absent"
+) || [];
 // today
 const today = new Date();
 const isToday = (day: number) =>
@@ -155,35 +200,123 @@ const prevMonth = () =>
 const nextMonth = () =>
   setCurrentDate(new Date(year, month + 1, 1));
 
-  const bestStudents = [
-    {
-      class: "Class IV, C",
-      students: [
-        { name: "Janet", score: "92%", img: "https://i.pravatar.cc/40?img=1" },
-        { name: "Joann", score: "90%", img: "https://i.pravatar.cc/40?img=2" },
-      ],
-    },
-    {
-      class: "Class III, B",
-      students: [
-        { name: "Kathleen", score: "88%", img: "https://i.pravatar.cc/40?img=3" },
-        { name: "Gifford", score: "85%", img: "https://i.pravatar.cc/40?img=4" },
-      ],
-    },
-    {
-      class: "Class V, A",
-      students: [
-        { name: "Lisa", score: "91%", img: "https://i.pravatar.cc/40?img=5" },
-      ],
-    },
-  ];
+const [bestPerformers, setBestPerformers] =
+  useState<any[]>([]);
+
+const [studentProgress, setStudentProgress] =
+  useState<any[]>([]);
+  const [syllabusData, setSyllabusData] =
+  useState<any[]>([]);
+  const [studentMarks,setStudentMarks] = useState<any[]>([]);
+
+const [leaveStatus,setLeaveStatus] = useState<any[]>([]);
+const [cardData, setCardData] =
+useState<any>(null);
+useEffect(()=>{
+
+ const teacherId =
+ localStorage.getItem("teacherId");
+
+ if(!teacherId) return;
+
+ getDashboardCards(teacherId)
+ .then((res:any)=>{
+
+   setCardData(
+    res.data.data
+   );
+
+ })
+ .catch(()=>{
+
+   setCardData(null);
+
+ });
+
+},[]);
+useEffect(() => {
+
+ getBestPerformers()
+  .then((res: any) => {
+
+   setBestPerformers(
+    res.data || []
+   );
+  })
+  .catch(() => {
+   setBestPerformers([]);
+  });
+}, []);
+
+useEffect(() => {
+ getStudentProgress()
+ .then((res: any) => {
+   setStudentProgress(
+    res.data || []
+   );
+  })
+  .catch(() => {
+
+   setStudentProgress([]);
+
+  });
+
+}, []);
+useEffect(() => {
+ const teacherId =
+  localStorage.getItem("teacherId");
+
+ if (!teacherId) return;
+
+ getTeacherSyllabus(teacherId)
+   .then((res:any)=>{
+      setSyllabusData(res.data || []);
+   })
+   .catch(()=>{
+      setSyllabusData([]);
+   });
+
+}, []);
+useEffect(() => {
+
+ getStudentMarks()
+  .then((res: any) => {
+   setStudentMarks(
+    res.data.data || []
+   );
+  })
+  .catch(() => {
+   setStudentMarks([]);
+  });
+
+}, []);
+useEffect(() => {
+
+ getLeaveStatus()
+  .then((res: any) => {
+   setLeaveStatus(
+    res.data.data || []
+   );
+  })
+  .catch(() => {
+   setLeaveStatus([]);
+  });
+
+}, []);
   const data = {
     Present: ["Janet", "Joann"],
     Absent: ["Gifford", "Lisa"],
     Late: ["Thomas"],
     "Half Day": [],
   };
-  
+  const todayDate = new Date().toLocaleDateString(
+  "en-GB",
+  {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }
+);
   return (
     //<DashboardLayout>
 <>
@@ -205,7 +338,7 @@ const nextMonth = () =>
     {/* LEFT TEXT */}
     <div className="text-white max-w-[70%]">
       <h3 className="text-lg font-semibold">
-        Good Morning Ms. Teena
+Good Morning {teacherName}
       </h3>
 
       <p className="text-blue-100 text-sm mt-1">
@@ -284,21 +417,30 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
-                95%
-              </div>
-            </div>
+  {cardData?.syllabus?.completed || 0}%
+</div>
+</div>
+<div>
+  <h4 className="text-18px font-medium">
+    Syllabus
+  </h4>
 
-            <div>
-              <h4 className="text-18px font-medium">Syllabus</h4>
-              <div className="flex items-center gap-2 text-xs mb-1">
-                <span className="w-2 h-2 bg-green-500 rounded-full" />
-                Completed : 95%
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span className="w-2 h-2 bg-red-400 rounded-full" />
-                Pending : 5%
-              </div>
-            </div>
+  {cardData?.syllabus ? (
+    <>
+      <div className="flex items-center gap-2 text-xs mb-1">
+        <span className="w-2 h-2 bg-green-500 rounded-full" />
+        Completed : {cardData.syllabus.completed}%
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-gray-500">
+        <span className="w-2 h-2 bg-red-400 rounded-full" />
+        Pending : {cardData.syllabus.pending}%
+      </div>
+    </>
+  ) : (
+    <div>No Syllabus Found</div>
+  )}
+</div>
           </div>
         </div>
         <div className={`bg-white rounded-xl border p-6 flex items-center gap-4 ${cardAnim(2)}`}>
@@ -311,17 +453,33 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 
   {/* Info */}
   <div className="flex-1">
-    <h4 className="text-18px font-medium">Best Teacher</h4>
-    <p className="text-xs text-gray-500 mt-1">Ms. Malar</p>
+    <h4 className="text-18px font-medium">
+  Best Teacher
+</h4>
+
+{cardData?.bestTeacher ? (
+  <>
+    <p className="text-xs text-gray-500 mt-1">
+      {cardData.bestTeacher.name}
+    </p>
 
     <div className="flex items-center gap-2 mt-2">
+
       <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
-        ⭐ 4.9 Rating
+        ⭐ {cardData.bestTeacher.rating}
       </span>
+
       <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
-        Physics
+        {cardData.bestTeacher.subject}
       </span>
+
     </div>
+  </>
+) : (
+  <div className="text-xs text-gray-500">
+    No Teacher Found
+  </div>
+)}
   </div>
 </div>
 
@@ -329,30 +487,48 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
         <div className={`bg-white rounded-xl border p-4 ${cardAnim(2)}`}>
     <div className="flex justify-between mb-3">
       <h4 className="text-18px font-medium">Today's Class</h4>
-      <span className="text-xs text-gray-500">16 May 2025</span>
+      {todayClasses.length > 0 && (
+  <span className="text-xs text-gray-500">
+    {todayDate}
+  </span>
+)}
     </div>
 
     <div className="grid grid-cols-5 gap-3">
-      {[
-        { t: "09:00 - 09:45", c: "Class V, B", col: "red" },
-        { t: "09:45 - 10:30", c: "Class IV, C", col: "red" },
-        { t: "11:30 - 12:15", c: "Class V, A", col: "blue" },
-        { t: "01:30 - 02:15", c: "Class V, B", col: "blue" },
-        { t: "02:15 - 03:00", c: "Class I", col: "blue" },
-      ].map((i, idx) => (
-        <div key={idx} className="bg-[#F8FAFC] border rounded-lg px-3 py-2.5">
-          <span
-            className={`text-xs px-2 py-0.5 rounded-md text-white ${
-              i.col === "red" ? "bg-red-500" : "bg-blue-600"
-            }`}
-          >
-            ⏱ {i.t}
-          </span>
-          <p className="text-xs mt-1">{i.c}</p>
-        </div>
-      ))}
+
+  {todayClasses.length > 0 ? (
+
+    todayClasses.map((item: any, idx) => (
+      <div
+        key={idx}
+        className="bg-[#F8FAFC] border rounded-lg px-3 py-2.5"
+      >
+        <span
+          className="text-xs px-2 py-0.5 rounded-md text-white bg-blue-600"
+        >
+          ⏱ {item.start_time} - {item.end_time}
+        </span>
+
+        <p className="text-xs mt-1">
+          {item.class_name},
+          {item.section}
+        </p>
+
+        <p className="text-[11px] text-gray-500">
+          {item.subject}
+        </p>
+      </div>
+    ))
+
+  ) : (
+
+    <div className="col-span-5 text-center py-8 text-gray-500">
+      Timetable Not Found
     </div>
-    
+
+  )}
+
+</div>    
   </div>
   
 </div>
@@ -363,12 +539,12 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-18px font-medium">Schedules</h4>
-            <button
+            {/* <button
               onClick={() => setOpenAddEvent(true)}
               className="text-xs text-blue-600 font-medium"
             >
               Add New
-            </button>
+            </button> */}
           </div>
 
           {/* Month + Arrows */}
@@ -422,43 +598,55 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
           </h4>
 
           <div className="space-y-4 overflow-y-auto pr-1">
-            {events.map((e, i) => (
-              <div key={i} className="flex gap-3">
 
-                <div className={`w-1 rounded-full ${e.bar}`} />
+  {events.length === 0 ? (
+    <div className="text-center py-4 text-gray-500">
+      No Events Found
+    </div>
+  ) : (
+    events.map((e, i) => (
+      <div key={i} className="flex gap-3">
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${e.iconBg}`}>
-                      📅
-                    </div>
+        <div className={`w-1 rounded-full ${e.bar}`} />
 
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{e.title}</p>
-                      <p className="text-xs text-gray-500">{e.date}</p>
-                    </div>
-                  </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
 
-                  <div className="flex items-center justify-between pl-12 mt-1">
-                    <p className="text-xs text-gray-500">
-                      ⏰ {e.time}
-                    </p>
+            <div
+              className={`w-9 h-9 rounded-lg flex items-center justify-center ${e.iconBg}`}
+            >
+              📅
+            </div>
 
-                    <div className="flex -space-x-2">
-                      {e.teachers.map((t, idx) => (
-                        <img
-                          key={idx}
-                          src={`https://i.pravatar.cc/24?img=${t}`}
-                          className="w-6 h-6 rounded-full border border-white"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className="flex-1">
+              <p className="text-sm font-medium">{e.title}</p>
+              <p className="text-xs text-gray-500">{e.date}</p>
+            </div>
+
           </div>
 
+          <div className="flex items-center justify-between pl-12 mt-1">
+            <p className="text-xs text-gray-500">
+              ⏰ {e.time}
+            </p>
+
+            <div className="flex -space-x-2">
+              {e.teachers?.map((t, idx) => (
+                <img
+                  key={idx}
+                  src={`https://i.pravatar.cc/24?img=${t}`}
+                  className="w-6 h-6 rounded-full border border-white"
+                />
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    ))
+  )}
+
+</div>
         </div>
       </div>
 
@@ -559,9 +747,11 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
   <div className="border rounded-lg px-4 py-3 mb-5">
     <div className="flex justify-between items-center mb-3">
       <p className="text-xs font-medium">Last 7 Days</p>
-      <p className="text-[11px] text-gray-400">
-        14 May 2024 - 21 May 2024
-      </p>
+{attendanceData?.fromDate && attendanceData?.toDate ? (
+  <p className="text-[11px] text-gray-400">
+    {attendanceData.fromDate} - {attendanceData.toDate}
+  </p>
+) : null}
     </div>
 
     <div className="flex gap-2">
@@ -585,25 +775,25 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 
   {/* Total Days */}
   <p className="text-xs text-gray-500 mb-5 px-1">
-    No of total working days <b className="text-gray-700">28 Days</b>
+    No of total working days <b className="text-gray-700">{attendanceData?.total || 0} Days</b>
   </p>
 
   {/* Stats */}
   <div className="grid grid-cols-4 text-center mb-6">
     <div>
-      <p className="text-sm font-semibold">25</p>
+      <p className="text-sm font-semibold">{attendanceData?.present || 0}</p>
       <p className="text-xs text-gray-500 mt-1">Present</p>
     </div>
     <div>
-      <p className="text-sm font-semibold">2</p>
+      <p className="text-sm font-semibold">{attendanceData?.absent || 0}</p>
       <p className="text-xs text-gray-500 mt-1">Absent</p>
     </div>
     <div>
-      <p className="text-sm font-semibold">0</p>
+      <p className="text-sm font-semibold">{attendanceData?.halfday || 0}</p>
       <p className="text-xs text-gray-500 mt-1">Halfday</p>
     </div>
     <div>
-      <p className="text-sm font-semibold">1</p>
+      <p className="text-sm font-semibold">{attendanceData?.late || 0}</p>
       <p className="text-xs text-gray-500 mt-1">Late</p>
     </div>
   </div>
@@ -646,7 +836,7 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <p className="text-xs text-gray-500">Attendance</p>
-        <p className="text-2xl font-bold mt-1">95%</p>
+        <p className="text-2xl font-bold mt-1">{attendanceData?.percentage || 0}%</p>
       </div>
     </div>
   </div>
@@ -687,11 +877,7 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 
   </div>
 
-  {[
-    { name: "Class IV, C", value: 80, color: "bg-blue-600" },
-    { name: "Class III, B", value: 54, color: "bg-yellow-400" },
-    { name: "Class V, A", value: 76, color: "bg-cyan-500" },
-  ].map((item, i) => (
+  {bestPerformers.map((item: any, i) => (
     <div key={i} className="flex items-center gap-3 mb-4">
       
       {/* Class Name (LEFT) */}
@@ -749,33 +935,7 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
   </div>
 
   {/* Student rows */}
-  {[
-    {
-      name: "Susan Boswell",
-      class: "III, B",
-      percent: "98%",
-      img: T2,
-      color: "bg-green-500",
-      badge: "🏅",
-    },
-    {
-      name: "Richard Mayes",
-      class: "V, A",
-      percent: "98%",
-      img: T3,
-      color: "bg-green-500",
-      badge: "⭐",
-    },
-    {
-      name: "Thomas Hunt",
-      class: "X, A",
-      percent: "78%",
-      img: T4,
-      color: "bg-blue-600",
-      badge: "🎖️",
-    },
-    
-  ].map((s, i) => (
+  {studentProgress.map((s: any, i) => (
     <div
       key={i}
       className="flex items-center justify-between border rounded-lg p-3 mb-3"
@@ -831,72 +991,17 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
     {/* Cards */}
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-5">
 
-      {[
-        {
-          cls: "Class V, B",
-          title: "Introduction Note to Physics on Today’s Tech",
-          pillBg: "bg-green-100 text-green-700",
-          bar: "bg-green-500",
-        },
-        {
-          cls: "Class V, A",
-          title: "Biometric & their Working Functionality",
-          pillBg: "bg-yellow-100 text-yellow-700",
-          bar: "bg-yellow-500",
-        },
-        {
-          cls: "Class IV, C",
-          title: "Analyze and interpret literary texts",
-          pillBg: "bg-blue-100 text-blue-700",
-          bar: "bg-blue-600",
-        },
-        {
-          cls: "Class IV, C",
-          title: "Enhance vocabulary and grammar skills",
-          pillBg: "bg-red-100 text-red-600",
-          bar: "bg-red-500",
-        },
-      ].map((item, i) => (
-        <div
-  key={i}
-  className={`border rounded-xl bg-white p-5 flex flex-col justify-between ${cardAnim(8 + i)}`}
->
-  {/* CONTENT */}
-  <div className="space-y-4">
-           {/* Class pill */}
-    <span
-      className={`inline-flex items-center justify-center
-        h-6 px-4 rounded-md
-        text-[11px] font-medium
-        ${item.pillBg}`}
-    >
-      {item.cls}
-    </span>            {/* Title */}
-    <p className="text-sm font-medium leading-snug min-h-[40px]">
-      {item.title}
-    </p>
-
-
-            {/* Progress line */}
-            <div className="pt-1">
-
-      <div className="w-full h-1.5 rounded-full bg-gray-200">
-      <div
-          className={`h-1.5 rounded-full ${item.bar}`}
-          style={{ width: "60%" }}
-        />
-            </div>
-          </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-2 border-t text-xs text-gray-500">
-
-</div>
-
-        </div>
-      ))}
-
+      {syllabusData.length === 0 ? (
+  <div className="col-span-4 text-center py-5">
+    No Syllabus Found
+  </div>
+) : (
+  syllabusData.map((item, i) => (
+    <div key={i}>
+      {item.topic}
+    </div>
+  ))
+)}
     </div>
   </div>
 </div>
@@ -966,13 +1071,21 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
         </thead>
 
         <tbody>
-          {[
-{ id: 35013, name: "Janet", cls: "III", sec: "A", marks: "89%", cgpa: "4.2", status: "Pass" },
-{ id: 35012, name: "Joann", cls: "IV", sec: "B", marks: "88%", cgpa: "3.2", status: "Pass" },
-            { id: 35011, name: "Kathleen", cls: "II", sec: "A", marks: "21%", cgpa: "4.5", status: "Pass" },
-            { id: 35010, name: "Gifford", cls: "I", sec: "B", marks: "69%", cgpa: "4.5", status: "Pass" },
-            { id: 35009, name: "Lisa", cls: "II", sec: "B", marks: "31%", cgpa: "3.9", status: "Fail" },
-          ].map((s, i) => (
+          {
+studentMarks.length === 0 ? (
+
+<tr>
+  <td
+    colSpan={7}
+    className="text-center py-8"
+  >
+    Marks Not Found
+  </td>
+</tr>
+
+) : (
+
+studentMarks.map((s:any,i:number)=>(
             <tr key={i} className="border-b last:border-none">
 
               <td className="py-3 text-gray-500">{s.id}</td>
@@ -980,20 +1093,19 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
               <td className="py-3">
                 <div className="flex items-center gap-2">
                 <img
-  src={studentImages[s.name]}
-  alt={s.name}
+  src={studentImages[s.student_name]}
+alt={s.student_name}
   className="w-8 h-8 rounded-full object-cover border"
 />
 
-                  <span className="font-medium">{s.name}</span>
+                  <span className="font-medium"> {s.student_name} </span>
                 </div>
               </td>
 
-              <td>{s.cls}</td>
-              <td>{s.sec}</td>
-              <td>{s.marks}</td>
-              <td>{s.cgpa}</td>
-
+             <td>{s.class_name}</td>
+<td>{s.section}</td>
+<td>{s.marks_percentage}%</td>
+             <td>{s.cgpa}</td>
               <td>
               <span
   className={`inline-flex items-center justify-center
@@ -1007,8 +1119,9 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 
               </td>
 
-            </tr>
-          ))}
+           </tr>
+))
+)}
         </tbody>
       </table>
     </div>
@@ -1043,40 +1156,16 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 </span>
    </div>
 
-    {[
-      {
-        title: "Emergency Leave",
-        date: "15 Jun 2024",
-        status: "Pending",
-        statusColor: "bg-blue-500",
-        icon: "⛔",
-        iconBg: "bg-red-100",
-      },
-      {
-        title: "Medical Leave",
-        date: "15 Jun 2024",
-        status: "Approved",
-        statusColor: "bg-green-500",
-        icon: "❄️",
-        iconBg: "bg-blue-100",
-      },
-      {
-        title: "Medical Leave",
-        date: "15 Jun 2024",
-        status: "Declined",
-        statusColor: "bg-red-500",
-        icon: "❄️",
-        iconBg: "bg-blue-100",
-      },
-      {
-        title: "Fever",
-        date: "15 Jun 2024",
-        status: "Approved",
-        statusColor: "bg-green-500",
-        icon: "🌡️",
-        iconBg: "bg-red-100",
-      },
-    ].map((l, i) => (
+    {
+leaveStatus.length === 0 ? (
+
+<div className="text-center py-10">
+  Leave Status Not Found
+</div>
+
+) : (
+
+leaveStatus.map((l:any,i:number)=>(
       <div
         key={i}
         className="flex items-center justify-between border rounded-lg p-4 mb-3"
@@ -1090,9 +1179,9 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
           </div>
 
           <div>
-            <p className="text-sm font-medium">{l.title}</p>
+            <p className="text-sm font-medium">{l.leave_type}</p>
             <p className="text-xs text-gray-500">
-              Leave Date : {l.date}
+              Leave Date : {l.leave_date}
             </p>
           </div>
         </div>
@@ -1104,7 +1193,8 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
           {l.status}
         </span>
       </div>
-    ))}
+    ))
+)}
   </div>
 
 </div>
@@ -1130,7 +1220,7 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
       {/* Content */}
       <div className="space-y-5 max-h-[400px] overflow-y-auto pr-1">
 
-        {bestStudents.map((cls, i) => (
+        {bestPerformers.map((cls: any, i) => (
           <div key={i}>
             
             {/* Class Name */}
@@ -1139,7 +1229,7 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
             </p>
 
             {/* Students */}
-            {cls.students.map((s, j) => (
+            {cls.students?.map((s: any, j: number) => (
               <div
                 key={j}
                 className="flex items-center justify-between border rounded-lg p-3 mb-2 hover:bg-gray-50"
@@ -1180,17 +1270,18 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 
       {/* List */}
       <div className="space-y-3 max-h-[400px] overflow-y-auto">
-        {[
-          { cls: "Class V, B", topic: "Physics – Today’s Tech" },
-          { cls: "Class V, A", topic: "Biometric Functionality" },
-          { cls: "Class IV, C", topic: "Literary Text Analysis" },
-          { cls: "Class IV, C", topic: "Grammar & Vocabulary" },
-        ].map((t, i) => (
-          <div key={i} className="border rounded-lg p-3">
-            <p className="text-xs text-gray-500">{t.cls}</p>
-            <p className="text-sm font-medium">{t.topic}</p>
-          </div>
-        ))}
+        {syllabusData.length === 0 ? (
+  <div className="text-center py-5">
+    No Syllabus Found
+  </div>
+) : (
+  syllabusData.map((t, i) => (
+    <div key={i}>
+      <p>{t.class_name}</p>
+      <p>{t.topic}</p>
+    </div>
+  ))
+)}
       </div>
     </div>
   </div>
@@ -1332,7 +1423,12 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
       {/* Attendance List */}
       <div className="space-y-2 max-h-[260px] overflow-y-auto">
 
-        {monthAttendance.map((d, i) => (
+        {monthAttendance.length === 0 ? (
+  <div className="text-center py-5 text-gray-500">
+    No Attendance Found
+  </div>
+) : (
+  monthAttendance.map((d: any, i: number) => (
           <div
             key={i}
             className="flex items-center justify-between border rounded-lg px-3 py-2 text-xs"
@@ -1348,7 +1444,8 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
               {d.status}
             </span>
           </div>
-        ))}
+       ))
+)}
 
       </div>
 

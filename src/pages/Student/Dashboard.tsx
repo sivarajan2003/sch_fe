@@ -17,6 +17,13 @@ import {
 import { getStudentFees }from "../../service/studentFeesService";
 import { getStudentFaculties } from "../../service/studentFacultyService";
 import { getStudentNotices } from "../../service/studentNoticeService";
+import studentService from "../../service/studentService";
+import {
+  getStudentSyllabus
+} from "../../service/studentSyllabusService";
+import {
+  getStudentTodo
+} from "../../service/studentTodoService";
 import StudentAvatar from "../../assets/s1.png";
 import Tc1 from "../../assets/tc1.png";
 import Tc2 from "../../assets/tc2.png";
@@ -75,14 +82,18 @@ const [activeQuarter, setActiveQuarter] =
   useState("1st Quarter");
 const [showQuarterMenu, setShowQuarterMenu] = useState(false);
 const [dashboardData, setDashboardData] = useState<any>(null);
-  useEffect(() => {
+const [students, setStudents] = useState([]);
+const [selectedStudentId, setSelectedStudentId] = useState("");
+const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
-  const studentId =
-    localStorage.getItem("studentId");
+useEffect(() => {
+ const studentId =
+  selectedStudentId ||
+  localStorage.getItem("studentId");
 
-  if (!studentId) return;
+ if (!studentId) return;
 
-  getStudentDashboard(studentId)
+ getStudentDashboard(studentId)
   .then((res: any) => {
     setDashboardData(res.data.data);
   })
@@ -90,38 +101,8 @@ const [dashboardData, setDashboardData] = useState<any>(null);
     console.error(err);
   });
 
-}, []);
-/* ================== EXAMS STATE ================== */
-// const [exams, setExams] = useState([
-//   {
-//     title: "1st Quarterly",
-//     subject: "Mathematics",
-//     date: new Date(2025, 6, 6),
-//     time: "01:30 - 02:15 PM",
-//     room: "105",
-//   },
-//   {
-//     title: "2nd Quarterly",
-//     subject: "English",
-//     date: new Date(2025, 6, 12),
-//     time: "01:30 - 02:15 PM",
-//     room: "106",
-//   },
-//   {
-//     title: "2nd Quarterly",
-//     subject: "Physics",
-//     date: new Date(2025, 6, 12),
-//     time: "01:30 - 02:15 PM",
-//     room: "107",
-//   },
-//   {
-//     title: "2nd Quarterly",
-//     subject: "Chemistry",
-//     date: new Date(2025, 7, 12),
-//     time: "01:30 - 02:15 PM",
-//     room: "108",
-//   },
-// ]);
+}, [selectedStudentId]);
+
 const [performanceData, setPerformanceData] = useState<any[]>([]);
 const [exams, setExams] = useState<any[]>([]);
 const [homeworks, setHomeworks] = useState<any[]>([]);
@@ -136,22 +117,40 @@ useState([]);
 const quarterResults = examResults.filter(
   (item: any) => item.quarter === activeQuarter
 );
+const [syllabus, setSyllabus] = useState([]);
+const [todos, setTodos] = useState([]);
 useEffect(() => {
+  loadStudents();
+}, []);
 
+const loadStudents = async () => {
+  try {
+    const res = await studentService.getStudents();
+
+    setStudents(res.rows || res.data || []);
+  } catch (err) {
+    console.error(err);
+  }
+};
+useEffect(() => {
  const studentId =
+  selectedStudentId ||
   localStorage.getItem("studentId");
 
  if (!studentId) return;
 
- getStudentExams(studentId)
-  .then((res) => {
-    setExams(res.data);
+getStudentExams(studentId)
+  .then((res:any)=>{
+     setExams(res.data.data || []);
   })
-  .catch(console.error);
-
-}, []);
+  .catch(()=>{
+     setExams([]);
+  });
+}, [selectedStudentId]);
 useEffect(() => {
-  const studentId = localStorage.getItem("studentId");
+  const studentId =
+  selectedStudentId ||
+  localStorage.getItem("studentId");
 
   if (!studentId) return;
 
@@ -163,24 +162,25 @@ useEffect(() => {
   console.error(err);
   setPerformanceData([]);
 });
-}, []);
+}, [selectedStudentId]);
 useEffect(() => {
-  const studentId =
-    localStorage.getItem("studentId");
-
+ const studentId =
+  selectedStudentId ||
+  localStorage.getItem("studentId");
   if (!studentId) return;
 
   getStudentHomework(studentId)
-    then((res: any) => {
-      setHomeworks(res.data.data);
-    })
-    .catch(() => {
-      setHomeworks([]);
-    });
-}, []);
+  .then((res:any) => {
+    setHomeworks(res?.data?.data || []);
+  })
+  .catch(() => {
+    setHomeworks([]);
+  });
+}, [selectedStudentId]);
 useEffect(() => {
   const studentId =
-    localStorage.getItem("studentId");
+ selectedStudentId ||
+ localStorage.getItem("studentId");
 
   if (!studentId) return;
 
@@ -191,11 +191,11 @@ useEffect(() => {
     .catch(() => {
       setExamResults([]);
     });
-}, []);
+}, [selectedStudentId]);
 useEffect(() => {
   const studentId =
-    localStorage.getItem("studentId");
-
+ selectedStudentId ||
+ localStorage.getItem("studentId");
   if (!studentId) return;
 
   getStudentFees(studentId)
@@ -205,12 +205,12 @@ useEffect(() => {
     .catch(() => {
       setFees([]);
     });
-}, []);
+}, [selectedStudentId]);
 useEffect(() => {
 
  const studentId =
+ selectedStudentId ||
  localStorage.getItem("studentId");
-
  if (!studentId) return;
 
  getStudentFaculties(studentId)
@@ -221,11 +221,11 @@ useEffect(() => {
     console.error(err);
     setFaculties([]);
   });
-}, []);
+}, [selectedStudentId]);
 useEffect(() => {
   const studentId =
-    localStorage.getItem("studentId");
-
+ selectedStudentId ||
+ localStorage.getItem("studentId");
   if (!studentId) return;
 
   getStudentNotices(studentId)
@@ -236,7 +236,31 @@ useEffect(() => {
       console.error(err);
       setNotices([]);
     });
-}, []);
+}, [selectedStudentId]);
+useEffect(() => {
+  const studentId =
+    selectedStudentId ||
+    localStorage.getItem("studentId");
+
+  if (!studentId) return;
+
+  getStudentSyllabus(studentId)
+  .then((res: any) => {
+    setSyllabus(res.data || []);
+  })
+  .catch(() => {
+    setSyllabus([]);
+  });
+
+getStudentTodo(studentId)
+  .then((res: any) => {
+    setTodos(res.data || []);
+  })
+  .catch(() => {
+    setTodos([]);
+  });
+
+}, [selectedStudentId]);
 /* ================= ATTENDANCE DATA ================= */
 
 const attendanceData = [
@@ -424,29 +448,6 @@ const approvedLeaves = yearLeaves.filter(l => l.status === "Approved").length;
 const pendingLeaves = yearLeaves.filter(l => l.status === "Pending").length;
 const declinedLeaves = yearLeaves.filter(l => l.status === "Declined").length;
 
-// const examResults = {
-//   "1st Quarter": [
-//     { label: "Mat", value: 100 },
-//     { label: "Phy", value: 92 },
-//     { label: "Che", value: 90 },
-//     { label: "Eng", value: 80 },
-//     { label: "Sci", value: 70 },
-//   ],
-//   "2nd Quarter": [
-//     { label: "Mat", value: 85 },
-//     { label: "Phy", value: 88 },
-//     { label: "Che", value: 78 },
-//     { label: "Eng", value: 82 },
-//     { label: "Sci", value: 75 },
-//   ],
-//   "Final Exam": [
-//     { label: "Mat", value: 90 },
-//     { label: "Phy", value: 94 },
-//     { label: "Che", value: 89 },
-//     { label: "Eng", value: 85 },
-//     { label: "Sci", value: 88 },
-//   ],
-// };
 const perfConfig: Record<
   PerfView,
   {
@@ -497,12 +498,35 @@ const performanceLabels = perfConfig[perfView].xLabels;
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        <button
+         <select
+  value={selectedStudentId}
+  onChange={(e) => {
+    const id = e.target.value;
+
+    setSelectedStudentId(id);
+
+    const stu = students.find(
+      (s:any) => String(s.id) === String(id)
+    );
+
+    setSelectedStudent(stu);
+  }}
+  className="px-4 py-2 border rounded-lg"
+>
+  <option value="">Select Student</option>
+
+  {students.map((s:any) => (
+    <option key={s.id} value={s.id}>
+      {s.name}
+    </option>
+  ))}
+</select>
+        {/* <button
   onClick={() => setShowExamPopup(true)}
   className="px-4 py-2 bg-blue-600 text-white rounded-lg"
 >
   Exam Result
-</button>
+</button> */}
 
 <button
   onClick={() => setShowFeesPopup(true)}
@@ -540,11 +564,16 @@ const performanceLabels = perfConfig[perfView].xLabels;
       </span>
       {/* NAME */}
       <p className="font-semibold text-base leading-tight">
-  {editProfile.name}
+  {selectedStudent?.name || editProfile.name}
 </p>
+
 <p className="text-xs text-gray-300 mt-0.5">
-  Class : {editProfile.className}, {editProfile.section} | Roll No : #{editProfile.rollNo}
-</p>    </div>
+  Class : {selectedStudent?.class_name || editProfile.className},
+  {selectedStudent?.section || editProfile.section}
+  | Roll No : #
+  {selectedStudent?.roll_no || editProfile.rollNo}
+</p>
+  </div>
   </div>
 
   {/* CENTER DASHED LINE */}
@@ -1142,126 +1171,13 @@ const performanceLabels = perfConfig[perfView].xLabels;
 </span>
 </div>
 
-{/* {[
-  {
-    sub: "Physics",
-    color: "blue",
-    title: "Write about Theory of Pendulum",
-    teacher: "Aaron",
-    due: "16 Jun 2025",
-    percent: 90,
-    img: H1,
-  },
-  {
-    sub: "Chemistry",
-    color: "green",
-    title: "Chemistry - Change of Elements",
-    teacher: "Hellana",
-    due: "18 Jun 2025",
-    percent: 65,
-    img: H2,
-  },
-  {
-    sub: "Maths",
-    color: "yellow",
-    title: "Maths - Problems to Solve Page 21",
-    teacher: "Morgan",
-    due: "21 Jun 2025",
-    percent: 30,
-    img: H3,
-  },
-  {
-    sub: "English",
-    color: "red",
-    title: "English - Vocabulary Introduction",
-    teacher: "Daniel Josua",
-    due: "21 Jun 2025",
-    percent: 10,
-    img: H4,
-  },
-].map((h, i) => (
-  <div
-    key={i}
-    className="flex items-center gap-3 p-3 rounded-lg border mb-3"
-  >
-   
-    <img
-      src={h.img}
-      alt={h.sub}
-      className="w-12 h-12 rounded-lg object-cover"
-    />
 
-   
-    <div className="flex-1">
-      <p
-        className={`text-xs font-medium ${
-          h.color === "blue"
-            ? "text-blue-600"
-            : h.color === "green"
-            ? "text-green-600"
-            : h.color === "yellow"
-            ? "text-yellow-600"
-            : "text-red-600"
-        }`}
-      >
-        {h.sub}
-      </p>
-
-      <p className="text-sm font-medium leading-snug">
-        {h.title}
-      </p>
-
-      <p className="text-xs text-gray-500">
-        👤 {h.teacher} &nbsp; Due by : {h.due}
-      </p>
-    </div>
-
- 
-    <div className="relative w-9 h-9">
-  <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-    
-    <circle
-      cx="18"
-      cy="18"
-      r="15.5"
-      fill="none"
-      stroke="#E5E7EB"
-      strokeWidth="2.5"
-    />
-
-    
-    <circle
-      cx="18"
-      cy="18"
-      r="15.5"
-      fill="none"
-      stroke={
-        h.color === "blue"
-          ? "#3B82F6"
-          : h.color === "green"
-          ? "#22C55E"
-          : h.color === "yellow"
-          ? "#EAB308"
-          : "#EF4444"
-      }
-      strokeWidth="2.5"
-      strokeDasharray={`${(h.percent / 100) * 97.4} 97.4`}
-      strokeLinecap="round"
-    />
-  </svg>
-
-  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold">
-    {h.percent}%
-  </span>
-</div>
-</div>
-))} */}
-{homeworks.length === 0 ? (
+{(homeworks?.length || 0) === 0 ? (
   <div className="text-center py-10 text-gray-500">
     No Homework Found
   </div>
 ) : (
-  homeworks.map((h: any) => (
+  (homeworks || []).map((h:any) => (
     <div
       key={h.id}
       className="flex items-center gap-3 p-3 rounded-lg border mb-3"
@@ -1550,7 +1466,7 @@ className={`w-10 rounded-lg ${
     scrollbar-hide max-w-full
   "
 >
-    {faculties.length === 0 ? (
+    {(faculties?.length || 0) === 0 ? (
   <div className="w-full text-center py-8 text-gray-500">
     No Faculty Found
   </div>
@@ -1666,7 +1582,7 @@ className={`w-10 rounded-lg ${
 
   </div>
 
- {notices.length === 0 ? (
+ {(notices?.length || 0) === 0 ? (
   <div className="text-center py-8 text-gray-500">
     No Notice Found
   </div>
@@ -1724,32 +1640,31 @@ className={`w-10 rounded-lg ${
   </div>
 
   {/* Progress list */}
-  {[
-    { sub: "Maths", w: "20%", c: "bg-indigo-500" },
-    { sub: "Physics", w: "35%", c: "bg-sky-400" },
-    { sub: "Chemistry", w: "55%", c: "bg-blue-600" },
-    { sub: "Botany", w: "45%", c: "bg-green-500" },
-    { sub: "English", w: "65%", c: "bg-yellow-500" },
-    { sub: "Spanish", w: "80%", c: "bg-red-500" },
-  ].map((s, i) => (
+ {syllabus.length === 0 ? (
+  <div className="text-center py-5 text-gray-500">
+    No Syllabus Found
+  </div>
+) : (
+  syllabus.map((s:any) => (
     <div
-      key={i}
-      className="flex items-center gap-4 mb-3 last:mb-0"
+      key={s.id}
+      className="flex items-center gap-4 mb-3"
     >
-      {/* Subject */}
       <span className="w-24 text-sm font-medium text-gray-700">
-        {s.sub}
+        {s.subject}
       </span>
 
-      {/* Progress bar */}
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div
-          className={`h-full ${s.c} rounded-full`}
-          style={{ width: s.w }}
+          className="h-full bg-blue-600 rounded-full"
+          style={{
+            width: `${s.completion_percentage}%`,
+          }}
         />
       </div>
     </div>
-  ))}
+  ))
+)}
 </div>
   {/* ================= TODO ================= */}
   <div className="bg-white rounded-xl border p-4 sm:p-5
@@ -1758,24 +1673,46 @@ className={`w-10 rounded-lg ${
       <h4 className="text-18px font-medium">Todo</h4>
       <span className="text-xs text-gray-500">Today</span>
     </div>
-    {[
-      { t: "Send Reminder to Students", time: "01:00 PM", status: "Completed", color: "bg-green-100 text-green-600", checked: true },
-      { t: "Create Routine to new staff", time: "04:50 PM", status: "Inprogress", color: "bg-blue-100 text-blue-600" },
-      { t: "Extra Class Info to Students", time: "04:55 PM", status: "Yet to Start", color: "bg-yellow-100 text-yellow-600" },
-      { t: "Fees for Upcoming Academics", time: "04:55 PM", status: "Yet to Start", color: "bg-yellow-100 text-yellow-600" },
-      { t: "English - Essay on Visit", time: "05:00 PM", status: "Yet to Start", color: "bg-yellow-100 text-yellow-600" },
-    ].map((t, i) => (
-      <div key={i} className="flex items-start gap-3 py-3 border-b last:border-none">
-        <input type="checkbox" defaultChecked={t.checked} className="mt-1" />
-        <div className="flex-1">
-          <p className="text-sm font-medium">{t.t}</p>
-          <p className="text-xs text-gray-500">{t.time}</p>
-        </div>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full ${t.color}`}>
-          {t.status}
-        </span>
+    {todos.length === 0 ? (
+  <div className="text-center py-5 text-gray-500">
+    No Todo Found
+  </div>
+) : (
+  todos.map((t:any) => (
+    <div
+      key={t.id}
+      className="flex items-start gap-3 py-3 border-b last:border-none"
+    >
+      <input
+        type="checkbox"
+        checked={t.status === "Completed"}
+        readOnly
+      />
+
+      <div className="flex-1">
+        <p className="text-sm font-medium">
+          {t.title}
+        </p>
+
+        <p className="text-xs text-gray-500">
+          {t.time}
+        </p>
       </div>
-    ))}
+
+      <span
+        className={`text-[10px] px-2 py-0.5 rounded-full ${
+          t.status === "Completed"
+            ? "bg-green-100 text-green-600"
+            : t.status === "Inprogress"
+            ? "bg-blue-100 text-blue-600"
+            : "bg-yellow-100 text-yellow-600"
+        }`}
+      >
+        {t.status}
+      </span>
+    </div>
+  ))
+)}
   </div>
 
 </div>
@@ -1950,7 +1887,7 @@ className={`w-10 rounded-lg ${
 
       {/* List */}
       <div className="p-4 space-y-3 overflow-y-auto max-h-[450px]">
-        {homeworks.length === 0 ? (
+        {(homeworks?.length || 0) === 0 ? (
   <div className="text-center py-10 text-gray-500">
     No Homework Found
   </div>
@@ -2071,20 +2008,45 @@ className={`w-10 rounded-lg ${
       </div>
 
       <div className="space-y-3">
-        <div className="flex justify-between border p-3 rounded">
-          <span>Tuition Fees</span>
-          <span className="font-semibold">₹25,000</span>
+  {fees.length === 0 ? (
+    <div className="text-center py-5 text-gray-500">
+      No Fees Found
+    </div>
+  ) : (
+    fees.map((f) => (
+      <div
+        key={f.id}
+        className="flex justify-between border p-3 rounded"
+      >
+        <div>
+          <p className="font-medium">
+            {f.fee_type}
+          </p>
+
+          <p className="text-xs text-gray-500">
+            Due Date : {f.due_date}
+          </p>
         </div>
-        <div className="flex justify-between border p-3 rounded">
-          <span>Exam Fees</span>
-          <span className="font-semibold">₹2,500</span>
-        </div>
-        <div className="flex justify-between border p-3 rounded">
-          <span>Transport Fees</span>
-          <span className="font-semibold">₹5,000</span>
+
+        <div className="text-right">
+          <p className="font-semibold">
+            ₹{f.amount}
+          </p>
+
+          <p
+            className={
+              f.status === "Paid"
+                ? "text-green-600 text-xs"
+                : "text-red-600 text-xs"
+            }
+          >
+            {f.status}
+          </p>
         </div>
       </div>
-
+    ))
+  )}
+</div>
       <button
         onClick={() => setShowFeesPopup(false)}
         className="mt-4 w-full border py-2 rounded"
@@ -2300,5 +2262,6 @@ className={`w-10 rounded-lg ${
 </div>
   </> 
  // </DashboardLayout>
-  );
+
+);
 }
