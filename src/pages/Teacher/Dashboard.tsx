@@ -38,6 +38,112 @@ type EventType = {
   iconBg: string;
   teachers: number[];
 };
+const dummyTodayClasses = [
+  {
+    start_time: "09:00 AM",
+    end_time: "10:00 AM",
+    class_name: "IV",
+    section: "A",
+    subject: "Physics",
+  },
+  {
+    start_time: "10:00 AM",
+    end_time: "11:00 AM",
+    class_name: "V",
+    section: "B",
+    subject: "Science",
+  },
+];
+
+const dummyEvents = [
+  {
+    title: "Science Exhibition",
+    date: "20 Jun 2026",
+    time: "10:00 AM",
+    bar: "bg-blue-500",
+    iconBg: "bg-blue-100",
+    teachers: [1, 2, 3],
+  },
+];
+
+const dummyAttendance = {
+  total: 24,
+  present: 20,
+  absent: 2,
+  halfday: 1,
+  late: 1,
+  percentage: 83,
+};
+
+const dummyBestPerformers = [
+  {
+    name: "Class IV-A",
+    value: 95,
+    color: "bg-green-500",
+  },
+  {
+    name: "Class V-B",
+    value: 88,
+    color: "bg-blue-500",
+  },
+];
+
+const dummyStudentProgress = [
+  {
+    name: "Janet",
+    class: "IV-A",
+    percent: "95%",
+    badge: "A",
+    color: "bg-green-500",
+    img: J1,
+  },
+];
+
+const dummySyllabus = [
+  {
+    class_name: "IV-A",
+    topic: "Newton Laws",
+  },
+  {
+    class_name: "V-B",
+    topic: "Electricity",
+  },
+];
+
+const dummyStudentMarks = [
+  {
+    id: "ST001",
+    student_name: "Janet",
+    class_name: "IV",
+    section: "A",
+    marks_percentage: 95,
+    cgpa: 9.5,
+    status: "Pass",
+  },
+];
+
+const dummyLeaveStatus = [
+  {
+    leave_type: "Medical Leave",
+    leave_date: "15-06-2026",
+    status: "Approved",
+    statusColor: "bg-green-500",
+    iconBg: "bg-green-100",
+    icon: "🏥",
+  },
+];
+
+const dummyCardData = {
+  syllabus: {
+    completed: 75,
+    pending: 25,
+  },
+  bestTeacher: {
+    name: "John Smith",
+    rating: 4.8,
+    subject: "Physics",
+  },
+};
 export default function TeacherDashboard() {
   const [showEditProfile, setShowEditProfile] = useState(false);
 const teacherName =
@@ -59,15 +165,25 @@ useEffect(() => {
   const teacherId =
     localStorage.getItem("teacherId");
 
-  if (!teacherId) return;
+if (!teacherId) {
+   setTodayClasses(dummyTodayClasses);
+   setCardData(dummyCardData);
+   setSyllabusData(dummySyllabus);
+   setAttendanceData(dummyAttendance);
+   return;
+}
 
   getTodayClasses(teacherId)
-    .then((res: any) => {
-  setTodayClasses(res.data || []);
+.then((res:any)=>{
+   setTodayClasses(
+      res?.data?.length
+         ? res.data
+         : dummyTodayClasses
+   );
 })
-    .catch(() => {
-      setTodayClasses([]);
-    });
+.catch(()=>{
+   setTodayClasses(dummyTodayClasses);
+});
 }, []);
 
   const [openSection, setOpenSection] = useState(false);
@@ -124,12 +240,16 @@ const monthNames = [
 useEffect(() => {
 
   getUpcomingEvents()
-    .then((res: any) => {
-      setEvents(res.data || []);
-    })
-    .catch(() => {
-      setEvents([]);
-    });
+.then((res:any)=>{
+   setEvents(
+      res?.data?.length
+         ? res.data
+         : dummyEvents
+   );
+})
+.catch(()=>{
+   setEvents(dummyEvents);
+});
 
 }, []);
 useEffect(() => {
@@ -137,7 +257,10 @@ useEffect(() => {
  const teacherId =
   localStorage.getItem("teacherId");
 
- if (!teacherId) return;
+ if (!teacherId) {
+   setTodayClasses(dummyTodayClasses);
+   return;
+}
 
  getTeacherAttendance(teacherId)
   .then((res: any) => {
@@ -146,10 +269,8 @@ useEffect(() => {
 
   })
   .catch(() => {
-
-   setAttendanceData(null);
-
-  });
+  setAttendanceData(dummyAttendance);
+});
 
 }, []);
 // first day of month (Mon based)
@@ -220,19 +341,16 @@ useEffect(()=>{
  if(!teacherId) return;
 
  getDashboardCards(teacherId)
- .then((res:any)=>{
-
+.then((res:any)=>{
    setCardData(
-    res.data.data
+      res?.data?.data
+         ? res.data.data
+         : dummyCardData
    );
-
- })
- .catch(()=>{
-
-   setCardData(null);
-
- });
-
+})
+.catch(()=>{
+   setCardData(dummyCardData);
+});
 },[]);
 useEffect(() => {
 
@@ -243,9 +361,9 @@ useEffect(() => {
     res.data || []
    );
   })
-  .catch(() => {
-   setBestPerformers([]);
-  });
+ .catch(() => {
+  setBestPerformers(dummyBestPerformers);
+});
 }, []);
 
 useEffect(() => {
@@ -256,25 +374,33 @@ useEffect(() => {
    );
   })
   .catch(() => {
-
-   setStudentProgress([]);
-
-  });
+  setStudentProgress(dummyStudentProgress);
+});
 
 }, []);
 useEffect(() => {
  const teacherId =
   localStorage.getItem("teacherId");
 
- if (!teacherId) return;
+ if (!teacherId) {
+   setTodayClasses(dummyTodayClasses);
+   setCardData(dummyCardData);
+   setSyllabusData(dummySyllabus);
+   setAttendanceData(dummyAttendance);
+   return;
+}
 
  getTeacherSyllabus(teacherId)
-   .then((res:any)=>{
-      setSyllabusData(res.data || []);
-   })
-   .catch(()=>{
-      setSyllabusData([]);
-   });
+.then((res:any)=>{
+   setSyllabusData(
+      res?.data?.length
+         ? res.data
+         : dummySyllabus
+   );
+})
+.catch(()=>{
+   setSyllabusData(dummySyllabus);
+});
 
 }, []);
 useEffect(() => {
@@ -286,8 +412,8 @@ useEffect(() => {
    );
   })
   .catch(() => {
-   setStudentMarks([]);
-  });
+  setStudentMarks(dummyStudentMarks);
+});
 
 }, []);
 useEffect(() => {
@@ -298,9 +424,9 @@ useEffect(() => {
     res.data.data || []
    );
   })
-  .catch(() => {
-   setLeaveStatus([]);
-  });
+ .catch(() => {
+  setLeaveStatus(dummyLeaveStatus);
+});
 
 }, []);
   const data = {

@@ -34,6 +34,88 @@ import {
 //   "Class IX": { top: 41, average: 15, below: 5, percent: 89 },
 //   "Class X": { top: 46, average: 9, below: 3, percent: 97 },
 // };
+const dummyPerformanceData: PerformanceData[] = [
+  {
+    id: "1",
+    class_name: "Class I",
+    top_students: 40,
+    average_students: 15,
+    below_average_students: 5,
+    performance_percentage: 88,
+  },
+  {
+    id: "2",
+    class_name: "Class II",
+    top_students: 45,
+    average_students: 11,
+    below_average_students: 2,
+    performance_percentage: 95,
+  },
+  {
+    id: "3",
+    class_name: "Class III",
+    top_students: 38,
+    average_students: 18,
+    below_average_students: 6,
+    performance_percentage: 84,
+  },
+  {
+    id: "4",
+    class_name: "Class IV",
+    top_students: 42,
+    average_students: 14,
+    below_average_students: 4,
+    performance_percentage: 90,
+  },
+  {
+    id: "5",
+    class_name: "Class V",
+    top_students: 47,
+    average_students: 10,
+    below_average_students: 3,
+    performance_percentage: 96,
+  },
+  {
+    id: "6",
+    class_name: "Class VI",
+    top_students: 35,
+    average_students: 20,
+    below_average_students: 7,
+    performance_percentage: 80,
+  },
+  {
+    id: "7",
+    class_name: "Class VII",
+    top_students: 44,
+    average_students: 12,
+    below_average_students: 4,
+    performance_percentage: 92,
+  },
+  {
+    id: "8",
+    class_name: "Class VIII",
+    top_students: 39,
+    average_students: 17,
+    below_average_students: 6,
+    performance_percentage: 86,
+  },
+  {
+    id: "9",
+    class_name: "Class IX",
+    top_students: 41,
+    average_students: 15,
+    below_average_students: 5,
+    performance_percentage: 89,
+  },
+  {
+    id: "10",
+    class_name: "Class X",
+    top_students: 46,
+    average_students: 9,
+    below_average_students: 3,
+    performance_percentage: 97,
+  },
+];
 interface PerformanceData {
   id: string;
   class_name: string;
@@ -73,22 +155,37 @@ const loadPerformance = async (): Promise<void> => {
   try {
     const res = await getPerformance();
 
-console.log("Performance API =", res);
+    console.log("Performance API =", res);
 
-    setAllClasses(res.data);
+    if (res?.data && res.data.length > 0) {
+      // Backend Data
+      setAllClasses(res.data);
 
-if (res.data.length > 0) {
-  setSelectedClass(
-    res.data[0].class_name
-  );
+      setSelectedClass(res.data[0].class_name);
+      setData(res.data[0]);
+    } else {
+      // Dummy Data
+      setAllClasses(dummyPerformanceData);
 
-  setData(res.data[0]);
-}
-  } catch (err) {
-    console.error(err);
+      setSelectedClass(
+        dummyPerformanceData[0].class_name
+      );
+
+      setData(dummyPerformanceData[0]);
+    }
+  } catch (error) {
+    console.error("API Failed:", error);
+
+    // Dummy Data if API Error
+    setAllClasses(dummyPerformanceData);
+
+    setSelectedClass(
+      dummyPerformanceData[0].class_name
+    );
+
+    setData(dummyPerformanceData[0]);
   }
 };
-
   return (
     <div className="bg-white rounded-xl border p-5 transition hover:shadow-md">
       {/* HEADER */}

@@ -53,6 +53,142 @@ interface DashboardData {
   late: number;
   attendancePercent: number;
 }
+const dummyDashboardData = {
+  totalWorkingDays: 26,
+  present: 22,
+  absent: 2,
+  halfday: 1,
+  late: 1,
+  attendancePercent: 92,
+};
+const dummyExams = [
+  {
+    id: 1,
+    subject: "Mathematics",
+    exam_date: "2025-07-15",
+    start_time: "09:00 AM",
+    end_time: "11:00 AM",
+    room_no: "101",
+  },
+  {
+    id: 2,
+    subject: "Science",
+    exam_date: "2025-07-20",
+    start_time: "10:00 AM",
+    end_time: "12:00 PM",
+    room_no: "102",
+  },
+];
+const dummyPerformance = [
+  {
+    id: 1,
+    quarter: "1st Quarter",
+    subject: "Maths",
+    mark: 90,
+  },
+  {
+    id: 2,
+    quarter: "1st Quarter",
+    subject: "Science",
+    mark: 85,
+  },
+  {
+    id: 3,
+    quarter: "1st Quarter",
+    subject: "English",
+    mark: 80,
+  },
+];
+const dummyHomework = [
+  {
+    id: 1,
+    subject: "Maths",
+    title: "Algebra Worksheet",
+    teacher_name: "John",
+    due_date: "2025-07-15",
+    progress: 70,
+  },
+];
+const dummyFees = [
+  {
+    id: 1,
+    fee_type: "Tuition Fee",
+    amount: 5000,
+    due_date: "2025-07-25",
+    status: "Pending",
+  },
+];
+const dummyFaculty = [
+  {
+    id: 1,
+    teacher_name: "Mr. Kumar",
+    subject: "Mathematics",
+    email: "kumar@gmail.com",
+    phone: "9876543210",
+  },
+   {
+    id: 2,
+    teacher_name: "Mr. Ram",
+    subject: "English",
+    email: "ram@gmail.com",
+    phone: "9876543217",
+  },
+   {
+    id: 3,
+    teacher_name: "Mr. Sri",
+    subject: "Tamil",
+    email: "sri@gmail.com",
+    phone: "9876543212",
+  },
+];
+const dummyNotices = [
+  {
+    id: 1,
+    title: "Unit Test Starts Next Week",
+    createdAt: new Date(),
+    created_by_role: "Admin",
+  },
+];
+const dummySyllabus = [
+  {
+    id: 1,
+    subject: "Maths",
+    completion_percentage: 75,
+  },
+  {
+    id: 2,
+    subject: "Science",
+    completion_percentage: 60,
+  },
+];
+const dummyTodos = [
+  {
+    id: 1,
+    title: "Complete Homework",
+    time: "10:00 AM",
+    status: "Pending",
+  },
+];
+const dummyExamResults = [
+  {
+    id: 1,
+    quarter: "1st Quarter",
+    subject: "Maths",
+    mark: 90,
+  },
+  {
+    id: 2,
+    quarter: "1st Quarter",
+    subject: "Science",
+    mark: 85,
+  },
+  {
+    id: 3,
+    quarter: "1st Quarter",
+    subject: "English",
+    mark: 80,
+  },
+];
 export default function StudentDashboard() {
   const [showEditProfile, setShowEditProfile] = useState(false);
 
@@ -91,11 +227,24 @@ useEffect(() => {
   selectedStudentId ||
   localStorage.getItem("studentId");
 
- if (!studentId) return;
+ if (!studentId) {
+  setDashboardData(dummyDashboardData);
+  setExams(dummyExams);
+  setPerformanceData(dummyPerformance);
+  setHomeworks(dummyHomework);
+  setFees(dummyFees);
+  setFaculties(dummyFaculty);
+  setNotices(dummyNotices);
+  setSyllabus(dummySyllabus);
+  setTodos(dummyTodos);
+  return;
+}
 
  getStudentDashboard(studentId)
   .then((res: any) => {
-    setDashboardData(res.data.data);
+    setDashboardData(
+  res?.data?.data || dummyDashboardData
+);
   })
   .catch((err: any) => {
     console.error(err);
@@ -114,9 +263,7 @@ const [fees, setFees] =
   useState<any[]>([]);
   const [faculties, setFaculties] =
 useState([]);
-const quarterResults = examResults.filter(
-  (item: any) => item.quarter === activeQuarter
-);
+const quarterResults = examResults;
 const [syllabus, setSyllabus] = useState([]);
 const [todos, setTodos] = useState([]);
 useEffect(() => {
@@ -141,11 +288,15 @@ useEffect(() => {
 
 getStudentExams(studentId)
   .then((res:any)=>{
-     setExams(res.data.data || []);
+     setExams(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyExams
+);
   })
-  .catch(()=>{
-     setExams([]);
-  });
+  .catch(() => {
+  setExams(dummyExams);
+});
 }, [selectedStudentId]);
 useEffect(() => {
   const studentId =
@@ -156,11 +307,15 @@ useEffect(() => {
 
   getStudentPerformance(studentId)
     .then((res: any) => {
-  setPerformanceData(res.data.data || []);
+  setPerformanceData(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyPerformance
+);
 })
-.catch((err: any) => {
+.catch((err) => {
   console.error(err);
-  setPerformanceData([]);
+  setPerformanceData(dummyPerformance);
 });
 }, [selectedStudentId]);
 useEffect(() => {
@@ -171,11 +326,15 @@ useEffect(() => {
 
   getStudentHomework(studentId)
   .then((res:any) => {
-    setHomeworks(res?.data?.data || []);
+    setHomeworks(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyHomework
+);
   })
   .catch(() => {
-    setHomeworks([]);
-  });
+  setHomeworks(dummyHomework);
+});
 }, [selectedStudentId]);
 useEffect(() => {
   const studentId =
@@ -186,11 +345,15 @@ useEffect(() => {
 
   getStudentExamResult(studentId)
     .then((res: any) => {
-  setExamResults(res.data || []);
+  setExamResults(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyPerformance
+);
 })
-    .catch(() => {
-      setExamResults([]);
-    });
+   .catch(() => {
+  setExamResults(dummyExamResults);
+});
 }, [selectedStudentId]);
 useEffect(() => {
   const studentId =
@@ -200,11 +363,15 @@ useEffect(() => {
 
   getStudentFees(studentId)
     .then((res: any) => {
-  setFees(res.data.data || []);
+  setFees(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyFees
+);
 })
-    .catch(() => {
-      setFees([]);
-    });
+   .catch(() => {
+  setFees(dummyFees);
+});
 }, [selectedStudentId]);
 useEffect(() => {
 
@@ -215,12 +382,16 @@ useEffect(() => {
 
  getStudentFaculties(studentId)
   .then((res: any) => {
-    setFaculties(res.data.data || []);
+    setFaculties(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyFaculty
+);
   })
-  .catch((err: any) => {
-    console.error(err);
-    setFaculties([]);
-  });
+  .catch((err:any) => {
+  console.error(err);
+  setDashboardData(dummyDashboardData);
+});
 }, [selectedStudentId]);
 useEffect(() => {
   const studentId =
@@ -230,12 +401,15 @@ useEffect(() => {
 
   getStudentNotices(studentId)
     .then((res: any) => {
-      setNotices(res.data.data || []);
+      setNotices(
+  res?.data?.data?.length
+    ? res.data.data
+    : dummyNotices
+);
     })
-    .catch((err: any) => {
-      console.error(err);
-      setNotices([]);
-    });
+   .catch(() => {
+  setNotices(dummyNotices);
+});
 }, [selectedStudentId]);
 useEffect(() => {
   const studentId =
@@ -246,19 +420,27 @@ useEffect(() => {
 
   getStudentSyllabus(studentId)
   .then((res: any) => {
-    setSyllabus(res.data || []);
+    setSyllabus(
+  res?.data?.length
+    ? res.data
+    : dummySyllabus
+);
   })
-  .catch(() => {
-    setSyllabus([]);
-  });
+ .catch(() => {
+  setDashboardData(dummyDashboardData);
+});
 
 getStudentTodo(studentId)
   .then((res: any) => {
-    setTodos(res.data || []);
+    setTodos(
+  res?.data?.length
+    ? res.data
+    : dummyTodos
+);
   })
   .catch(() => {
-    setTodos([]);
-  });
+  setDashboardData(dummyDashboardData);
+});
 
 }, [selectedStudentId]);
 /* ================= ATTENDANCE DATA ================= */
