@@ -620,30 +620,35 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
 )}
     </div>
 
-    <div className="grid grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
   {todayClasses.length > 0 ? (
 
     todayClasses.map((item: any, idx) => (
       <div
-        key={idx}
-        className="bg-[#F8FAFC] border rounded-lg px-3 py-2.5"
-      >
-        <span
-          className="text-xs px-2 py-0.5 rounded-md text-white bg-blue-600"
-        >
-          ⏱ {item.start_time} - {item.end_time}
-        </span>
+  key={idx}
+  className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
+>
+  <div className="flex items-center gap-2 mb-3">
+    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+      📚
+    </div>
 
-        <p className="text-xs mt-1">
-          {item.class_name},
-          {item.section}
-        </p>
+    <div>
+      <h5 className="font-semibold text-sm">
+        {item.subject}
+      </h5>
 
-        <p className="text-[11px] text-gray-500">
-          {item.subject}
-        </p>
-      </div>
+      <p className="text-xs text-gray-500">
+        Class {item.class_name}-{item.section}
+      </p>
+    </div>
+  </div>
+
+  <div className="bg-blue-50 text-blue-700 text-xs font-medium px-3 py-2 rounded-lg">
+     {item.start_time} - {item.end_time}
+  </div>
+</div>
     ))
 
   ) : (
