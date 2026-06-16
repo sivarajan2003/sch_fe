@@ -1,8 +1,11 @@
 //dashboardWidgetService.js
 import axios from "axios";
 
-const API =
-"http://localhost:4000/api/v1/psms/dashboard";
+import BASE_API from "../api/baseurl";
+
+const API = `${BASE_API}/dashboard`;
+// const API =
+// "http://localhost:4000/api/v1/psms/dashboard";
 
 export const getTopSubjects =
 (className) =>
