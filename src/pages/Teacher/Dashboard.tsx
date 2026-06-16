@@ -419,14 +419,23 @@ useEffect(() => {
 useEffect(() => {
 
  getLeaveStatus()
-  .then((res: any) => {
-   setLeaveStatus(
-    res.data.data || []
-   );
-  })
- .catch(() => {
-  setLeaveStatus(dummyLeaveStatus);
-});
+.then((res:any)=>{
+
+ const formatted =
+   (res.data.data || []).map((l:any)=>({
+      ...l,
+      icon: "🏥",
+      iconBg: "bg-green-100",
+      statusColor:
+        l.status === "Approved"
+          ? "bg-green-500"
+          : l.status === "Pending"
+          ? "bg-blue-500"
+          : "bg-red-500",
+   }));
+
+ setLeaveStatus(formatted);
+})
 
 }, []);
   const data = {
@@ -1128,10 +1137,10 @@ bg-gradient-to-r from-[#0F1025] to-[#1A1C3A] ${cardAnim(0)}`}>
   </div>
 ) : (
   syllabusData.map((item, i) => (
-    <div key={i}>
-      {item.topic}
-    </div>
-  ))
+  <div key={i}>
+    {item?.topic || "No Topic"}
+  </div>
+))
 )}
     </div>
   </div>
@@ -1224,8 +1233,8 @@ studentMarks.map((s:any,i:number)=>(
               <td className="py-3">
                 <div className="flex items-center gap-2">
                 <img
-  src={studentImages[s.student_name]}
-alt={s.student_name}
+  src={studentImages[s.student_name] || J1}
+  alt={s.student_name}
   className="w-8 h-8 rounded-full object-cover border"
 />
 
@@ -1356,8 +1365,9 @@ leaveStatus.map((l:any,i:number)=>(
             
             {/* Class Name */}
             <p className="text-xs font-semibold text-gray-500 mb-2">
-              {cls.class}
+              {cls.class || cls.name}
             </p>
+            
 
             {/* Students */}
             {cls.students?.map((s: any, j: number) => (
@@ -1408,8 +1418,8 @@ leaveStatus.map((l:any,i:number)=>(
 ) : (
   syllabusData.map((t, i) => (
     <div key={i}>
-      <p>{t.class_name}</p>
-      <p>{t.topic}</p>
+     <p>{t?.class_name || "-"}</p>
+<p>{t?.topic || "No Topic"}</p>
     </div>
   ))
 )}
