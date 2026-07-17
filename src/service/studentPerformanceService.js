@@ -1,7 +1,7 @@
-import axios from "axios";
+// studentPerformanceService.js
+import api from "../api/client";
 
-export const getStudentPerformance = (studentId) => {
-  return axios.get(
-    `http://localhost:4000/api/v1/psms/student-performance/${studentId}`
-  );
-};
+export const getStudentPerformance = (studentId) =>
+  api.get(`/student-performance/${studentId}`);
+
+export default { getStudentPerformance };

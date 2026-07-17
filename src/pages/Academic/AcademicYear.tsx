@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import {
   RefreshCcw,
@@ -31,7 +32,7 @@ interface AcademicYearType {
 export default function AcademicYear() {
   const token = localStorage.getItem("token");
   if (!token) {
-    alert("Login expired. Please login again.");
+    toast.info("Login expired. Please login again.");
     return null;
   }
   const headerYear = localStorage.getItem("academicYear");
@@ -113,11 +114,11 @@ useEffect(() => {
 
     // client-side validation
     if (!form.year || !form.start || !form.end) {
-      alert("All fields are required");
+      toast.info("All fields are required");
       return;
     }
     if (new Date(form.start) > new Date(form.end)) {
-      alert("Start date cannot be after End date");
+      toast.info("Start date cannot be after End date");
       return;
     }
 
@@ -144,7 +145,7 @@ useEffect(() => {
       fetchAcademicYears(); // reload from backend
     } catch (error) {
       console.error("Update failed", error);
-      alert("Update failed. See console for details.");
+      toast.error("Update failed. See console for details.");
     }
   };
 
@@ -157,7 +158,7 @@ useEffect(() => {
       fetchAcademicYears(); // reload
     } catch (error) {
       console.error("Delete failed", error);
-      alert("Delete failed. See console for details.");
+      toast.error("Delete failed. See console for details.");
     }
   };
 
@@ -169,12 +170,12 @@ useEffect(() => {
   
       // validation
       if (!form.year || !form.start || !form.end) {
-        alert("All fields are required");
+        toast.info("All fields are required");
         return;
       }
   
       if (new Date(form.start) > new Date(form.end)) {
-        alert("Start date cannot be after End date");
+        toast.info("Start date cannot be after End date");
         return;
       }
   
@@ -201,7 +202,7 @@ useEffect(() => {
       await fetchAcademicYears(); // reload once
     } catch (error: any) {
       console.error("Save failed", error);
-      alert(
+      toast.info(
         error?.response?.data?.message ||
         error?.message ||
         "Save failed"

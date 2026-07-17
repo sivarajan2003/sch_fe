@@ -1,5 +1,6 @@
 //Approvelleave.tsx
 import { useEffect, useState } from "react";
+import api from "../../../api/client";
 import {
   RefreshCcw,
   Printer,
@@ -13,21 +14,13 @@ import {
 } from "lucide-react";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  { id: "LT748294", leaveType: "Medical Leave", status: "Active" },
-  { id: "LT748293", leaveType: "Casual Leave", status: "Active" },
-  { id: "LT748292", leaveType: "Maternity Leave", status: "Active" },
-  { id: "LT748291", leaveType: "Sick Leave", status: "Active" },
-  { id: "LT748290", leaveType: "Paternity Leave", status: "Inactive" },
-  { id: "LT748289", leaveType: "Special Leave", status: "Active" },
-];
 
 /* ================= PAGE ================= */
 export default function LeaveList() {
  const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortAsc, setSortAsc] = useState(true);
@@ -39,7 +32,16 @@ export default function LeaveList() {
   const [openFilter, setOpenFilter] = useState(false);
 
   /* CLOSE DROPDOWN */
+
+  const fetchLeaveRequests = async () => {
+    try {
+      const res = await api.get("/leave-requests");
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data?.rows) ? res.data.rows : [];
+      setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchLeaveRequests();
     const close = () => setOpenFilter(false);
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
@@ -64,8 +66,8 @@ export default function LeaveList() {
     setData(prev =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.leaveType.localeCompare(b.leaveType)
-          : b.leaveType.localeCompare(a.leaveType)
+          ? (a.leaveType ?? '').localeCompare(b.leaveType)
+          : (b.leaveType ?? '').localeCompare(a.leaveType)
       )
     );
     setSortAsc(!sortAsc);
@@ -74,8 +76,8 @@ export default function LeaveList() {
   /* SEARCH */
   const filtered = data.filter(
     d =>
-      d.leaveType.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.leaveType ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* PAGINATION */

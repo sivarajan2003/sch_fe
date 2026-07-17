@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 //ComplaintsMaintenance.tsx
 import { useState, useEffect } from "react";
 import {
@@ -150,7 +151,7 @@ const handleSave = async () => {
 
     setShowModal(false);
 
-    alert("Complaint Added Successfully");
+    toast.success("Complaint Added Successfully");
 
   } catch (error: any) {
 
@@ -161,7 +162,7 @@ const handleSave = async () => {
       error?.response?.data
     );
 
-    alert(
+    toast.info(
       error?.response?.data?.message ||
       "Save Failed"
     );

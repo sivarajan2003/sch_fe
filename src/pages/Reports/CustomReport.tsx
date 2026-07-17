@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../../api/client";
 import {
   RefreshCcw,
   Printer,
@@ -11,84 +12,12 @@ import {
 } from "lucide-react";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "CR1001",
-    reportName: "Fees Collection Summary",
-    category: "Finance",
-    status: "Active",
-    createdOn: "15 May 2024",
-  },
-  {
-    id: "CR1002",
-    reportName: "Exam Results Analysis",
-    category: "Academic",
-    status: "Active",
-    createdOn: "14 May 2024",
-  },
-  {
-    id: "CR1003",
-    reportName: "Attendance Overview",
-    category: "HRM",
-    status: "Inactive",
-    createdOn: "13 May 2024",
-  },
-  {
-    id: "CR1004",
-    reportName: "Payroll Summary",
-    category: "Finance",
-    status: "Active",
-    createdOn: "12 May 2024",
-  },
-  {
-    id: "CR1005",
-    reportName: "Student Performance",
-    category: "Academic",
-    status: "Active",
-    createdOn: "11 May 2024",
-  },
-  {
-    id: "CR1006",
-    reportName: "Library Usage",
-    category: "Management",
-    status: "Inactive",
-    createdOn: "10 May 2024",
-  },
-  {
-    id: "CR1007",
-    reportName: "Transport Report",
-    category: "Management",
-    status: "Active",
-    createdOn: "09 May 2024",
-  },
-  {
-    id: "CR1008",
-    reportName: "Hostel Occupancy",
-    category: "Management",
-    status: "Active",
-    createdOn: "08 May 2024",
-  },
-  {
-    id: "CR1009",
-    reportName: "Leave Statistics",
-    category: "HRM",
-    status: "Active",
-    createdOn: "07 May 2024",
-  },
-  {
-    id: "CR1010",
-    reportName: "Disciplinary Records",
-    category: "Academic",
-    status: "Inactive",
-    createdOn: "06 May 2024",
-  },
-];
 
 export default function CustomReports() {
    const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -102,7 +31,16 @@ export default function CustomReports() {
   const [endDate, setEndDate] = useState("");
 
   /* CLOSE DROPDOWNS */
+
+  const fetchReportData = async () => {
+    try {
+      const res = await api.get("/student");
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data?.rows) ? res.data.rows : [];
+      setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchReportData();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -113,7 +51,7 @@ export default function CustomReports() {
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchReportData();
     setSearch("");
     setStartDate("");
     setEndDate("");
@@ -144,8 +82,8 @@ export default function CustomReports() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.reportName.localeCompare(b.reportName)
-          : b.reportName.localeCompare(a.reportName)
+          ? (a.reportName ?? '').localeCompare(b.reportName)
+          : (b.reportName ?? '').localeCompare(a.reportName)
       )
     );
     setSortAsc(!sortAsc);
@@ -154,8 +92,8 @@ export default function CustomReports() {
   /* 🔍 SEARCH */
   const filtered = data.filter(
     (d) =>
-      d.reportName.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.reportName ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */

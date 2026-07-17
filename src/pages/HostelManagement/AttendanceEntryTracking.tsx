@@ -90,8 +90,8 @@ const fetchAttendance = async () => {
 };
   const filtered = attendanceList.filter(
     (d) =>
-      d.student.toLowerCase().includes(search.toLowerCase()) ||
-      d.regNo.toLowerCase().includes(search.toLowerCase())
+      (d.student ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.regNo ?? '').toLowerCase().includes(search.toLowerCase())
   );
 const handleSave = async () => {
 

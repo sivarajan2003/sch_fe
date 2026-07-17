@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -54,7 +55,7 @@ export default function TeachersPage() {
   const isLocked = userRole !== "Admin"; //  Admin bypass lock
   const token = localStorage.getItem("token");
   if (!token) {
-    alert("Login expired. Please login again.");
+    toast.info("Login expired. Please login again.");
     return null;
   }
 
@@ -152,7 +153,7 @@ export default function TeachersPage() {
       setData(mapped);
     } catch (err) {
       console.error("Failed to load teachers", err);
-      alert("Failed to load teachers. See console for details.");
+      toast.error("Failed to load teachers. See console for details.");
     } finally {
       setLoading(false);
     }
@@ -232,7 +233,7 @@ export default function TeachersPage() {
       setOpenAddTeacher(false);
     } catch (err: any) {
       console.error("Create teacher failed", err);
-      alert(err?.response?.data?.message ?? err?.message ?? "Create failed");
+      toast.info(err?.response?.data?.message ?? err?.message ?? "Create failed");
     } finally {
       setLoading(false);
     }
@@ -258,7 +259,7 @@ export default function TeachersPage() {
       setEditTeacher(null);
     } catch (err) {
       console.error("Update failed", err);
-      alert("Update failed. See console for details.");
+      toast.error("Update failed. See console for details.");
     } finally {
       setLoading(false);
     }
@@ -275,7 +276,7 @@ export default function TeachersPage() {
       setDeleteTeacherModal(null);
     } catch (err) {
       console.error("Delete failed", err);
-      alert("Delete failed. See console for details.");
+      toast.error("Delete failed. See console for details.");
     } finally {
       setLoading(false);
     }

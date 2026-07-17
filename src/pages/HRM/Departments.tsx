@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../../api/client";
 import {
   RefreshCcw,
   Printer,
@@ -11,25 +12,13 @@ import {
 import AddDepartmentModal from "../../components/tables/AddDepartmentModal";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  { id: "D757248", name: "Admin", status: "Active", date: "15 May 2024" },
-  { id: "D757247", name: "Finance", status: "Active", date: "14 May 2024" },
-  { id: "D757246", name: "Academic", status: "Active", date: "13 May 2024" },
-  { id: "D757245", name: "Library", status: "Active", date: "12 May 2024" },
-  { id: "D757244", name: "Health", status: "Inactive", date: "11 May 2024" },
-  { id: "D757243", name: "Transport", status: "Active", date: "10 May 2024" },
-  { id: "D757242", name: "Hostel", status: "Active", date: "09 May 2024" },
-  { id: "D757241", name: "Management", status: "Active", date: "08 May 2024" },
-  { id: "D757240", name: "Guidance", status: "Inactive", date: "07 May 2024" },
-  { id: "D757239", name: "Sports", status: "Active", date: "06 May 2024" },
-];
 
 export default function Departments() {
   const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +33,16 @@ export default function Departments() {
   const [endDate, setEndDate] = useState("");
   
   /* CLOSE DROPDOWNS */
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await api.get("/hr");
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data?.rows) ? res.data.rows : [];
+      setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchDepartments();
     const close = () => {
       setOpenMenu(null);
       setOpenCalendar(false);
@@ -55,7 +53,7 @@ export default function Departments() {
   }, []);
 
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchDepartments();
     setSearch("");
     setStartDate("");
     setEndDate("");
@@ -86,8 +84,8 @@ export default function Departments() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
@@ -96,8 +94,8 @@ export default function Departments() {
   /* 🔍 SEARCH */
   const filtered = data.filter(
     (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -246,7 +244,7 @@ export default function Departments() {
       onClick={() => {
         if (!startDate || !endDate) return;
 
-        const filteredByDate = INITIAL_DATA.filter((d) => {
+        const filteredByDate = data.filter((d) => {
           const itemDate = new Date(d.date);
           return (
             itemDate >= new Date(startDate) &&
@@ -283,7 +281,7 @@ export default function Departments() {
                 <div className="absolute left-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-30">
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Active"));
+                      setData(data.filter(d => d.status === "Active"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"
@@ -292,7 +290,7 @@ export default function Departments() {
                   </button>
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Inactive"));
+                      setData(data.filter(d => d.status === "Inactive"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"

@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -364,7 +365,7 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
 
       setOpenAdd(false);
 
-      alert(
+      toast.info(
         "Saved successfully"
       );
 
@@ -374,7 +375,7 @@ Subscription Upgrade Required — Contact Atelier Creation</p>
         error.response?.data
       );
 
-      alert(
+      toast.info(
         "Save failed"
       );
     }

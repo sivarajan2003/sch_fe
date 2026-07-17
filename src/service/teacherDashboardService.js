@@ -1,71 +1,41 @@
-//teacherDashboardService.js
+// teacherDashboardService.js
 import api from "../api/client";
-import axios from "axios";
 
-const API =
-"http://localhost:5000/api/v1/psms";
-export const getTodayClasses = async (teacherId) => {
-  const res = await api.get(
-    `/teacher-dashboard/today-class/${teacherId}`
-  );
+export const getTodayClasses = (teacherId) =>
+  api.get(`/teacher-dashboard/today-class/${teacherId}`).then(r => r.data);
 
-  return res.data;
-};
+export const getUpcomingEvents = () =>
+  api.get("/teacher-dashboard/upcoming-events").then(r => r.data);
 
-export const getUpcomingEvents = async () => {
-  const res = await api.get(
-    "/teacher-dashboard/upcoming-events"
-  );
+export const getTeacherAttendance = (teacherId) =>
+  api.get(`/teacher-dashboard/teacher-attendance/${teacherId}`).then(r => r.data);
 
-  return res.data;
-};
-export const getTeacherAttendance =
-async (teacherId) => {
+export const getBestPerformers = () =>
+  api.get("/teacher-dashboard/best-performers");
 
-  const res = await api.get(
-    `/teacher-dashboard/teacher-attendance/${teacherId}`
-  );
+export const getStudentProgress = () =>
+  api.get("/teacher-dashboard/student-progress");
 
-  return res.data;
-};
-export const getBestPerformers = () => {
-  return api.get(
-    "/teacher-dashboard/best-performers"
-  );
-};
+export const getTeacherSyllabus = (teacherId) =>
+  api.get(`/teacher-dashboard/syllabus/${teacherId}`).then(r => r.data);
 
-export const getStudentProgress = () => {
-  return api.get(
-    "/teacher-dashboard/student-progress"
-  );
-};
-export const getTeacherSyllabus = async (
- teacherId
-) => {
+export const getStudentMarks = () =>
+  api.get("/teacher-dashboard/student-marks");
 
- const res = await api.get(
-  `/teacher-dashboard/syllabus/${teacherId}`
- );
+export const getLeaveStatus = () =>
+  api.get("/teacher-dashboard/leave-status");
 
- return res.data;
-};
-export const getStudentMarks =
-() => {
-  return axios.get(
-   `${API}/teacher-dashboard/student-marks`
-  );
-};
-export const getLeaveStatus =
-() => {
-  return axios.get(
-   `${API}/teacher-dashboard/leave-status`
-  );
-};
-export const getDashboardCards =
-(teacherId)=>{
+export const getDashboardCards = (teacherId) =>
+  api.get(`/teacher-dashboard/cards/${teacherId}`);
 
- return api.get(
-  `/teacher-dashboard/cards/${teacherId}`
- );
-
+export default {
+  getTodayClasses,
+  getUpcomingEvents,
+  getTeacherAttendance,
+  getBestPerformers,
+  getStudentProgress,
+  getTeacherSyllabus,
+  getStudentMarks,
+  getLeaveStatus,
+  getDashboardCards,
 };

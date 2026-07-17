@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import jsPDF from "jspdf";
@@ -51,7 +52,7 @@ export default function PayFees() {
   
   const handlePay = () => {
     // Later you can connect backend / Razorpay here
-    alert(
+    toast.info(
       `Payment Successful ✅
 Student: ${form.studentName}
 Class: ${form.className}

@@ -1,15 +1,20 @@
-import axios from "axios";
+import api from "../api/client";
 
-const API_URL =
-  "http://localhost:5000/api/management/library-member";
+const getMembers = () => api.get("/management/library-member");
 
-const getMembers = async () => {
-  const response =
-    await axios.get(API_URL);
+const getMemberById = (id) => api.get(`/management/library-member/${id}`);
 
-  return response.data;
-};
+const createMember = (data) => api.post("/management/library-member", data);
+
+const updateMember = (id, data) =>
+  api.put(`/management/library-member/${id}`, data);
+
+const deleteMember = (id) => api.delete(`/management/library-member/${id}`);
 
 export default {
-  getMembers
+  getMembers,
+  getMemberById,
+  createMember,
+  updateMember,
+  deleteMember,
 };

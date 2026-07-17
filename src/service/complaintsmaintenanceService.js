@@ -1,19 +1,9 @@
-import axios from 'axios';
+// complaintsmaintenanceService.js
+import api from "../api/client";
 
-const API =
-  'http://localhost:4000/api/v1/psms/hostel/complaintsmaintenance';
+export const getComplaints = () => api.get("/hostel/complaintsmaintenance");
+export const createComplaint = (data) => api.post("/hostel/complaintsmaintenance", data);
+export const updateComplaint = (id, data) => api.put(`/hostel/complaintsmaintenance/${id}`, data);
+export const deleteComplaint = (id) => api.delete(`/hostel/complaintsmaintenance/${id}`);
 
-export const getComplaints = () =>
-  axios.get(API);
-
-export const createComplaint = (data) =>
-  axios.post(API, data);
-
-export const updateComplaint = (
-  id,
-  data
-) =>
-  axios.put(`${API}/${id}`, data);
-
-export const deleteComplaint = (id) =>
-  axios.delete(`${API}/${id}`);
+export default { getComplaints, createComplaint, updateComplaint, deleteComplaint };

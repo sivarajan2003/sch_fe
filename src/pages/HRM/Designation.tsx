@@ -9,27 +9,15 @@ import {
   Plus,
 } from "lucide-react";
 import AddDesignationModal from "../../components/tables/AddDesignationModal";
-
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  { id: "DS748294", name: "Technical Head", status: "Active", date: "15 May 2024" },
-  { id: "DS748293", name: "Accountant", status: "Active", date: "14 May 2024" },
-  { id: "DS748292", name: "Teacher", status: "Active", date: "13 May 2024" },
-  { id: "DS748291", name: "Librarian", status: "Active", date: "12 May 2024" },
-  { id: "DS748290", name: "Doctor", status: "Inactive", date: "11 May 2024" },
-  { id: "DS748289", name: "Driver", status: "Active", date: "10 May 2024" },
-  { id: "DS748288", name: "Warden", status: "Active", date: "09 May 2024" },
-  { id: "DS748287", name: "Receptionist", status: "Active", date: "08 May 2024" },
-  { id: "DS748286", name: "Therapist", status: "Inactive", date: "07 May 2024" },
-  { id: "DS748285", name: "Coach", status: "Active", date: "06 May 2024" },
-];
+import { getHR } from "../../service/hrService";
 
 export default function Designation() {
 const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,7 +33,10 @@ const isLocked = false; // 🔒 enable full blur lock
   const [endDate, setEndDate] = useState("");
 
   /* CLOSE DROPDOWNS */
+
+  const fetchDesignations = async () => { try { setLoading(true); const res = await getHR(); const rows = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : []; setData(rows); } catch { } finally { setLoading(false); } };
   useEffect(() => {
+    fetchDesignations();
     const close = () => {
      
       setOpenCalendar(false);
@@ -57,7 +48,7 @@ const isLocked = false; // 🔒 enable full blur lock
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchDesignations();
     setSearch("");
     setStartDate("");
     setEndDate("");
@@ -83,8 +74,8 @@ const isLocked = false; // 🔒 enable full blur lock
     setData(prev =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
@@ -93,8 +84,8 @@ const isLocked = false; // 🔒 enable full blur lock
   /* 🔍 SEARCH */
   const filtered = data.filter(
     d =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -224,7 +215,7 @@ const isLocked = false; // 🔒 enable full blur lock
                     onClick={() => {
                       if (!startDate || !endDate) return;
 
-                      const filteredByDate = INITIAL_DATA.filter(d => {
+                      const filteredByDate = data.filter(d => {
                         const rowDate = new Date(d.date);
                         return (
                           rowDate >= new Date(startDate) &&
@@ -260,7 +251,7 @@ const isLocked = false; // 🔒 enable full blur lock
                 <div className="absolute left-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-30">
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Active"));
+                      setData(data.filter(d => d.status === "Active"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"
@@ -269,7 +260,7 @@ const isLocked = false; // 🔒 enable full blur lock
                   </button>
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Inactive"));
+                      setData(data.filter(d => d.status === "Inactive"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"

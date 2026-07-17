@@ -12,81 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import AddFeesGroupModal from "../../components/tables/AddFeesGroupModal";
-
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "FG80482",
-    group: "Tuition Fees",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "15 May 2024",
-  },
-  {
-    id: "FG80481",
-    group: "Monthly Fees",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "14 May 2024",
-  },
-  {
-    id: "FG80480",
-    group: "Class 1 General",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "13 May 2024",
-  },
-  {
-    id: "FG80479",
-    group: "Class 1 Lump Sum",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "12 May 2024",
-  },
-  {
-    id: "FG80478",
-    group: "Class 1 - I Installment",
-    description: "The money that you pay to be taught",
-    status: "Inactive",
-    date: "11 May 2024",
-  },
-  {
-    id: "FG80477",
-    group: "Class 1 - II Installment",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "10 May 2024",
-  },
-  {
-    id: "FG80476",
-    group: "Class 1 - III Installment",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "09 May 2024",
-  },
-  {
-    id: "FG80475",
-    group: "Discount",
-    description: "The money that you pay to be taught",
-    status: "Inactive",
-    date: "08 May 2024",
-  },
-  {
-    id: "FG80474",
-    group: "Class 3 - I Installment",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "07 May 2024",
-  },
-  {
-    id: "FG80473",
-    group: "Class 4 - I Installment",
-    description: "The money that you pay to be taught",
-    status: "Active",
-    date: "06 May 2024",
-  },
-];
-
+import { getFeeCollection } from "../../service/feecollectionService";
 
 /* ================= PAGE ================= */
 export default function FeesCollection() {
@@ -95,7 +21,8 @@ export default function FeesCollection() {
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -117,7 +44,19 @@ const [openEdit, setOpenEdit] = useState(false);
 const [selectedFees, setSelectedFees] = useState<any>(null);
 
   /* CLOSE DROPDOWNS */
+
+  const fetchFees = async () => {
+    try {
+      setLoading(true);
+      const res = await getFeeCollection();
+      const rows = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+      setData(rows);
+    } catch { }
+    finally { setLoading(false); }
+  };
+
   useEffect(() => {
+    fetchFees();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -128,7 +67,7 @@ const [selectedFees, setSelectedFees] = useState<any>(null);
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchFees();
     setSearch("");
     setCurrentPage(1);
   };
@@ -157,8 +96,8 @@ const [selectedFees, setSelectedFees] = useState<any>(null);
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.group.localeCompare(b.group)
-          : b.group.localeCompare(a.group)
+          ? (a.group ?? '').localeCompare(b.group)
+          : (b.group ?? '').localeCompare(a.group)
       )
     );
     setSortAsc(!sortAsc);
@@ -167,8 +106,8 @@ const [selectedFees, setSelectedFees] = useState<any>(null);
   /* 🔍 SEARCH */
   const filtered = data.filter(
     (d) =>
-      d.group.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.group ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -307,7 +246,7 @@ const [selectedFees, setSelectedFees] = useState<any>(null);
   onClick={() => {
     if (!startDate || !endDate) return;
 
-    const filteredByDate = INITIAL_DATA.filter((d) => {
+    const filteredByDate = data.filter((d) => {
       const rowDate = parseDate(d.date);
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -344,7 +283,7 @@ const [selectedFees, setSelectedFees] = useState<any>(null);
                 <div className="absolute left-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-30">
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Active"));
+                      setData(data.filter(d => d.status === "Active"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
@@ -353,7 +292,7 @@ const [selectedFees, setSelectedFees] = useState<any>(null);
                   </button>
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Inactive"));
+                      setData(data.filter(d => d.status === "Inactive"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-50"

@@ -1,28 +1,12 @@
-import axios from "axios";
+import api from "../api/client";
 
-const API =
-  "http://localhost:5000/management/sports";
+const getSports = () => api.get("/management/sports");
 
-const getSports = () => {
-  return axios.get(API);
-};
+const createSports = (data) => api.post("/management/sports", data);
 
-const createSports = (data) => {
-  return axios.post(API, data);
-};
+const updateSports = (id, data) => api.put(`/management/sports/${id}`, data);
 
-const updateSports = (id, data) => {
-  return axios.put(
-    `${API}/${id}`,
-    data
-  );
-};
-
-const deleteSports = (id) => {
-  return axios.delete(
-    `${API}/${id}`
-  );
-};
+const deleteSports = (id) => api.delete(`/management/sports/${id}`);
 
 export default {
   getSports,

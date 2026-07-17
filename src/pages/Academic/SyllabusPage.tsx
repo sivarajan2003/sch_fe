@@ -17,21 +17,6 @@ import syllabusService from "../../service/syllabusService";
 
 //import AddSyllabusGroupModal from "../../components/AddSyllabusGroupModal";
 
-/* ================= DATA ================= */
-
-const INITIAL_DATA = [
-  { id: 1, class: "I", section: "A", group: "I, C English", date: "10 May 2024", status: "Active" },
-  { id: 2, class: "I", section: "B", group: "III, A Maths", date: "11 May 2024", status: "Active" },
-  { id: 3, class: "II", section: "A", group: "II, A English", date: "12 May 2024", status: "Active" },
-  { id: 4, class: "II", section: "B", group: "IV, A Physics", date: "13 May 2024", status: "Active" },
-  { id: 5, class: "II", section: "C", group: "V, A Chemistry", date: "14 May 2024", status: "Active" },
-  { id: 6, class: "III", section: "A", group: "III, B Maths", date: "15 May 2024", status: "Active" },
-  { id: 7, class: "III", section: "B", group: "IV, B Chemistry", date: "16 May 2024", status: "Active" },
-  { id: 8, class: "IV", section: "A", group: "I, B Maths", date: "17 May 2024", status: "Active" },
-  { id: 9, class: "IV", section: "B", group: "VI, B Chemistry", date: "18 May 2024", status: "Active" },
-  { id: 10, class: "V", section: "A", group: "IV, D Maths", date: "19 May 2024", status: "Active" },
-];
-
 /* ================= PAGE ================= */
 
 export default function SyllabusPage() {
@@ -39,7 +24,7 @@ export default function SyllabusPage() {
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
  
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const [search, setSearch] = useState("");
@@ -92,7 +77,7 @@ const loadSyllabus = async () => {
 };
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchSyllabus();
     setSearch("");
     setCurrentPage(1);
   };
@@ -120,8 +105,8 @@ const loadSyllabus = async () => {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.group.localeCompare(b.group)
-          : b.group.localeCompare(a.group)
+          ? (a.group ?? '').localeCompare(b.group)
+          : (b.group ?? '').localeCompare(a.group)
       )
     );
     setSortAsc(!sortAsc);
@@ -130,8 +115,8 @@ const loadSyllabus = async () => {
   /* 🔍 FILTER + SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.group.toLowerCase().includes(search.toLowerCase()) ||
-      d.class.toLowerCase().includes(search.toLowerCase());
+      (d.group ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.class ?? '').toLowerCase().includes(search.toLowerCase());
   
     if (!startDate || !endDate) return matchSearch;
   

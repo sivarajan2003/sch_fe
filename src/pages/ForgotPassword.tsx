@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.png";
@@ -11,12 +12,12 @@ export default function ForgotPassword() {
     e.preventDefault();
 
     if (!email) {
-      alert("Please enter email address");
+      toast.info("Please enter email address");
       return;
     }
 
     // Later: API / Firebase reset logic
-    alert(`Password reset link sent to ${email}`);
+    toast.success(`Password reset link sent to ${email}`);
   };
 
   return (

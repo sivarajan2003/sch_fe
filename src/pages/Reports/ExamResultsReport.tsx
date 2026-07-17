@@ -1,3 +1,4 @@
+import api from "../../api/client";
 import { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -11,124 +12,12 @@ import {
 } from "lucide-react";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "ER2001",
-    student: "Arjun",
-    class: "X - A",
-    subject: "Maths",
-    marks: 92,
-    result: "Pass",
-    date: "15 May 2024",
-  },
-  {
-    id: "ER2002",
-    student: "Priya",
-    class: "IX - B",
-    subject: "Science",
-    marks: 78,
-    result: "Pass",
-    date: "14 May 2024",
-  },
-  {
-    id: "ER2003",
-    student: "Karthik",
-    class: "VIII - C",
-    subject: "English",
-    marks: 65,
-    result: "Pass",
-    date: "13 May 2024",
-  },
-
-
-  {
-    id: "ER2004",
-    student: "Sneha",
-    class: "VII - A",
-    subject: "Maths",
-    marks: 88,
-    result: "Pass",
-    date: "12 May 2024",
-  },
-  {
-    id: "ER2005",
-    student: "Rahul",
-    class: "X - B",
-    subject: "Science",
-    marks: 42,
-    result: "Fail",
-    date: "11 May 2024",
-  },
-  {
-    id: "ER2006",
-    student: "Anitha",
-    class: "IX - A",
-    subject: "English",
-    marks: 81,
-    result: "Pass",
-    date: "10 May 2024",
-  },
-  {
-    id: "ER2007",
-    student: "Vignesh",
-    class: "VIII - B",
-    subject: "Maths",
-    marks: 74,
-    result: "Pass",
-    date: "09 May 2024",
-  },
-  {
-    id: "ER2008",
-    student: "Divya",
-    class: "VI - A",
-    subject: "Science",
-    marks: 39,
-    result: "Fail",
-    date: "08 May 2024",
-  },
-  {
-    id: "ER2009",
-    student: "Suresh",
-    class: "X - C",
-    subject: "English",
-    marks: 85,
-    result: "Pass",
-    date: "07 May 2024",
-  },
-  {
-    id: "ER2010",
-    student: "Meena",
-    class: "VII - B",
-    subject: "Maths",
-    marks: 90,
-    result: "Pass",
-    date: "06 May 2024",
-  },
-   {
-    id: "ER2002",
-    student: "Priya",
-    class: "IX - B",
-    subject: "Science",
-    marks: 78,
-    result: "Pass",
-    date: "14 May 2024",
-  },
-  {
-    id: "ER2002",
-    student: "Priya",
-    class: "IX - B",
-    subject: "Science",
-    marks: 78,
-    result: "Pass",
-    date: "14 May 2024",
-  },
-];
 
 export default function ExamResultsReport() {
   const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,7 +31,14 @@ export default function ExamResultsReport() {
   const [endDate, setEndDate] = useState("");
 
   /* CLOSE DROPDOWNS */
+
+  const fetchExamResults = async () => {
+    try {
+      const res = await api.get("/studentexam"); const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : []; setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchExamResults();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -153,7 +49,7 @@ export default function ExamResultsReport() {
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchExamResults();
     setSearch("");
     setStartDate("");
     setEndDate("");
@@ -184,8 +80,8 @@ export default function ExamResultsReport() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.student.localeCompare(b.student)
-          : b.student.localeCompare(a.student)
+          ? (a.student ?? '').localeCompare(b.student)
+          : (b.student ?? '').localeCompare(a.student)
       )
     );
     setSortAsc(!sortAsc);
@@ -194,8 +90,8 @@ export default function ExamResultsReport() {
   /* 🔍 SEARCH */
   const filtered = data.filter(
     (d) =>
-      d.student.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.student ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -323,7 +219,7 @@ export default function ExamResultsReport() {
                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-30">
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter((d) => d.result === "Pass"));
+                      setData(data.filter((d) => d.result === "Pass"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"
@@ -332,7 +228,7 @@ export default function ExamResultsReport() {
                   </button>
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter((d) => d.result === "Fail"));
+                      setData(data.filter((d) => d.result === "Fail"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"

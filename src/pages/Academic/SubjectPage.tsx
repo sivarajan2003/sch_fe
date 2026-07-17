@@ -10,19 +10,6 @@ import {
 import AddSubjectModal from "../../components/AddSubjectModal";
 import { useEffect } from "react";
 import subjectService from "../../service/subjectService";
-/* ================= DATA ================= */
-
-const INITIAL_DATA = [
-  { id: "SU128394", name: "English", code: "101", type: "Theory", status: "Active" },
-  { id: "SU128393", name: "Math", code: "102", type: "Theory", status: "Active" },
-  { id: "SU128392", name: "Physics", code: "103", type: "Practical", status: "Active" },
-  { id: "SU128391", name: "Chemistry", code: "104", type: "Practical", status: "Active" },
-  { id: "SU128390", name: "Biology", code: "105", type: "Practical", status: "Inactive" },
-  { id: "SU128389", name: "Spanish", code: "106", type: "Theory", status: "Active" },
-  { id: "SU128388", name: "Higher Math", code: "107", type: "Theory", status: "Active" },
-  { id: "SU128387", name: "Moral Education", code: "108", type: "Practical", status: "Inactive" },
-  { id: "SU128386", name: "Economics", code: "110", type: "Theory", status: "Active" },
-];
 
 /* ================= PAGE ================= */
 
@@ -75,7 +62,7 @@ useEffect(() => {
 }, []);
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchSubjects();
     setSearch("");
     setCurrentPage(1);
   };

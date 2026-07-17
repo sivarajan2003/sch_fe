@@ -14,100 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import AddLibraryMemberModal from "../../components/tables/AddLibraryMemberModal";
-
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "LMB23748",
-    name: "James",
-    avatar: "https://i.pravatar.cc/40?img=12",
-    cardNo: "501",
-    email: "james@example.com",
-    date: "22 Apr 2024",
-    mobile: "+1 78429 82414",
-  },
-  {
-    id: "LMB23747",
-    name: "Garcia",
-    avatar: "https://i.pravatar.cc/40?img=32",
-    cardNo: "502",
-    email: "garcia@example.com",
-    date: "30 Apr 2024",
-    mobile: "+1 37489 46485",
-  },
-  {
-    id: "LMB23746",
-    name: "Frank",
-    avatar: "https://i.pravatar.cc/40?img=45",
-    cardNo: "503",
-    email: "frank@example.com",
-    date: "05 May 2024",
-    mobile: "+1 87651 64816",
-  },
-  {
-    id: "LMB23745",
-    name: "Jennie",
-    avatar: "https://i.pravatar.cc/40?img=47",
-    cardNo: "504",
-    email: "jennie@example.com",
-    date: "16 May 2024",
-    mobile: "+1 49879 86498",
-  },
-  {
-    id: "LMB23744",
-    name: "Paul",
-    avatar: "https://i.pravatar.cc/40?img=8",
-    cardNo: "505",
-    email: "paul@example.com",
-    date: "28 May 2024",
-    mobile: "+1 69787 87984",
-  },
-  {
-    id: "LMB23743",
-    name: "Elaine",
-    avatar: "https://i.pravatar.cc/40?img=19",
-    cardNo: "506",
-    email: "elaine@example.com",
-    date: "06 Jun 2024",
-    mobile: "+1 98764 84984",
-  },
-  {
-    id: "LMB23742",
-    name: "Jackson",
-    avatar: "https://i.pravatar.cc/40?img=21",
-    cardNo: "507",
-    email: "jackson@example.com",
-    date: "10 Jun 2024",
-    mobile: "+1 46876 55498",
-  },
-  {
-    id: "LMB23741",
-    name: "Kerry",
-    avatar: "https://i.pravatar.cc/40?img=25",
-    cardNo: "508",
-    email: "kerry@example.com",
-    date: "18 Jun 2024",
-    mobile: "+1 79468 87467",
-  },
-  {
-    id: "LMB23740",
-    name: "Roger",
-    avatar: "https://i.pravatar.cc/40?img=30",
-    cardNo: "509",
-    email: "roger@example.com",
-    date: "20 Jul 2024",
-    mobile: "+1 65598 64658",
-  },
-  {
-    id: "LMB23739",
-    name: "Denise",
-    avatar: "https://i.pravatar.cc/40?img=36",
-    cardNo: "510",
-    email: "denise@example.com",
-    date: "26 Jul 2024",
-    mobile: "+1 57866 68746",
-  },
-];
+import libraryMemberService from "../../service/libraryMemberService";
 
 /* ================= PAGE ================= */
 
@@ -117,7 +24,8 @@ export default function LibraryMembers() {
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -144,7 +52,7 @@ export default function LibraryMembers() {
   
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchMembers();
     setSearch("");
     setCurrentPage(1);
   };
@@ -173,8 +81,8 @@ export default function LibraryMembers() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
@@ -183,8 +91,8 @@ export default function LibraryMembers() {
   /* 🔍 SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase());
   
     if (!startDate || !endDate) return matchSearch;
   
@@ -385,7 +293,7 @@ export default function LibraryMembers() {
 
       <button
         onClick={() => {
-          setData([...data].sort((a, b) => a.name.localeCompare(b.name)));
+          setData([...data].sort((a, b) => (a.name ?? '').localeCompare(b.name)));
           setOpenFilter(false);
         }}
         className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
@@ -395,7 +303,7 @@ export default function LibraryMembers() {
 
       <button
         onClick={() => {
-          setData([...data].sort((a, b) => b.name.localeCompare(a.name)));
+          setData([...data].sort((a, b) => (b.name ?? '').localeCompare(a.name)));
           setOpenFilter(false);
         }}
         className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"

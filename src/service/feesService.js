@@ -1,15 +1,19 @@
-import axios from "axios";
+import api from "../api/client";
 
-const API_URL =
-  "http://localhost:5000/api/fees";
+const getFees = () => api.get("/management/fees");
 
-const getFees = async () => {
-  const response =
-    await axios.get(API_URL);
+const getFeeById = (id) => api.get(`/management/fees/${id}`);
 
-  return response.data;
-};
+const createFee = (data) => api.post("/management/fees", data);
+
+const updateFee = (id, data) => api.put(`/management/fees/${id}`, data);
+
+const deleteFee = (id) => api.delete(`/management/fees/${id}`);
 
 export default {
-  getFees
+  getFees,
+  getFeeById,
+  createFee,
+  updateFee,
+  deleteFee,
 };

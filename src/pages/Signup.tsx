@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { useState } from 'react';
 import { Facebook, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -16,15 +17,15 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const handleFacebookSignup = () => {
-    alert("Facebook signup clicked (OAuth not connected yet)");
+    toast.info("Facebook signup clicked (OAuth not connected yet)");
   };
   
   const handleGoogleSignup = () => {
-    alert("Google signup clicked (OAuth not connected yet)");
+    toast.info("Google signup clicked (OAuth not connected yet)");
   };
   
   const handleAppleSignup = () => {
-    alert("Apple signup clicked (OAuth not connected yet)");
+    toast.info("Apple signup clicked (OAuth not connected yet)");
   };
   
   const handleSignup = (e: React.FormEvent) => {

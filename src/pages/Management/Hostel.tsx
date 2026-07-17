@@ -12,90 +12,7 @@ import {
   Plus,
 } from "lucide-react";
 import AddHostelModal from "../../components/tables/AddHostelModal";
-
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "H823828",
-    name: "Phoenix Residence",
-    type: "Boys",
-    address: "25 Crowfield Road, Phoenix",
-    intake: 150,
-    description: "Rising to nurture young minds",
-  },
-  {
-    id: "H823827",
-    name: "Tranquil Haven",
-    type: "Girls",
-    address: "81 Hartland Avenue, Milwaukee",
-    intake: 200,
-    description: "Where peace meets academic pursuits",
-  },
-  {
-    id: "H823826",
-    name: "Radiant Towers",
-    type: "Boys",
-    address: "School Campus",
-    intake: 180,
-    description: "Illuminating minds with knowledge and warmth",
-  },
-  {
-    id: "H823825",
-    name: "Nova Nest",
-    type: "Girls",
-    address: "School Campus",
-    intake: 100,
-    description: "A nestling ground for budding intellectuals",
-  },
-  {
-    id: "H823824",
-    name: "Vista Villa",
-    type: "Boys",
-    address: "65 Braxton Street, Sheffield",
-    intake: 250,
-    description: "Overlooking the vast landscape of knowledge",
-  },
-  {
-    id: "H823823",
-    name: "Zenith Zone",
-    type: "Girls",
-    address: "School Campus",
-    intake: 150,
-    description: "Living at the peak of academic achievement",
-  },
-  {
-    id: "H823822",
-    name: "Summit Springs",
-    type: "Boys",
-    address: "55 Upton Avenue, Monson",
-    intake: 300,
-    description: "Drawing from the wellspring of knowledge",
-  },
-  {
-    id: "H823821",
-    name: "Beacon Breeze",
-    type: "Girls",
-    address: "School Campus",
-    intake: 280,
-    description: "Riding the winds of educational inspiration",
-  },
-  {
-    id: "H823820",
-    name: "Empyrean Estate",
-    type: "Boys",
-    address: "45 Cinnamon Lane, San Antonio",
-    intake: 200,
-    description: "Infusing energy into scholarly endeavors",
-  },
-  {
-    id: "H823819",
-    name: "Nexus Nook",
-    type: "Girls",
-    address: "School Campus",
-    intake: 350,
-    description: "A communal hub for academic excellence",
-  },
-];
+import { getHostels } from "../../service/hostelService";
 
 /* ================= PAGE ================= */
 export default function Hostel() {
@@ -103,7 +20,8 @@ export default function Hostel() {
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,7 +38,20 @@ const [selectedHostel, setSelectedHostel] = useState<any>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [openAdd, setOpenAdd] = useState(false);
 
+
+  const fetchHostels = async () => {
+    try {
+      setLoading(true);
+      const res = await getHostels();
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
+      setData(rows);
+    } catch { }
+    finally { setLoading(false); }
+  };
+
+
   useEffect(() => {
+    fetchHostels();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -132,7 +63,7 @@ const [selectedHostel, setSelectedHostel] = useState<any>(null);
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchHostels();
     setSearch("");
     setCurrentPage(1);
   };
@@ -161,8 +92,8 @@ const [selectedHostel, setSelectedHostel] = useState<any>(null);
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
@@ -171,8 +102,8 @@ const [selectedHostel, setSelectedHostel] = useState<any>(null);
   /* 🔍 SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase());
   
     if (!startDate || !endDate) return matchSearch;
   
@@ -353,7 +284,7 @@ const [selectedHostel, setSelectedHostel] = useState<any>(null);
 
       <button
         onClick={() => {
-          setData([...data].sort((a, b) => a.type.localeCompare(b.type)));
+          setData([...data].sort((a, b) => (a.type ?? '').localeCompare(b.type)));
           setOpenFilter(false);
         }}
         className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"

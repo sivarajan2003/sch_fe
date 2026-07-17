@@ -48,12 +48,14 @@ export default function LeaveRequests() {
   const [confirmReject, setConfirmReject] = useState<number | null>(null);
   const [successMsg, setSuccessMsg] = useState("");
   
+  const pendingLeaves = leaves.filter((item) => item.status === "Pending");
+
   const filteredLeaves = thisWeekOnly
-  ? leaves.filter((item) => {
+  ? pendingLeaves.filter((item) => {
       const leaveDate = new Date(item.leave_from);
       return leaveDate >= startOfWeek && leaveDate <= endOfWeek;
     })
-  : leaves;
+  : pendingLeaves;
 const [errorMsg, setErrorMsg] = useState("");
 useEffect(() => {
   loadLeaves();
@@ -162,48 +164,53 @@ const loadLeaves = async () => {
               </div>
             </div>
 
-            {/* ACTIONS */}
-            <div className="flex gap-2 justify-end sm:justify-start">
-            <button
- onClick={async () => {
-  try {
-    await approveLeave(item.id);
-
-    setSuccessMsg(
-      `Leave approved for ${item.employee_name}`
-    );
-
-    loadLeaves();
-
-    setTimeout(() => {
-      setSuccessMsg("");
-    }, 3000);
-  } catch (err) {
-    console.error(err);
-  }
-}}
-  className="
-    w-8 h-8 flex items-center justify-center rounded
-    bg-green-500 text-white
-    transition-all duration-200
-    hover:bg-green-600 hover:scale-110
-    active:scale-95
-  "
->
-  <Check size={16} />
-</button>
-<button
-  onClick={() => setConfirmReject(item.id)}
-  className="
-    w-8 h-8 flex items-center justify-center rounded
-    bg-red-500 text-white
-    transition-all duration-200
-    hover:bg-red-600 hover:scale-110
-    active:scale-95
-  "
->
-  <X size={16} />
-</button>
+            {/* ACTIONS or STATUS BADGE */}
+            <div className="flex gap-2 justify-end sm:justify-start shrink-0">
+              {item.status === "Approved" ? (
+                <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+                  Approved
+                </span>
+              ) : item.status === "Rejected" ? (
+                <span className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-600 font-medium">
+                  Rejected
+                </span>
+              ) : (
+                <>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await approveLeave(item.id);
+                        setSuccessMsg(`Leave approved for ${item.employee_name}`);
+                        loadLeaves();
+                        setTimeout(() => setSuccessMsg(""), 3000);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
+                    className="
+                      w-8 h-8 flex items-center justify-center rounded
+                      bg-green-500 text-white
+                      transition-all duration-200
+                      hover:bg-green-600 hover:scale-110
+                      active:scale-95
+                    "
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    onClick={() => setConfirmReject(item.id)}
+                    className="
+                      w-8 h-8 flex items-center justify-center rounded
+                      bg-red-500 text-white
+                      transition-all duration-200
+                      hover:bg-red-600 hover:scale-110
+                      active:scale-95
+                    "
+                  >
+                    <X size={16} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
        ))

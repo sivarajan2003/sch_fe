@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import attendanceService from "../../../service/attendanceService";
 import {
   RefreshCcw,
   Printer,
@@ -8,116 +9,13 @@ import {
   Download,
 } from "lucide-react";
 
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "AD9892434",
-    roll: "35013",
-    name: "Janet",
-    image: "https://i.pravatar.cc/40?img=11",
-    class: "III",
-    section: "A",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "AD9892433",
-    roll: "35012",
-    name: "Joann",
-    image: "https://i.pravatar.cc/40?img=12",
-    class: "IV",
-    section: "B",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "AD9892432",
-    roll: "35011",
-    name: "Kathleen",
-    image: "https://i.pravatar.cc/40?img=13",
-    class: "II",
-    section: "A",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "AD9892431",
-    roll: "35010",
-    name: "Gifford",
-    image: "https://i.pravatar.cc/40?img=14",
-    class: "I",
-    section: "B",
-    attendance: "Late",
-    notes: "",
-  },
-  {
-    id: "AD9892430",
-    roll: "35009",
-    name: "Lisa",
-    image: "https://i.pravatar.cc/40?img=15",
-    class: "II",
-    section: "B",
-    attendance: "Halfday",
-    notes: "",
-  },
-  {
-    id: "AD9892429",
-    roll: "35008",
-    name: "Ralph",
-    image: "https://i.pravatar.cc/40?img=16",
-    class: "III",
-    section: "B",
-    attendance: "Holiday",
-    notes: "",
-  },
-  {
-    id: "AD9892428",
-    roll: "35007",
-    name: "Julie",
-    image: "https://i.pravatar.cc/40?img=17",
-    class: "V",
-    section: "A",
-    attendance: "Absent",
-    notes: "",
-  },
-  {
-    id: "AD9892427",
-    roll: "35006",
-    name: "Ryan",
-    image: "https://i.pravatar.cc/40?img=18",
-    class: "VI",
-    section: "A",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "AD9892426",
-    roll: "35005",
-    name: "Susan",
-    image: "https://i.pravatar.cc/40?img=19",
-    class: "VIII",
-    section: "B",
-    attendance: "Absent",
-    notes: "",
-  },
-  {
-    id: "AD9892425",
-    roll: "35004",
-    name: "Richard",
-    image: "https://i.pravatar.cc/40?img=20",
-    class: "VII",
-    section: "B",
-    attendance: "Absent",
-    notes: "",
-  },
-];
-
 /* ================= PAGE ================= */
 export default function StudentAttendance() {
   const isLocked = false; // 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
@@ -131,7 +29,10 @@ export default function StudentAttendance() {
     useState<"Present" | "Late" | "Absent" | "Holiday" | "Halfday" | null>(null);
   
   /* CLOSE DROPDOWNS */
+
+  const fetchAttendance = async () => { try { setLoading(true); const res = await attendanceService.getStudentAttendance(); const rows = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : []; setData(rows); } catch { } finally { setLoading(false); } };
   useEffect(() => {
+    fetchAttendance();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -162,14 +63,14 @@ export default function StudentAttendance() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
   };
   const handleRefresh = () => {
-    setData(INITIAL_DATA);   // reset data
+    fetchAttendance();   // reset data
     setSearch("");           // clear search
     setCurrentPage(1);       // reset pagination
     setStatusFilter(null);   // clear filter
@@ -180,8 +81,8 @@ export default function StudentAttendance() {
   /* SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase());
   
     const matchStatus = statusFilter
       ? d.attendance === statusFilter

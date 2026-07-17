@@ -10,22 +10,14 @@ import {
   Plus,
 } from "lucide-react";
 import AddLeaveModal from "../../../components/tables/AddLeaveModal";
-
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  { id: "LT748294", name: "Medical Leave", status: "Active", date: "15 May 2024" },
-  { id: "LT748293", name: "Casual Leave", status: "Active", date: "14 May 2024" },
-  { id: "LT748292", name: "Maternity Leave", status: "Active", date: "13 May 2024" },
-  { id: "LT748291", name: "Sick Leave", status: "Active", date: "12 May 2024" },
-  { id: "LT748290", name: "Paternity Leave", status: "Inactive", date: "11 May 2024" },
-  { id: "LT748289", name: "Special Leave", status: "Active", date: "10 May 2024" },
-];
+import { getAllLeaves } from "../../../service/leaveService";
 
 export default function LeaveList() {
  const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +35,10 @@ export default function LeaveList() {
   const [endDate, setEndDate] = useState("");
   
   /* CLOSE DROPDOWNS */
+
+  const fetchLeaves = async () => { try { setLoading(true); const res = await getAllLeaves(); const rows = Array.isArray(res) ? res : Array.isArray(res?.rows) ? res.rows : Array.isArray(res?.data) ? res.data : []; setData(rows); } catch { } finally { setLoading(false); } };
   useEffect(() => {
+    fetchLeaves();
     const close = () => {
       //setOpenMenu(null);
       setOpenCalendar(false);
@@ -55,7 +50,7 @@ export default function LeaveList() {
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchLeaves();
     setSearch("");
     setCurrentPage(1);
   };
@@ -79,8 +74,8 @@ export default function LeaveList() {
     setData(prev =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
@@ -89,8 +84,8 @@ export default function LeaveList() {
   /* 🔍 SEARCH */
   const filtered = data.filter(
     d =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -229,7 +224,7 @@ export default function LeaveList() {
         onClick={() => {
           if (!startDate || !endDate) return;
 
-          const filteredByDate = INITIAL_DATA.filter((d) => {
+          const filteredByDate = data.filter((d) => {
             const rowDate = new Date(d.date);
             return (
               rowDate >= new Date(startDate) &&
@@ -265,7 +260,7 @@ export default function LeaveList() {
                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-30">
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Active"));
+                      setData(data.filter(d => d.status === "Active"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"
@@ -274,7 +269,7 @@ export default function LeaveList() {
                   </button>
                   <button
                     onClick={() => {
-                      setData(INITIAL_DATA.filter(d => d.status === "Inactive"));
+                      setData(data.filter(d => d.status === "Inactive"));
                       setOpenFilter(false);
                     }}
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"

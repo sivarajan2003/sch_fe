@@ -75,8 +75,8 @@ const [newHostel, setNewHostel] = useState({
   /* SEARCH */
   const filtered = data.filter(
   (d: any) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* REFRESH */
@@ -109,8 +109,8 @@ const [newHostel, setNewHostel] = useState({
     setData((prev: any) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
 

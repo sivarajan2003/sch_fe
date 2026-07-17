@@ -89,6 +89,7 @@ import ClassReport from "./pages/Reports/ClassReport";
 import StudentReport from "./pages/Reports/StudentReport";
 import GradeReport from "./pages/Reports/GradeReport";
 import LeaveReport from "./pages/Reports/LeaveReport";
+import StaffReportPage from "./pages/Reports/StaffReport";
 //import FeesReport from "./pages/Reports/FeesReport";
 import AttendanceMain from "./pages/Reports/AttendanceTabs/AttendanceMain";
 import StudentAttendanceType from "./pages/Reports/AttendanceTabs/StudentAttendanceType";
@@ -285,6 +286,11 @@ export default function App() {
           <Route path="reports/exam-results" element={<ExamResultsReport />} />
           <Route path="reports/payroll" element={<PayrollReport />} />
           <Route path="reports/custom" element={<CustomReport />} />
+          <Route path="reports/class" element={<ClassReport />} />
+          <Route path="reports/students" element={<StudentReport />} />
+          <Route path="reports/grade" element={<GradeReport />} />
+          <Route path="reports/leave" element={<LeaveReport />} />
+          <Route path="reports/staff" element={<StaffReportPage />} />
           {/* MANAGEMENT ✅ THIS IS WHERE IT GOES */}
           <Route
             path="management/fees-collection"

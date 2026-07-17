@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 // StepFees.tsx
 import { useState, useEffect } from "react";
 import { CreditCard, Banknote, AlertCircle } from "lucide-react";
@@ -119,7 +120,7 @@ export default function StepFees({ data, onNext, onBack }: Props) {
   const handleNext = () => {
     // Validate amount
     if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
-      alert("Please enter a valid amount greater than 0");
+      toast.info("Please enter a valid amount greater than 0");
       return;
     }
 

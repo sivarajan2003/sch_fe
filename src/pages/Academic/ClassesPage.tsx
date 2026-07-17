@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -181,10 +182,10 @@ useEffect(() => {
       await createClass(payload);
       await fetchClasses();
       setOpenAddClass(false);
-      alert("Class created successfully");
+      toast.success("Class created successfully");
     } catch (err) {
       console.error("Create class failed", err);
-      alert("Failed to create class");
+      toast.error("Failed to create class");
     } finally {
       setLoading(false);
     }
@@ -197,10 +198,10 @@ useEffect(() => {
       await fetchClasses();
       setOpenEditClass(false);
       setEditingClass(null);
-      alert("Class updated");
+      toast.success("Class updated");
     } catch (err) {
       console.error("Update class failed", err);
-      alert("Failed to update class");
+      toast.error("Failed to update class");
     } finally {
       setLoading(false);
     }
@@ -212,10 +213,10 @@ useEffect(() => {
       setLoading(true);
       await deleteClass(id);
       await fetchClasses();
-      alert("Class deleted");
+      toast.info("Class deleted");
     } catch (err) {
       console.error("Delete class failed", err);
-      alert("Failed to delete class");
+      toast.error("Failed to delete class");
     } finally {
       setLoading(false);
     }

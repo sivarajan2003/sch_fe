@@ -9,69 +9,11 @@ import {
   Filter,
 } from "lucide-react";
 //import AddGradeModal from "../../components/AddGradeModal";
+import api from "../../api/client";
 import { Calendar } from "lucide-react";
 import AddGradeModal from "../../components/AddGradeModal";
 
 /* ================= DATA ================= */
-
-const INITIAL_DATA = [
-  {
-    id: "G180482",
-    grade: "O",
-    percentage: "90% - 100%",
-    points: 10,
-    status: "Active",
-  },
-  {
-    id: "G180481",
-    grade: "A+",
-    percentage: "80% - 90%",
-    points: 8,
-    status: "Active",
-  },
-  {
-    id: "G180480",
-    grade: "A",
-    percentage: "70% - 80%",
-    points: 6,
-    status: "Active",
-  },
-  {
-    id: "G180479",
-    grade: "B+",
-    percentage: "60% - 70%",
-    points: 4,
-    status: "Active",
-  },
-  {
-    id: "G180478",
-    grade: "B",
-    percentage: "50% - 60%",
-    points: 3,
-    status: "Active",
-  },
-  {
-    id: "G180477",
-    grade: "C+",
-    percentage: "40% - 50%",
-    points: 2,
-    status: "Active",
-  },
-  {
-    id: "G180476",
-    grade: "C",
-    percentage: "35% - 40%",
-    points: 1,
-    status: "Active",
-  },
-  {
-    id: "G180475",
-    grade: "F",
-    percentage: "Below 35%",
-    points: 0,
-    status: "Active",
-  },
-];
 
 /* ================= PAGE ================= */
 
@@ -82,7 +24,7 @@ export default function GradePage() {
  
     const [openAdd, setOpenAdd] = useState(false);
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -109,11 +51,21 @@ useEffect(() => {
 
   /* ðŸ”„ REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchGrades();
     setSearch("");
     setRowsPerPage(10);
     setCurrentPage(1);
   };
+
+  const fetchGrades = async () => {
+    try {
+      const res = await api.get('/studentexam');
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
+      setData(rows);
+    } catch { }
+  };
+
+  useEffect(() => { fetchGrades(); }, []);
 
   /* ðŸ“¤ EXPORT */
   const handleExport = () => {
@@ -123,7 +75,7 @@ useEffect(() => {
         .concat(
           data.map(
             (d) =>
-              `${d.id},${d.grade},${d.percentage},${d.points},${d.status}`
+              `${d.id},${d.grade ?? d.subject ?? "—"},${d.percentage ?? d.exam_date ?? "—"},${d.points ?? "—"},${d.status}`
           )
         )
         .join("\n");
@@ -139,8 +91,8 @@ useEffect(() => {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.grade.localeCompare(b.grade)
-          : b.grade.localeCompare(a.grade)
+          ? (a.grade ?? '').localeCompare(b.grade)
+          : (b.grade ?? b.subject ?? "").localeCompare(a.grade)
       )
     );
     setSortAsc(!sortAsc);
@@ -149,8 +101,8 @@ useEffect(() => {
   /* ðŸ” SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.grade.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
+      (d.grade ?? d.subject ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase());
   
     const matchStatus = statusFilter ? d.status === statusFilter : true;
   
@@ -534,17 +486,17 @@ useEffect(() => {
 
       {/* Grade */}
       <td className="px-4 py-3 text-center">
-        {d.grade}
+        {d.grade ?? d.subject ?? "—"}
       </td>
 
       {/* Percentage */}
       <td className="px-4 py-3 text-center">
-        {d.percentage}
+        {d.percentage ?? d.exam_date ?? "—"}
       </td>
 
       {/* Grade Points */}
       <td className="px-4 py-3 text-center">
-        {d.points}
+        {d.points ?? "—"}
       </td>
 
       {/* Status */}
@@ -617,7 +569,7 @@ useEffect(() => {
     font-semibold
     text-sm
   ">
-    {d.grade}
+    {d.grade ?? d.subject ?? "—"}
   </div>
 
   {/* META INFO */}
@@ -626,14 +578,14 @@ useEffect(() => {
       Percentage
     </span>
     <span className="text-sm font-medium">
-      {d.percentage}
+      {d.percentage ?? d.exam_date ?? "—"}
     </span>
   </div>
 </div>
 
 
       <div className="text-sm space-y-1">
-        <p><span className="text-gray-500">Grade Points:</span> {d.points}</p>
+        <p><span className="text-gray-500">Grade Points:</span> {d.points ?? "—"}</p>
         <p><span className="text-gray-500">Status:</span> {d.status}</p>
       </div>
 

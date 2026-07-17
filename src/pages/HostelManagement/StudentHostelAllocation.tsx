@@ -109,8 +109,8 @@ const fetchAllocations = async () => {
   const filtered = allocationData
   .filter((d) => {
     const matchesSearch =
-      d.student.toLowerCase().includes(search.toLowerCase()) ||
-      d.regNo.toLowerCase().includes(search.toLowerCase());
+      (d.student ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.regNo ?? '').toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
       filterStatus === "All"
@@ -122,9 +122,9 @@ const fetchAllocations = async () => {
 
   .sort((a, b) => {
     if (sortOrder === "asc") {
-      return a.student.localeCompare(b.student);
+      return (a.student ?? '').localeCompare(b.student);
     } else {
-      return b.student.localeCompare(a.student);
+      return (b.student ?? '').localeCompare(a.student);
     }
   });
 // const handleSave = () => {

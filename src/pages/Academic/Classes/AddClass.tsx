@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import React, { useState } from "react";
 import { X } from "lucide-react";
 
@@ -29,7 +30,7 @@ export default function AddClassModal({ onClose, onCreate }: Props) {
     if (loading) return;
     const err = validate();
     if (err) {
-      alert(err);
+      toast.info(err);
       return;
     }
 
@@ -54,7 +55,7 @@ export default function AddClassModal({ onClose, onCreate }: Props) {
       // parent will close modal on success
     } catch (err) {
       console.error("Create class failed", err);
-      alert("Failed to create class");
+      toast.error("Failed to create class");
     } finally {
       setLoading(false);
     }

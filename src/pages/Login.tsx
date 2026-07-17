@@ -51,26 +51,8 @@ export default function Login() {
       return;
     }
 
-    // Parent portal demo
-    if (email.trim() === "parentportal@preskool.com" && password.trim() === "admin123") {
-      localStorage.setItem("token", "parent-portal-demo-token");
-      localStorage.setItem("role", "parent");
-      localStorage.setItem("portal", "true");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          email,
-          role: "parent",
-          portal: true,
-        })
-      );
-      localStorage.setItem("isAuth", "true");
-
-      toast.success("Parent Portal Login Successful ");
-      navigate("/parent/dashboard");
-      setLoading(false);
-      return;
-    }
+    // Parent portal demo — now redirected to real DB (remove hardcoded bypass)
+    // Real parents use parent1@atelier.com / Parent@123 via DB auth below
 
     try {
       // Use the auth service — it should return { accessToken, refreshToken, user }
@@ -85,7 +67,8 @@ export default function Login() {
 
       // Persist tokens & user
       // If rememberMe behavior required to persist differently, implement here.
-      localStorage.setItem("token", accessToken);
+      localStorage.setItem("token",       accessToken);
+      localStorage.setItem("accessToken", accessToken); // for api/client interceptor
 
       const normalizedRole = user?.role?.toLowerCase() || "";
       if (normalizedRole) localStorage.setItem("role", normalizedRole);
@@ -95,6 +78,7 @@ export default function Login() {
       localStorage.setItem("portal", String(isPortal));
 
       localStorage.setItem("user", JSON.stringify(user ?? {}));
+      localStorage.setItem("isAuth", "true");  // required by ProtectedRoute
       localStorage.setItem(
   "userName",
   user?.name || ""

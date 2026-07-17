@@ -1,3 +1,4 @@
+import api from "../../api/client";
 import { useEffect, useState } from "react";
 import {
   RefreshCcw,
@@ -11,119 +12,12 @@ import {
 } from "lucide-react";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "FR10201",
-    student: "Arjun",
-    class: "X - A",
-    amount: 15000,
-    status: "Paid",
-    date: "15 May 2024",
-  },
-  {
-    id: "FR10202",
-    student: "Priya",
-    class: "IX - B",
-    amount: 12000,
-    status: "Pending",
-    date: "14 May 2024",
-  },
-  {
-    id: "FR10203",
-    student: "Karthik",
-    class: "VIII - C",
-    amount: 10000,
-    status: "Paid",
-    date: "13 May 2024",
-  },
 
-  /* ✅ NEW 10 RECORDS */
-  {
-    id: "FR10204",
-    student: "Sneha",
-    class: "VII - A",
-    amount: 9500,
-    status: "Paid",
-    date: "12 May 2024",
-  },
-  {
-    id: "FR10205",
-    student: "Rahul",
-    class: "X - B",
-    amount: 15500,
-    status: "Pending",
-    date: "11 May 2024",
-  },
-  {
-    id: "FR10206",
-    student: "Anitha",
-    class: "IX - A",
-    amount: 13000,
-    status: "Paid",
-    date: "10 May 2024",
-  },
-  {
-    id: "FR10207",
-    student: "Vignesh",
-    class: "VIII - B",
-    amount: 11000,
-    status: "Paid",
-    date: "09 May 2024",
-  },
-  {
-    id: "FR10208",
-    student: "Divya",
-    class: "VI - A",
-    amount: 9000,
-    status: "Pending",
-    date: "08 May 2024",
-  },
-  {
-    id: "FR10209",
-    student: "Suresh",
-    class: "X - C",
-    amount: 16000,
-    status: "Paid",
-    date: "07 May 2024",
-  },
-  {
-    id: "FR10210",
-    student: "Meena",
-    class: "VII - B",
-    amount: 9800,
-    status: "Paid",
-    date: "06 May 2024",
-  },
-  {
-    id: "FR10211",
-    student: "Naveen",
-    class: "IX - C",
-    amount: 12500,
-    status: "Pending",
-    date: "05 May 2024",
-  },
-  {
-    id: "FR10212",
-    student: "Pooja",
-    class: "VIII - A",
-    amount: 10500,
-    status: "Paid",
-    date: "04 May 2024",
-  },
-  {
-    id: "FR10213",
-    student: "Manoj",
-    class: "X - A",
-    amount: 15000,
-    status: "Pending",
-    date: "03 May 2024",
-  },
-];
 export default function FeesReport() {
    const isLocked = false;// 🔒 enable full blur lock
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -141,7 +35,14 @@ export default function FeesReport() {
   const [endDate, setEndDate] = useState("");
 
   /* CLOSE DROPDOWNS */
+
+  const fetchFees = async () => {
+    try {
+      const res = await api.get("/management/fees"); const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data?.rows) ? res.data.rows : []; setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchFees();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -152,7 +53,7 @@ export default function FeesReport() {
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchFees();
     setSearch("");
     setStartDate("");
     setEndDate("");
@@ -183,8 +84,8 @@ export default function FeesReport() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.student.localeCompare(b.student)
-          : b.student.localeCompare(a.student)
+          ? (a.student ?? '').localeCompare(b.student)
+          : (b.student ?? '').localeCompare(a.student)
       )
     );
     setSortAsc(!sortAsc);
@@ -193,8 +94,8 @@ export default function FeesReport() {
   /* 🔍 SEARCH */
   const filtered = data.filter(
     (d) =>
-      d.student.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.student ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -319,7 +220,7 @@ export default function FeesReport() {
         onClick={() => {
           if (!startDate || !endDate) return;
 
-          const filteredByDate = INITIAL_DATA.filter((d) => {
+          const filteredByDate = data.filter((d) => {
             const rowDate = new Date(d.date);
             return (
               rowDate >= new Date(startDate) &&
@@ -361,7 +262,7 @@ export default function FeesReport() {
     >
       <button
         onClick={() => {
-          setData(INITIAL_DATA.filter((d) => d.status === "Paid"));
+          setData(data.filter((d) => d.status === "Paid"));
           setOpenFilter(false);
         }}
         className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"
@@ -371,7 +272,7 @@ export default function FeesReport() {
 
       <button
         onClick={() => {
-          setData(INITIAL_DATA.filter((d) => d.status === "Pending"));
+          setData(data.filter((d) => d.status === "Pending"));
           setOpenFilter(false);
         }}
         className="block w-full px-4 py-2 text-sm hover:bg-gray-50 text-left"

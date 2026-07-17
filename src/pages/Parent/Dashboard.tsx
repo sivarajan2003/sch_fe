@@ -200,7 +200,7 @@ const [successMessage, setSuccessMessage] = useState("");
 const [showAllEventsPopup, setShowAllEventsPopup] = useState(false);
 const [showAllSubjectsPopup, setShowAllSubjectsPopup] = useState(false);
 
-const isAdmissionCompleted = false; // true = normal dashboard
+const isAdmissionCompleted = true; // admission overlay removed
 // Interview status (mock – later replace with backend data)
 
 
@@ -451,30 +451,6 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
 </div>
       {/* ================= TOP GRID ================= */}
-{/* ================= LOCKED DASHBOARD WRAPPER ================= */}
-<div className="relative">
-  {!isAdmissionCompleted && (
-    <div className="
-  absolute inset-0 z-40
-  bg-white/20
-  backdrop-blur-md
-  flex items-center justify-center
-  rounded-2xl
-">
-
-      <div className="bg-white px-6 py-4 rounded-xl shadow-md text-center">
-        <p className="text-sm font-semibold text-gray-800">
-          Complete Admission Process to Unlock Dashboard
-        </p>
-        <p className="text-xs text-gray-500 mt-1">
-          Finish application, document verification & interview
-        </p>
-      </div>
-    </div>
-  )}
-  <div className={`
-    ${!isAdmissionCompleted ? "pointer-events-none select-none" : ""}
-  `}>
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5 items-stretch">
 
@@ -1766,8 +1742,6 @@ const [hoverIndex, setHoverIndex] = useState<number | null>(null);
     </div>
   </div>
 )}
-  </div> {/* unlock wrapper */}
-</div>   {/* relative wrapper */}
 
 </>
     //</DashboardLayout>

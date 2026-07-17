@@ -1,10 +1,7 @@
-//studentFacultyService.js
-import axios from "axios";
+// studentFacultyService.js
+import api from "../api/client";
 
-export const getStudentFaculties = (
-  studentId
-) => {
-  return axios.get(
-    `http://localhost:4000/api/v1/student/${studentId}/faculties`
-  );
-};
+export const getStudentFaculties = (studentId) =>
+  api.get(`/student/${studentId}/faculties`);
+
+export default { getStudentFaculties };

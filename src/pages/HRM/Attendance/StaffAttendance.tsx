@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../../../api/client";
 import {
   RefreshCcw,
   Printer,
@@ -9,98 +10,6 @@ import {
 } from "lucide-react";
 
 /* ================= DATA ================= */
-const INITIAL_DATA = [
-  {
-    id: "8482",
-    name: "Daniel",
-    image: "https://i.pravatar.cc/40?img=1",
-    department: "Finance",
-    role: "Accounts Manager",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "8477",
-    name: "Edward",
-    image: "https://i.pravatar.cc/40?img=2",
-    department: "Transport",
-    role: "Admin",
-    attendance: "Late",
-    notes: "",
-  },
-  {
-    id: "8475",
-    name: "Elizabeth",
-    image: "https://i.pravatar.cc/40?img=3",
-    department: "Management",
-    role: "Receptionist",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "8483",
-    name: "Hellana",
-    image: "https://i.pravatar.cc/40?img=4",
-    department: "Management",
-    role: "Receptionist",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "8476",
-    name: "Jacquelin",
-    image: "https://i.pravatar.cc/40?img=5",
-    department: "Library",
-    role: "Admin",
-    attendance: "Absent",
-    notes: "",
-  },
-  {
-    id: "8479",
-    name: "James",
-    image: "https://i.pravatar.cc/40?img=6",
-    department: "Management",
-    role: "HR Manager",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "8478",
-    name: "Johnson",
-    image: "https://i.pravatar.cc/40?img=7",
-    department: "Admin",
-    role: "Accountant",
-    attendance: "Late",
-    notes: "",
-  },
-  {
-    id: "8481",
-    name: "Kevin",
-    image: "https://i.pravatar.cc/40?img=8",
-    department: "Management",
-    role: "Driver",
-    attendance: "Present",
-    notes: "",
-  },
-  {
-    id: "8480",
-    name: "Teresa",
-    image: "https://i.pravatar.cc/40?img=9",
-    department: "Finance",
-    role: "Librarian",
-    attendance: "Holiday",
-    notes: "",
-  },
-  {
-    id: "8474",
-    name: "Willie",
-    image: "https://i.pravatar.cc/40?img=10",
-    department: "Management",
-    role: "Technical Head",
-    attendance: "Present",
-    notes: "",
-  },
-];
 
 /* ================= PAGE ================= */
 export default function StudentAttendance() {
@@ -108,7 +17,7 @@ export default function StudentAttendance() {
  //const userRole = "Admin";        //  change dynamically later
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
@@ -122,7 +31,16 @@ export default function StudentAttendance() {
     useState<"Present" | "Late" | "Absent" | "Holiday" | "Halfday" | null>(null);
   
   /* CLOSE DROPDOWNS */
+
+  const fetchStaffAttendance = async () => {
+    try {
+      const res = await api.get("/attendance?person_type=Staff");
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data?.rows) ? res.data.rows : [];
+      setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchStaffAttendance();
     const close = () => {
       setOpenCalendar(false);
       setOpenFilter(false);
@@ -155,14 +73,14 @@ export default function StudentAttendance() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
+          ? (a.name ?? '').localeCompare(b.name)
+          : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
   };
   const handleRefresh = () => {
-    setData(INITIAL_DATA);   // reset data
+    fetchStaffAttendance();   // reset data
     setSearch("");           // clear search
     setCurrentPage(1);       // reset pagination
     setStatusFilter(null);   // clear filter
@@ -173,8 +91,8 @@ export default function StudentAttendance() {
   /* SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase());
   
     const matchStatus = statusFilter
       ? d.attendance === statusFilter

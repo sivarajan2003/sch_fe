@@ -13,81 +13,9 @@ ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AddExamModal from "../../components/AddExamModal";
+import api from "../../api/client";
 
 /* ================= DATA ================= */
-
-const INITIAL_DATA = [
-  {
-    id: "E140523",
-    name: "Week Test",
-    date: "13 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-  },
-  {
-    id: "E140522",
-    name: "Monthly Test",
-    date: "27 May 2024",
-    start: "09:30 AM",
-    end: "11:00 AM",
-  },
-  {
-    id: "E140521",
-    name: "Chapter Wise Test",
-    date: "05 Jun 2024",
-    start: "09:30 AM",
-    end: "10:30 AM",
-  },
-  {
-    id: "E140520",
-    name: "Unit Test",
-    date: "15 Jun 2024",
-    start: "10:30 AM",
-    end: "11:30 AM",
-  },
-  {
-    id: "E140519",
-    name: "Progress Test",
-    date: "20 Jun 2024",
-    start: "11:00 AM",
-    end: "12:00 PM",
-  },
-  {
-    id: "E140518",
-    name: "Oral Test",
-    date: "03 Jul 2024",
-    start: "12:30 PM",
-    end: "01:30 PM",
-  },
-  {
-    id: "E140517",
-    name: "Semester Exam",
-    date: "18 Jul 2024",
-    start: "10:30 AM",
-    end: "12:30 PM",
-  },
-  {
-    id: "E140516",
-    name: "Quarterly Exam",
-    date: "26 Aug 2024",
-    start: "09:00 AM",
-    end: "12:00 PM",
-  },
-  {
-    id: "E140515",
-    name: "Half Yearly Exam",
-    date: "15 Nov 2024",
-    start: "09:30 AM",
-    end: "12:30 PM",
-  },
-  {
-    id: "E140514",
-    name: "Annual Exam",
-    date: "10 Mar 2025",
-    start: "10:00 AM",
-    end: "01:00 PM",
-  },
-];
 
 /* ================= PAGE ================= */
 
@@ -108,7 +36,7 @@ const [filterDate, setFilterDate] = useState<
   "Today" | "This Week" | "This Month" | null
 >(null);
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,7 +44,16 @@ const [filterDate, setFilterDate] = useState<
   //const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openFilter, setOpenFilter] = useState(false);
 
+
+  const fetchExams = async () => {
+    try {
+      const res = await api.get('/studentexam');
+      const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
+      setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchExams();
     const close = () => setOpenFilter(false);
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
@@ -125,7 +62,7 @@ const [filterDate, setFilterDate] = useState<
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchExams();
     setSearch("");
     setCurrentPage(1);
   };
@@ -137,7 +74,7 @@ const [filterDate, setFilterDate] = useState<
       ["ID,Exam Name,Exam Date,Start Time,End Time"]
         .concat(
           data.map(
-            (d) => `${d.id},${d.name},${d.date},${d.start},${d.end}`
+            (d) => `${d.id},${d.name ?? d.subject ?? ""},${d.date ?? d.exam_date ?? ""},${d.start ?? d.start_time ?? ""},${d.end ?? d.end_time ?? ""}`
           )
         )
         .join("\n");
@@ -152,7 +89,7 @@ const [filterDate, setFilterDate] = useState<
   const handleSort = () => {
     setData((prev) =>
       [...prev].sort((a, b) =>
-        sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+        sortAsc ? (a.name??a.subject??"").localeCompare(b.name??b.subject??"") : (b.name??b.subject??"").localeCompare(a.name??a.subject??"")
       )
     );
     setSortAsc(!sortAsc);
@@ -161,17 +98,19 @@ const [filterDate, setFilterDate] = useState<
   /* 🔍 FILTER */
   const filtered = data.filter((d) => {
     /* SEARCH */
+    const name = d.name ?? d.subject ?? '';
+    const id = d.id ?? '';
     const matchSearch =
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase());
+      name.toLowerCase().includes(search.toLowerCase()) ||
+      id.toLowerCase().includes(search.toLowerCase());
   
     /* TYPE FILTER (Test / Exam) */
     const matchType = filterType
-      ? d.name.toLowerCase().includes(filterType.toLowerCase())
+      ? name.toLowerCase().includes(filterType.toLowerCase())
       : true;
   
     /* DATE FILTER */
-    const examDate = new Date(d.date);
+    const examDate = new Date(d.date ?? d.exam_date ?? '');
     const today = new Date();
   
     let matchDate = true;
@@ -534,22 +473,22 @@ const [filterDate, setFilterDate] = useState<
             
               {/* Exam Name */}
               <td className="px-4 py-3 text-left">
-                {d.name}
+                {d.name ?? d.subject ?? ""}
               </td>
             
               {/* Exam Date */}
               <td className="px-4 py-3 text-center">
-                {d.date}
+                {d.date ?? d.exam_date ?? ""}
               </td>
             
               {/* Start Time */}
               <td className="px-4 py-3 text-center">
-                {d.start}
+                {d.start ?? d.start_time ?? ""}
               </td>
             
               {/* End Time */}
               <td className="px-4 py-3 text-center">
-                {d.end}
+                {d.end ?? d.end_time ?? ""}
               </td>
             
               {/* Action */}
@@ -608,14 +547,14 @@ const [filterDate, setFilterDate] = useState<
           {d.id}
         </span>
         <span className="text-xs text-gray-500">
-          {d.date}
+          {d.date ?? d.exam_date ?? ""}
         </span>
       </div>
 
       <div className="text-sm space-y-1">
-        <p><span className="text-gray-500">Exam:</span> {d.name}</p>
-        <p><span className="text-gray-500">Start:</span> {d.start}</p>
-        <p><span className="text-gray-500">End:</span> {d.end}</p>
+        <p><span className="text-gray-500">Exam:</span> {d.name ?? d.subject ?? ""}</p>
+        <p><span className="text-gray-500">Start:</span> {d.start ?? d.start_time ?? ""}</p>
+        <p><span className="text-gray-500">End:</span> {d.end ?? d.end_time ?? ""}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2 pt-2">

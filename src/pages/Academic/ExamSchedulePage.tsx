@@ -10,88 +10,9 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AddExamScheduleModal from "../../components/AddExamScheduleModal";
+import api from "../../api/client";
 
 /* ================= DATA ================= */
-
-const INITIAL_DATA = [
-  {
-    id: "1",
-    subject: "English",
-    date: "13 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "101",
-    max: 100,
-    min: 35,
-  },
-  {
-    id: "2",
-    subject: "Spanish",
-    date: "14 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "104",
-    max: 100,
-    min: 35,
-  },
-  {
-    id: "3",
-    subject: "Physics",
-    date: "15 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "103",
-    max: 100,
-    min: 35,
-  },
-  {
-    id: "4",
-    subject: "Chemistry",
-    date: "16 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "105",
-    max: 100,
-    min: 35,
-  },
-  {
-    id: "5",
-    subject: "Maths",
-    date: "17 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "106",
-    max: 100,
-    min: 35,
-  },
-  {
-    id: "6",
-    subject: "Computer",
-    date: "18 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "102",
-    max: 100,
-    min: 35,
-  },
-  {
-    id: "7",
-    subject: "Env Science",
-    date: "19 May 2024",
-    start: "09:30 AM",
-    end: "10:45 AM",
-    duration: "3 hrs",
-    room: "107",
-    max: 100,
-    min: 35,
-  },
-];
 
 /* ================= PAGE ================= */
 
@@ -103,7 +24,7 @@ export default function ExamSchedulePage() {
   const navigate = useNavigate();
   const [openAdd, setOpenAdd] = useState(false);
 
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,7 +41,14 @@ export default function ExamSchedulePage() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   
+
+  const fetchExamSchedules = async () => {
+    try {
+      const res = await api.get("/studentexam"); const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : []; setData(rows);
+    } catch { }
+  };
   useEffect(() => {
+    fetchExamSchedules();
     const close = () => setOpenMenu(null);
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
@@ -128,7 +56,7 @@ export default function ExamSchedulePage() {
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);     // restore original data
+    fetchExamSchedules();     // restore original data
     setSearch("");            // clear search
     setRowsPerPage(10);       // reset rows
     setCurrentPage(1);        // reset page
@@ -153,7 +81,7 @@ export default function ExamSchedulePage() {
         .concat(
           data.map(
             (d) =>
-              `${d.subject},${d.date},${d.start},${d.end},${d.duration},${d.room},${d.max},${d.min}`
+              `${d.subject ?? ""},${d.date},${(d.start ?? d.start_time ?? "") ?? d.start_time ?? ""},${(d.end ?? d.end_time ?? "") ?? d.end_time ?? ""},${d.duration ?? ""},${d.room ?? d.room_no ?? ""},${d.max ?? ""},${d.min ?? ""}`
           )
         )
         .join("\n");
@@ -169,8 +97,8 @@ export default function ExamSchedulePage() {
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.subject.localeCompare(b.subject)
-          : b.subject.localeCompare(a.subject)
+          ? (a.subject ?? '').localeCompare(b.subject)
+          : (b.subject ?? '').localeCompare(a.subject)
       )
     );
     setSortAsc(!sortAsc);
@@ -179,7 +107,7 @@ export default function ExamSchedulePage() {
   /* 🔍 SEARCH */
   const filtered = data.filter((d) => {
     const matchSearch =
-      d.subject.toLowerCase().includes(search.toLowerCase());
+      (d.subject ?? '').toLowerCase().includes(search.toLowerCase());
   
     const matchSubject = filterSubject
       ? d.subject === filterSubject
@@ -563,14 +491,14 @@ export default function ExamSchedulePage() {
           <tbody>
             {paginated.map((d) => (
               <tr key={d.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-3">{d.subject}</td>
+                <td className="px-4 py-3">{d.subject ?? ""}</td>
                 <td className="px-4 py-3 text-center">{d.date}</td>
-                <td className="px-4 py-3 text-center">{d.start}</td>
-                <td className="px-4 py-3 text-center">{d.end}</td>
-                <td className="px-4 py-3 text-center">{d.duration}</td>
-                <td className="px-4 py-3 text-center">{d.room}</td>
-                <td className="px-4 py-3 text-center">{d.max}</td>
-                <td className="px-4 py-3 text-center">{d.min}</td>
+                <td className="px-4 py-3 text-center">{(d.start ?? d.start_time ?? "") ?? d.start_time ?? ""}</td>
+                <td className="px-4 py-3 text-center">{(d.end ?? d.end_time ?? "") ?? d.end_time ?? ""}</td>
+                <td className="px-4 py-3 text-center">{d.duration ?? ""}</td>
+                <td className="px-4 py-3 text-center">{d.room ?? d.room_no ?? ""}</td>
+                <td className="px-4 py-3 text-center">{d.max ?? ""}</td>
+                <td className="px-4 py-3 text-center">{d.min ?? ""}</td>
 
                 <td className="px-4 py-3 text-center">
   <div className="flex items-center justify-center gap-3">
@@ -623,7 +551,7 @@ export default function ExamSchedulePage() {
     >
       <div className="flex justify-between items-center">
         <span className="font-medium text-sm">
-          {d.subject}
+          {d.subject ?? ""}
         </span>
         <span className="text-xs text-gray-500">
           {d.date}
@@ -631,10 +559,10 @@ export default function ExamSchedulePage() {
       </div>
 
       <div className="text-sm space-y-1">
-        <p><span className="text-gray-500">Start:</span> {d.start}</p>
-        <p><span className="text-gray-500">End:</span> {d.end}</p>
-        <p><span className="text-gray-500">Room:</span> {d.room}</p>
-        <p><span className="text-gray-500">Duration:</span> {d.duration}</p>
+        <p><span className="text-gray-500">Start:</span> {(d.start ?? d.start_time ?? "") ?? d.start_time ?? ""}</p>
+        <p><span className="text-gray-500">End:</span> {(d.end ?? d.end_time ?? "") ?? d.end_time ?? ""}</p>
+        <p><span className="text-gray-500">Room:</span> {d.room ?? d.room_no ?? ""}</p>
+        <p><span className="text-gray-500">Duration:</span> {d.duration ?? ""}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3 pt-2">

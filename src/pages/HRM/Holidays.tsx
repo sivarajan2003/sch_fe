@@ -80,8 +80,8 @@ interface Holiday {
    setData((prev: any[]) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.title.localeCompare(b.title)
-          : b.title.localeCompare(a.title)
+          ? (a.title ?? '').localeCompare(b.title)
+          : (b.title ?? '').localeCompare(a.title)
       )
     );
     setSortAsc(!sortAsc);
@@ -112,8 +112,8 @@ interface Holiday {
   /* 🔍 SEARCH */
   const filtered = data.filter(
   (d: any) =>
-      d.title.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.title ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */

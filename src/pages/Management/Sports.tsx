@@ -12,20 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AddSportModal from "../../components/tables/AddSportModal";
-
-/* ================= DATA ================= */
-const INITIAL_DATA = [
-  { id: "SP826329", name: "Cricket", coach: "Thomas", avatar: "https://i.pravatar.cc/40?img=11", year: 2004 },
-  { id: "SP826328", name: "Throwball", coach: "Georgia", avatar: "https://i.pravatar.cc/40?img=12", year: 2005 },
-  { id: "SP826327", name: "Football", coach: "Nicholas", avatar: "https://i.pravatar.cc/40?img=13", year: 2006 },
-  { id: "SP826326", name: "Tennis", coach: "Sandra", avatar: "https://i.pravatar.cc/40?img=14", year: 2007 },
-  { id: "SP826325", name: "Basketball", coach: "Jon", avatar: "https://i.pravatar.cc/40?img=15", year: 2008 },
-  { id: "SP826324", name: "Badminton", coach: "Shannon", avatar: "https://i.pravatar.cc/40?img=16", year: 2009 },
-  { id: "SP826323", name: "Carrom", coach: "Wilson", avatar: "https://i.pravatar.cc/40?img=17", year: 2010 },
-  { id: "SP826322", name: "Chess", coach: "Sonia", avatar: "https://i.pravatar.cc/40?img=18", year: 2011 },
-  { id: "SP826321", name: "Volleyball", coach: "Adams", avatar: "https://i.pravatar.cc/40?img=19", year: 2012 },
-  { id: "SP826320", name: "Hockey", coach: "Lydia", avatar: "https://i.pravatar.cc/40?img=20", year: 2013 },
-];
+import sportsService from "../../service/spotrsService";
 
 /* ================= PAGE ================= */
 export default function Sports() {
@@ -34,7 +21,8 @@ export default function Sports() {
   //const isLocked = userRole !== "Admin";   //  Admin bypass lock
 
   const navigate = useNavigate();
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,6 +36,7 @@ const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 const [openAddSport, setOpenAddSport] = useState(false);
 
 useEffect(() => {
+  fetchSports();
   const close = () => {
     setOpenCalendar(false);
     setOpenFilter(false);
@@ -55,13 +44,24 @@ useEffect(() => {
   window.addEventListener("click", close);
   return () => window.removeEventListener("click", close);
 }, []);
+
+const fetchSports = async () => {
+  try {
+    setLoading(true);
+    const res = await sportsService.getSports();
+    const rows = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
+    setData(rows);
+  } catch { /* silently keep empty */ }
+  finally { setLoading(false); }
+};
+
 const [openView, setOpenView] = useState(false);
 const [openEdit, setOpenEdit] = useState(false);
 const [selectedSport, setSelectedSport] = useState<any>(null);
 
   /* 🔄 REFRESH */
   const handleRefresh = () => {
-    setData(INITIAL_DATA);
+    fetchSports();
     setSearch("");
     setCurrentPage(1);
   };
@@ -70,7 +70,7 @@ const [selectedSport, setSelectedSport] = useState<any>(null);
   const handleSort = () => {
     setData((prev) =>
       [...prev].sort((a, b) =>
-        sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+        sortAsc ? (a.name ?? '').localeCompare(b.name) : (b.name ?? '').localeCompare(a.name)
       )
     );
     setSortAsc(!sortAsc);
@@ -79,8 +79,8 @@ const [selectedSport, setSelectedSport] = useState<any>(null);
   /* 🔍 SEARCH */
   const filtered = data.filter(
     (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase())
+      (d.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (d.id ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   /* 📄 PAGINATION */
@@ -257,7 +257,7 @@ const [selectedSport, setSelectedSport] = useState<any>(null);
             const to = new Date(endDate).getFullYear();
 
             setData(
-              INITIAL_DATA.filter(
+              data.filter(
                 (d) => d.year >= from && d.year <= to
               )
             );
@@ -313,7 +313,7 @@ const [selectedSport, setSelectedSport] = useState<any>(null);
 
       <button
         onClick={() => {
-          setData([...data].sort((a, b) => a.coach.localeCompare(b.coach)));
+          setData([...data].sort((a, b) => (a.coach ?? '').localeCompare(b.coach)));
           setOpenFilter(false);
         }}
         className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"

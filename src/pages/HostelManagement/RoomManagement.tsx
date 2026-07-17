@@ -94,7 +94,7 @@ const [sortAsc, setSortAsc] =
   });
   const filtered = data.filter(
     (d) =>
-      d.roomNo.toLowerCase().includes(search.toLowerCase()) ||
+      (d.roomNo ?? '').toLowerCase().includes(search.toLowerCase()) ||
      d.room_id?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -322,8 +322,8 @@ const [sortAsc, setSortAsc] =
     setData((prev) =>
       [...prev].sort((a, b) =>
         sortAsc
-          ? a.roomNo.localeCompare(b.roomNo)
-          : b.roomNo.localeCompare(a.roomNo)
+          ? (a.roomNo ?? '').localeCompare(b.roomNo)
+          : (b.roomNo ?? '').localeCompare(a.roomNo)
       )
     );
 

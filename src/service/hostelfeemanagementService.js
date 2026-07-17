@@ -1,19 +1,9 @@
-import axios from 'axios';
+// hostelfeemanagementService.js
+import api from "../api/client";
 
-const API =
-'http://localhost:4000/api/v1/psms/hostel/hostelfeemanagement';
+export const getFees = () => api.get("/hostel/hostelfeemanagement");
+export const createFee = (data) => api.post("/hostel/hostelfeemanagement", data);
+export const updateFee = (id, data) => api.put(`/hostel/hostelfeemanagement/${id}`, data);
+export const deleteFee = (id) => api.delete(`/hostel/hostelfeemanagement/${id}`);
 
-export const getFees = () =>
-  axios.get(API);
-
-export const createFee = (data) =>
-  axios.post(API, data);
-
-export const updateFee = (
-  id,
-  data
-) =>
-  axios.put(`${API}/${id}`, data);
-
-export const deleteFee = (id) =>
-  axios.delete(`${API}/${id}`);
+export default { getFees, createFee, updateFee, deleteFee };

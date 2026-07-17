@@ -30,7 +30,7 @@ export const getLeaves = async () => {
 
 export const approveLeave = async (id) => {
   const res = await api.patch(
-    `/leave/leave-requests/${id}/approve`
+    `/leave-requests/${id}/approve`
   );
 
   return res.data;
@@ -40,7 +40,7 @@ export const approveLeave = async (id) => {
 
 export const rejectLeave = async (id) => {
   const res = await api.patch(
-    `/leave/leave-requests/${id}/reject`
+    `/leave-requests/${id}/reject`
   );
 
   return res.data;
